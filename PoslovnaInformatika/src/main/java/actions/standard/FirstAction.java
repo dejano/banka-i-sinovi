@@ -1,28 +1,27 @@
 package actions.standard;
 
+import gui.standard.form.Form;
+
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
-import javax.swing.JDialog;
-
 
 public class FirstAction extends AbstractAction {
 
 	private static final long serialVersionUID = 1L;
-	private JDialog standardForm;
+	private Form form;
 
-	public FirstAction(JDialog standardForm) {
-		putValue(SMALL_ICON, new ImageIcon(getClass().getResource("/img/first.gif")));
+	public FirstAction(Form form) {
+		putValue(SMALL_ICON,
+				new ImageIcon(getClass().getResource("/img/first.gif")));
 		putValue(SHORT_DESCRIPTION, "Pocetak");
-		this.standardForm=standardForm;
+		this.form = form;
 	}
 
 	public void actionPerformed(ActionEvent arg0) {
-//		if(standardForm instanceof DrzavaStandardForm){
-//			int rowCount = ((DrzavaStandardForm) standardForm).getTableModel().getRowCount(); 
-//		    if (rowCount > 0)
-//		    	((DrzavaStandardForm) standardForm).getTblGrid().setRowSelectionInterval(0, 0);
-//		}
+		int rowCount = form.getTableModel().getRowCount();
+		if (rowCount > 0)
+			form.getDataTable().setRowSelectionInterval(0, 0);
 	}
 }

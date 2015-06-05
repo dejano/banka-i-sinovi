@@ -25,7 +25,7 @@ public class DBConnection {
 		if (conn != null)
 			return;
 		ResourceBundle bundle = PropertyResourceBundle
-				.getBundle("DBConnection"); // ime fajla
+				.getBundle("DBConnection"); 
 		String driver = bundle.getString("driver"); // Ime parametara
 		String url = bundle.getString("url");
 		String username = bundle.getString("username");
@@ -53,4 +53,8 @@ public class DBConnection {
 		stmt.execute(cmd);
 	}
 
+	public static void main(String[] args) {
+		getConnection();
+	}
+	
 }

@@ -56,7 +56,7 @@ public class MosquitoSingletone {
 			for (int i = 0; i < table.getTotalColumns(); i++) {
 				MetaColumn column = columns.get(i);
 				System.out.println("\t" + column.getName() + " "
-						+ column.getJClassName());
+						+ column.getPrecision());
 			}
 		}
 	}

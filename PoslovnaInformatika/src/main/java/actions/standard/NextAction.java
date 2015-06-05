@@ -1,35 +1,35 @@
 package actions.standard;
 
+import gui.standard.form.Form;
+
 import java.awt.event.ActionEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
-import javax.swing.JDialog;
 
 public class NextAction extends AbstractAction {
 
 	private static final long serialVersionUID = 1L;
-	private JDialog standardForm;
+	private Form form;
 
-	public NextAction(JDialog standardForm) {
-		putValue(SMALL_ICON, new ImageIcon(getClass().getResource("/img/next.gif")));
+	public NextAction(Form form) {
+		putValue(SMALL_ICON,
+				new ImageIcon(getClass().getResource("/img/next.gif")));
 		putValue(SHORT_DESCRIPTION, "Sledeci");
-		this.standardForm=standardForm;
+		this.form = form;
 
 	}
 
-	
 	public void actionPerformed(ActionEvent arg0) {
-//		if(standardForm instanceof DrzavaStandardForm){
-//			int br = ((DrzavaStandardForm) standardForm).getTblGrid().getSelectedRow();
-//			int rowCount = ((DrzavaStandardForm) standardForm).getTableModel().getRowCount(); 
-//		    if (rowCount > 0){
-//		    	if(br < rowCount-1){
-//		    		((DrzavaStandardForm) standardForm).getTblGrid().setRowSelectionInterval(br+1, br+1);
-//		    		br++;
-//		    	}else return;
-//		    	
-//		    }
-//		}
+		int br = form.getDataTable().getSelectedRow();
+		int rowCount = form.getTableModel()
+				.getRowCount();
+		
+		if (rowCount > 0) {
+			if (br < rowCount - 1) {
+				form.getDataTable()
+						.setRowSelectionInterval(br + 1, br + 1);
+			} 
+		}
 	}
 }

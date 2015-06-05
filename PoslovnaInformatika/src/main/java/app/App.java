@@ -1,18 +1,15 @@
 package app;
 
-import gui.standard.form.StandardForm;
+import gui.standard.form.Form;
 
 import java.sql.SQLException;
-import java.util.Date;
 
 import meta.StandardFormCreator;
 
 public class App {
 	public static void main(String[] args) {
 		try {
-			System.out.println(new Date());
-			StandardForm form = StandardFormCreator.getStandardForm("videoteka");
-			System.out.println(new Date());
+			Form form = StandardFormCreator.getStandardForm("videoteka");
 			form.setVisible(true);
 		} catch (SQLException e) {
 			e.printStackTrace();

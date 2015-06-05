@@ -83,9 +83,9 @@ public class JsonHelper {
 	
 	public static void main(String[] args) {
 		FormMetaData fmd = new FormMetaData();
-		fmd.setTableName("VIDEOTEKA");
+		fmd.setTableName("UCESNICI_FILMA");
 		fmd.setTitle("foooo");
 		
-		marshall(fmd, "videoteka.json");
+		marshall(fmd, "ucesnici_filma.json");
 	}
 }
