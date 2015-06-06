@@ -7,29 +7,29 @@ public class StatusBar extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 
-	public enum FormStatusEnum {
+	public enum FormModeEnum {
 		ADD, EDIT, SEARCH
 	}
 
-	private FormStatusEnum status;
+	private FormModeEnum mode;
 	private JLabel statusText;
 
 	public StatusBar() {
 		statusText = new JLabel();
-		setStatus(FormStatusEnum.EDIT);
+		setMode(FormModeEnum.EDIT);
 		this.add(statusText);
 	}
 
-	public FormStatusEnum getStatus() {
-		return status;
+	public FormModeEnum getMode() {
+		return mode;
 	}
 
-	public void setStatus(FormStatusEnum status) {
+	public void setMode(FormModeEnum mode) {
 		String text = null;
 
-		this.status = status;
+		this.mode = mode;
 
-		switch (status) {
+		switch (mode) {
 		case ADD:
 			text = "Dodavanje novog sloga";
 			break;

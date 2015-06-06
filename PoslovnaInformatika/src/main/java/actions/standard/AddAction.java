@@ -1,7 +1,7 @@
 package actions.standard;
 
 import gui.standard.form.Form;
-import gui.standard.form.StatusBar.FormStatusEnum;
+import gui.standard.form.StatusBar.FormModeEnum;
 
 import java.awt.event.ActionEvent;
 import java.sql.SQLException;
@@ -23,6 +23,6 @@ public class AddAction extends AbstractAction {
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		form.setMode(FormStatusEnum.ADD);
+		form.setMode(FormModeEnum.ADD);
 	}
 }

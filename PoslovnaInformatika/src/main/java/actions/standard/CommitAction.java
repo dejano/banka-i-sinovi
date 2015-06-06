@@ -1,13 +1,13 @@
 package actions.standard;
 
 import gui.standard.form.Form;
-import gui.standard.form.StatusBar.FormStatusEnum;
+import gui.standard.form.StatusBar.FormModeEnum;
+import gui.standard.form.TableModel;
 
+import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.sql.SQLException;
 
-import javax.swing.AbstractAction;
-import javax.swing.ImageIcon;
 
 public class CommitAction extends AbstractAction {
 
@@ -22,37 +22,34 @@ public class CommitAction extends AbstractAction {
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		FormStatusEnum mode = form.getMode();
+		FormModeEnum mode = form.getMode();
 
-		switch (mode) {
-		case ADD:
-			try {
-				// form.getTableModel().insertRow(form.getDataPanel().getValues());
-				form.getTableModel()
-						.insertRow(
-								new String[] { "4", "a", "a", "a", "a", "a",
-										"1", "2" });
-			} catch (SQLException e1) {
-				e1.printStackTrace();
+		try {
+			int newRowIndex = -1;
+
+			switch (mode) {
+			case ADD:
+				newRowIndex = form.getTableModel().insertRow(new String []{"4", "4", "7"});
+
+				break;
+			case EDIT:
+	//				form.getTableModel().updateRow(form.getDataPanel().getValues());
+				newRowIndex = form.getTableModel().updateRow(form.getDataTable().getSelectedRow(), new String[]{ "8", "11", "8"});
+
+				break;
+			default:
+				break;
 			}
 
-			break;
-		case EDIT:
-			try {
-				// form.getTableModel().updateRow(form.getDataTable().getSelectedRow(),
-				// form.getDataPanel().getValues());
-				form.getTableModel()
-						.updateRow(
-								form.getDataTable().getSelectedRow(),
-								new String[] { "4", "a", "b", "a", "b", "a",
-										"1", "3" });
-			} catch (SQLException e1) {
-				e1.printStackTrace();
+			if(newRowIndex != -1)
+				form.getDataTable().setRowSelectionInterval(newRowIndex, newRowIndex);
+		} catch (SQLException exception) {
+			if(exception.getErrorCode() == TableModel.CUSTOM_ERROR_CODE){
+				JOptionPane.showConfirmDialog(form, exception.getMessage(), "Greska",
+						JOptionPane.OK_OPTION, JOptionPane.ERROR_MESSAGE);
+			} else {
+				exception.printStackTrace();
 			}
-
-			break;
-		default:
-			break;
 		}
 	}
 }

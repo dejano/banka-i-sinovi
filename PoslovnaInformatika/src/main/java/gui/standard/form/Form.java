@@ -2,7 +2,7 @@ package gui.standard.form;
 
 import gui.standard.Column;
 import gui.standard.ColumnList;
-import gui.standard.form.StatusBar.FormStatusEnum;
+import gui.standard.form.StatusBar.FormModeEnum;
 
 import java.awt.Dimension;
 import java.sql.SQLException;
@@ -166,7 +166,7 @@ public class Form extends JDialog {
 						if (e.getValueIsAdjusting())
 							return;
 						
-						Form.this.setMode(FormStatusEnum.EDIT);
+						Form.this.setMode(FormModeEnum.EDIT);
 						sync();
 					}
 				});
@@ -238,12 +238,12 @@ public class Form extends JDialog {
 		return tableModel;
 	}
 
-	public FormStatusEnum getMode(){
-		return this.statusBar.getStatus();
+	public FormModeEnum getMode(){
+		return this.statusBar.getMode();
 	}
 	
-	public void setMode(FormStatusEnum mode) {
-		this.statusBar.setStatus(mode);
+	public void setMode(FormModeEnum mode) {
+		this.statusBar.setMode(mode);
 	}
 
 	public void enablePickup() {
