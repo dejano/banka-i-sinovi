@@ -201,45 +201,23 @@ public class TableModel extends DefaultTableModel {
     public int search(String[] values) throws SQLException {
         int retVal = 0;
 
-//        StatementExecutor executor = new StatementExecutor(tableMetaData.getColumnCodeTypes())
-        PreparedStatement stmt = DBConnection.getConnection().prepareStatement(
-                tableQueries.getBasicQuery() + tableQueries.getWhereQuery()
-                        + tableQueries.getNextWhereQuery() + tableQueries.getOrderByQuery());
+        StatementExecutor executor = new StatementExecutor(tableMetaData.getColumnCodeTypes(ALL_WITHOUT_LOOKUP));
+        List<String[]> results = executor.execute(
+                tableQueries.getBasicQuery() + tableQueries.getWhereQuery() + tableQueries.getOrderByQuery(),
+                tableMetaData.getColumns().keySet(),
+                tableHelper.createMap(tableMetaData.getColumns().keySet(), values));
 
-//        if (nextColumnCodeValues == null)
-//            setParametersLike(stmt, values);
-//        else
-//            setParametersLike(stmt, ArrayUtils.addAll(values,
-//                    nextColumnCodeValues.values().toArray(new String[nextColumnCodeValues.size()])));
+        // TODO no results
+//        if (!resultSet.isBeforeFirst())
+//            throw new SQLException();
 
-        ResultSet resultSet = stmt.executeQuery();
+        this.setRowCount(0);
 
-        if (!resultSet.isBeforeFirst()) {
-            // TODO throw exception and remove else
-        } else {
-            this.setRowCount(0);
-
-            List<String> rowValues = new ArrayList<>();
-            while (resultSet.next()) {
-                rowValues.clear();
-
-                for (String columnName : tableMetaData.getColumns().keySet()) {
-                    resultSet.getString(columnName);
-                }
-
-                addRow(rowValues.toArray());
-            }
+        for(String[] rowValues : results){
+            addRow(rowValues);
         }
 
-        resultSet.close();
-        stmt.close();
-
-        DBConnection.getConnection().commit();
-
-        // if (rowsAffected > 0) {
-        // retVal = sortedInsert(values);
-        // fireTableDataChanged();
-        // }
+        fireTableDataChanged();
 
         return retVal;
     }
