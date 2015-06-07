@@ -1,6 +1,10 @@
 package actions.standard;
 
+import gui.standard.form.Form;
+import gui.standard.form.StatusBar;
+
 import java.awt.event.ActionEvent;
+import java.sql.SQLException;
 
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
@@ -9,27 +13,21 @@ import javax.swing.JDialog;
 public class SearchAction extends AbstractAction {
 
 	private static final long serialVersionUID = 1L;
-	private JDialog standardForm;
+	private Form form;
 
-	public SearchAction(JDialog standardForm) {
+	public SearchAction(Form form) {
 		putValue(SMALL_ICON, new ImageIcon(getClass().getResource("/img/search.gif")));
 		putValue(SHORT_DESCRIPTION, "Pretraga");
-		this.standardForm=standardForm;
+		this.form = form;
 	}
 
 	public void actionPerformed(ActionEvent e) {
-//		if(standardForm instanceof DrzavaStandardForm){
-//			((DrzavaStandardForm) standardForm).setMode(3);
-//			((DrzavaStandardForm) standardForm).getTfSifra().setText("");
-//			((DrzavaStandardForm) standardForm).getTfNaziv().setText("");
-//			((DrzavaStandardForm) standardForm).getTfSifra().requestFocus();
-//			
-//			try {
-//				((DrzavaStandardForm) standardForm).getTableModel().search(((DrzavaStandardForm) standardForm).getTfSifra().getText(), ((DrzavaStandardForm) standardForm).getTfNaziv().getText());
-//			} catch (SQLException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			}
-//		}
+		form.setMode(StatusBar.FormModeEnum.SEARCH);
+		try {
+			form.getTableModel().search(new String[]{"", "BHA", "", "", "", "", "", ""});
+		} catch (SQLException e1) {
+			// TODO show error message
+			e1.printStackTrace();
+		}
 	}
 }

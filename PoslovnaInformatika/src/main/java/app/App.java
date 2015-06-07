@@ -9,7 +9,7 @@ import meta.StandardFormCreator;
 public class App {
 	public static void main(String[] args) {
 		try {
-			Form form = StandardFormCreator.getStandardForm("ucesnici_filma");
+			Form form = StandardFormCreator.getStandardForm("videoteka");
 			form.setVisible(true);
 		} catch (SQLException e) {
 			e.printStackTrace();

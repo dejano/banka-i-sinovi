@@ -1,6 +1,7 @@
 package actions.standard;
 
 import gui.standard.form.Form;
+import gui.standard.form.StatusBar;
 
 import java.awt.event.ActionEvent;
 import java.sql.SQLException;
@@ -24,6 +25,7 @@ public class RefreshAction extends AbstractAction {
 
 	public void actionPerformed(ActionEvent arg0) {
 		try {
+			form.setMode(StatusBar.FormModeEnum.DEFAULT);
 			form.getTableModel().open();
 		} catch (SQLException e) {
 			e.printStackTrace();

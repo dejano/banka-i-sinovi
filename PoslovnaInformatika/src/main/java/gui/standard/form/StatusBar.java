@@ -8,7 +8,7 @@ public class StatusBar extends JPanel {
 	private static final long serialVersionUID = 1L;
 
 	public enum FormModeEnum {
-		ADD, EDIT, SEARCH
+		DEFAULT, ADD, EDIT, SEARCH
 	}
 
 	private FormModeEnum mode;
@@ -16,7 +16,7 @@ public class StatusBar extends JPanel {
 
 	public StatusBar() {
 		statusText = new JLabel();
-		setMode(FormModeEnum.EDIT);
+		setMode(FormModeEnum.DEFAULT);
 		this.add(statusText);
 	}
 
@@ -38,6 +38,9 @@ public class StatusBar extends JPanel {
 			break;
 		case SEARCH:
 			text = "Pretraga";
+			break;
+		case DEFAULT:
+			text = " ";
 			break;
 		}
 
