@@ -119,8 +119,12 @@ public class TableQueries {
         if (whereQuery == null) {
             QueryBuilder queryBuilder = new QueryBuilder();
 
+            int i = 0;
             for (String column : tableMetaData.getColumns().keySet()) {
                 queryBuilder.whereLike(tableMetaData.getTableName(), column);
+
+                if (i++ != tableMetaData.getColumns().size() - 1)
+                    queryBuilder.and();
             }
 
             whereQuery = queryBuilder.build();

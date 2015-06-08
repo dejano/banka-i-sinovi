@@ -12,6 +12,7 @@ import java.util.*;
 public class StatementExecutor {
 
     private Map<String, String> columnCodeTypes;
+    private boolean fuzzy;
 
     public StatementExecutor(Map<String, String> columnCodeTypes) {
         this.columnCodeTypes = columnCodeTypes;
@@ -33,9 +34,9 @@ public class StatementExecutor {
                     statement.setString(i, value);
                     break;
                 case "java.math.BigDecimal":
-                    try{
+                    try {
                         statement.setInt(i, Integer.parseInt(value));
-                    } catch (NumberFormatException e){
+                    } catch (NumberFormatException e) {
                         statement.setDouble(i, Double.parseDouble(value));
                     }
                     break;
@@ -64,24 +65,30 @@ public class StatementExecutor {
 
         PreparedStatement statement = DBConnection.getConnection().prepareStatement(query);
 
-        int i = 0;
+        int i = 1;
         for (String columnCode : columnCodeValues.keySet()) {
             String columnTypeClass = columnCodeTypes.get(columnCode);
 
             String value = columnCodeValues.get(columnCode);
-            switch (columnTypeClass) {
-                case "java.lang.String":
-                    statement.setString(i + 1, value);
-                    break;
-                case "java.math.BigDecimal":
-                    try{
-                        statement.setInt(i + 1, Integer.parseInt(value));
-                    } catch (NumberFormatException e){
-                        statement.setDouble(i + 1, Double.parseDouble(value));
-                    }
-                    break;
-            }
+            if (value.equals("")) {
+                statement.setString(i, "%");
+            } else {
+                switch (columnTypeClass) {
+                    case "java.lang.String":
+                        if (fuzzy)
+                            value = "%" + value + "%";
 
+                        statement.setString(i, value);
+                        break;
+                    case "java.math.BigDecimal":
+                        try {
+                            statement.setInt(i, Integer.parseInt(value));
+                        } catch (NumberFormatException e) {
+                            statement.setDouble(i, Double.parseDouble(value));
+                        }
+                        break;
+                }
+            }
             i++;
         }
 
@@ -111,5 +118,9 @@ public class StatementExecutor {
         DBConnection.getConnection().commit();
 
         return ret;
+    }
+
+    public void setFuzzy(boolean fuzzy) {
+        this.fuzzy = fuzzy;
     }
 }

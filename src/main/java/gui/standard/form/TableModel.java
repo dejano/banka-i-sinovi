@@ -202,6 +202,7 @@ public class TableModel extends DefaultTableModel {
         int retVal = 0;
 
         StatementExecutor executor = new StatementExecutor(tableMetaData.getColumnCodeTypes(ALL_WITHOUT_LOOKUP));
+        executor.setFuzzy(true);
         List<String[]> results = executor.execute(
                 tableQueries.getBasicQuery() + tableQueries.getWhereQuery() + tableQueries.getOrderByQuery(),
                 tableMetaData.getColumns().keySet(),
