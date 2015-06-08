@@ -1,0 +1,13 @@
+{
+   "formMetaData" : {
+      "nextData" : [ {
+         "columnCodeMapping" : [ {
+            "columnCode1" : "SIFRA_FILMA",
+            "columnCode2" : "SIFRA_FILMA"
+         } ],
+         "formName" : "kopija"
+      } ],
+      "tableName" : "FILM",
+      "title" : "Film"
+   }
+}

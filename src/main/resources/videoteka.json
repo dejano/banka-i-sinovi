@@ -1,0 +1,13 @@
+{
+   "formMetaData" : {
+      "nextData" : [ {
+         "columnCodeMapping" : [ {
+            "columnCode1" : "SIFRA_VIDEOTEKE",
+            "columnCode2" : "SIFRA_VIDEOTEKE"
+         } ],
+         "formName" : "film"
+      } ],
+      "tableName" : "VIDEOTEKA",
+      "title" : "Videoteka"
+   }
+}
