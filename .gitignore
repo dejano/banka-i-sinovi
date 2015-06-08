@@ -8,3 +8,5 @@ hs_err_pid*
 .idea
 PoslovnaInformatika.iml
 target
+.classpath
+.project
