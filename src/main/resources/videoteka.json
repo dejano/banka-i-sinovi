@@ -7,8 +7,8 @@
       "formName": "film",
       "columnCodeMapping": [
         {
-          "columnCode1": "SIFRA_VIDEOTEKE",
-          "columnCode2": "SIFRA_VIDEOTEKE"
+          "from": "SIFRA_VIDEOTEKE",
+          "to": "SIFRA_VIDEOTEKE"
         }
       ]
     }

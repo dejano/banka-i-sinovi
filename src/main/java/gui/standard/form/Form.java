@@ -1,8 +1,6 @@
 package gui.standard.form;
 
 import actions.standard.*;
-import gui.standard.Column;
-import gui.standard.ColumnList;
 import gui.standard.form.StatusBar.FormModeEnum;
 import gui.standard.form.misc.TableMetaData;
 import meta.FormMetaData;
@@ -24,12 +22,9 @@ public class Form extends JDialog {
 
     private static final long serialVersionUID = 1L;
 
-    private JToolBar toolBar;
-
-    private JButton btnAdd, btnCommit, btnDelete, btnFirst, btnLast, btnHelp,
-            btnNext, btnNextForm, btnPickup, btnRefresh, btnRollback,
-            btnSearch, btnPrevious;
-    private List<JButton> selectionSensitiveButtons = new ArrayList<>();
+    private JButton btnDelete;
+    private JButton btnNextForm;
+    private JButton btnPickup;
 
     private JTable dataTable = new JTable();
     private TableModel tableModel;
@@ -37,7 +32,6 @@ public class Form extends JDialog {
     private DataPanel dataPanel;
     private StatusBar statusBar;
 
-    private ColumnList zoomList;
     private List<NextMetaData> nextData = new ArrayList<>();
 
     public Form(FormMetaData fmd) throws SQLException {
@@ -83,37 +77,37 @@ public class Form extends JDialog {
     }
 
     private void initToolbar() {
-        toolBar = new JToolBar();
-        btnSearch = new JButton(new SearchAction(this));
+        JToolBar toolBar = new JToolBar();
+        JButton btnSearch = new JButton(new SearchAction(this));
         toolBar.add(btnSearch);
 
-        btnRefresh = new JButton(new RefreshAction(this));
+        JButton btnRefresh = new JButton(new RefreshAction(this));
         toolBar.add(btnRefresh);
 
         btnPickup = new JButton(new PickupAction(this));
         toolBar.add(btnPickup);
         btnPickup.setEnabled(false);
 
-        btnHelp = new JButton(new HelpAction());
+        JButton btnHelp = new JButton(new HelpAction());
         toolBar.add(btnHelp);
 
         toolBar.addSeparator();
 
-        btnFirst = new JButton(new FirstAction(this));
+        JButton btnFirst = new JButton(new FirstAction(this));
         toolBar.add(btnFirst);
 
-        btnPrevious = new JButton(new PreviousAction(this));
+        JButton btnPrevious = new JButton(new PreviousAction(this));
         toolBar.add(btnPrevious);
 
-        btnNext = new JButton(new NextAction(this));
+        JButton btnNext = new JButton(new NextAction(this));
         toolBar.add(btnNext);
 
-        btnLast = new JButton(new LastAction(this));
+        JButton btnLast = new JButton(new LastAction(this));
         toolBar.add(btnLast);
 
         toolBar.addSeparator();
 
-        btnAdd = new JButton(new AddAction(this));
+        JButton btnAdd = new JButton(new AddAction(this));
         toolBar.add(btnAdd);
 
         btnDelete = new JButton(new DeleteAction(this));
@@ -143,8 +137,8 @@ public class Form extends JDialog {
         dataPanel.setLayout(new MigLayout("gapx 15px"));
 
         JPanel buttonsPanel = new JPanel();
-        btnCommit = new JButton(new CommitAction(this));
-        btnRollback = new JButton(new RollbackAction(this));
+        JButton btnCommit = new JButton(new CommitAction(this));
+        JButton btnRollback = new JButton(new RollbackAction(this));
 
         // JLabel lblSifra = new JLabel("Šifra države:");
         // JLabel lblNaziv = new JLabel("Naziv države:");
@@ -216,7 +210,6 @@ public class Form extends JDialog {
         if (index < 0) {
             // tfSifra.setText("");
             // tfNaziv.setText("");
-            return;
         }
         // String sifra = (String) tableModel.getValueAt(index, 0);
         // String naziv = (String) tableModel.getValueAt(index, 1);
@@ -250,30 +243,6 @@ public class Form extends JDialog {
         }
     }
 
-    public void createZoomList() {
-        int selectedRowIndex = dataTable.getSelectedRow();
-        int columnCount = tableModel.getColumnCount();
-
-        zoomList = new ColumnList();
-
-        for (int i = 0; i < columnCount; i++) {
-            Column column = new Column(tableModel.getColumnName(i),
-                    tableModel.getValueAt(selectedRowIndex, i));
-            zoomList.add(column);
-        }
-    }
-
-    public void createNextList() {
-        int selectedRowIndex = dataTable.getSelectedRow();
-
-        zoomList = new ColumnList();
-
-        zoomList.add(new Column("drzava.dr_sifra", tableModel.getValueAt(
-                selectedRowIndex, 0)));
-        zoomList.add(new Column("drzava.dr_naziv", tableModel.getValueAt(
-                selectedRowIndex, 1)));
-    }
-
     public JTable getDataTable() {
         return dataTable;
     }
@@ -296,10 +265,6 @@ public class Form extends JDialog {
 
     public void disablePickup() {
         btnPickup.setEnabled(false);
-    }
-
-    public ColumnList getColumnList() {
-        return zoomList;
     }
 
     public DataPanel getDataPanel() {

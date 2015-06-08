@@ -1,30 +1,22 @@
 package gui.standard;
 
 public class Column {
-	private String name;
-	private Object value;
+    private String name;
+    private String value;
 
-	public Column() {
-	}
+    public Column() {
+    }
 
-	public Column(String name, Object value) {
-		this.name = name;
-		this.value = value;
-	}
+    public Column(String name, String value) {
+        this.name = name;
+        this.value = value;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public Object getValue() {
-		return value;
-	}
-
-	public void setValue(Object value) {
-		this.value = value;
-	}
+    public String getValue() {
+        return value;
+    }
 }

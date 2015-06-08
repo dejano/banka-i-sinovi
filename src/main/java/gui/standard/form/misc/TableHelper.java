@@ -1,6 +1,7 @@
 package gui.standard.form.misc;
 
 import database.DBConnection;
+import gui.standard.Column;
 
 import javax.swing.*;
 import javax.swing.plaf.nimbus.State;
@@ -22,6 +23,17 @@ public class TableHelper {
     public TableHelper(TableQueries tableQueries, TableMetaData tableMetaData) {
         this.tableQueries = tableQueries;
         this.tableMetaData = tableMetaData;
+    }
+
+    public List<Column> getColumnList(Collection<String> keys, String[] values){
+        List<Column> ret = new ArrayList<>();
+
+        Iterator<String> it = keys.iterator();
+        for (String value : values) {
+            ret.add(new Column(it.next(), value));
+        }
+
+        return ret;
     }
 
     public Map<String, String> createMap(Collection<String> keys, String[] values) {

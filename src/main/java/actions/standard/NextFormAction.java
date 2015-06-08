@@ -47,8 +47,8 @@ public class NextFormAction extends AbstractAction {
     private void createNextForm(NextMetaData nextData) {
         Map<String, String> nextValues = new HashMap<>();
         for (ColumnMapping columnCodeMappingEntry : nextData.getColumnCodeMapping()) {
-            nextValues.put(columnCodeMappingEntry.getColumnCode2(),
-                    form.getSelectedRowValue(columnCodeMappingEntry.getColumnCode1()));
+            nextValues.put(columnCodeMappingEntry.getTo(),
+                    form.getSelectedRowValue(columnCodeMappingEntry.getFrom()));
         }
 
         // TODO check if exists column code in next form

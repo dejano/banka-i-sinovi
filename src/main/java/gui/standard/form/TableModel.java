@@ -1,6 +1,7 @@
 package gui.standard.form;
 
 import database.DBConnection;
+import gui.standard.Column;
 import gui.standard.SortUtils;
 import gui.standard.form.misc.*;
 import org.apache.commons.lang3.ArrayUtils;
@@ -61,7 +62,7 @@ public class TableModel extends DefaultTableModel {
             );
         } else {
             fillData(tableQueries.getBasicQuery()
-                    + tableQueries.getNextWhereQuery()
+                            + tableQueries.getNextWhereQuery()
 //                    + tableQueries.getOrderByQuery()
             );
         }
@@ -94,7 +95,7 @@ public class TableModel extends DefaultTableModel {
                 tableMetaData.getColumnCodeTypes(ALL_WITHOUT_LOOKUP));
 
         executor.executeProcedure(ProcedureCallFactory.getProcedureCall(tableMetaData.getTableName(),
-                CREATE_PROCEDURE_CALL), tableHelper.createMap(tableMetaData.getColumns().keySet(), values));
+                CREATE_PROCEDURE_CALL), tableHelper.getColumnList(tableMetaData.getColumns().keySet(), values));
 
         retVal = sortedInsert(values);
         fireTableDataChanged();
@@ -109,15 +110,20 @@ public class TableModel extends DefaultTableModel {
 
         String[] pkValues = tableHelper.getPkValues(getRowValues(rowIndex));
 
-        List<String> columnCodes = new ArrayList<>(tableMetaData.getPrimaryKeyColumns());
-        columnCodes.addAll(tableMetaData.getColumns().keySet());
+        List<Column> columnValues = new ArrayList<>();
+        int i = 0;
+        for (String pkColumnCode : tableMetaData.getPrimaryKeyColumns()) {
+            columnValues.add(new Column(pkColumnCode, pkValues[i++]));
+        }
 
-        Map<String, String> columnCodeValues = tableHelper.createMap(columnCodes,
-                ArrayUtils.addAll(pkValues, values));
+        i = 0;
+        for (String columnCode : tableMetaData.getColumns().keySet()) {
+            columnValues.add(new Column(columnCode, values[i++]));
+        }
 
         StatementExecutor executor = new StatementExecutor(tableMetaData.getColumnCodeTypes(ALL_WITHOUT_LOOKUP));
         executor.executeProcedure(ProcedureCallFactory.getProcedureCall(tableMetaData.getTableName(),
-                UPDATE_PROCEDURE_CALL), columnCodeValues);
+                UPDATE_PROCEDURE_CALL), columnValues);
 
         removeRow(rowIndex);
         retVal = sortedInsert(values);
@@ -181,12 +187,12 @@ public class TableModel extends DefaultTableModel {
         checkRowDelete(index);
 
         String[] pkValues = tableHelper.getPkValues(getRowValues(index));
-        Map<String, String> columnCodeValues =
-                tableHelper.createMap(tableMetaData.getPrimaryKeyColumns(), pkValues);
+        List<Column> columnValues =
+                tableHelper.getColumnList(tableMetaData.getPrimaryKeyColumns(), pkValues);
 
         StatementExecutor executor = new StatementExecutor(tableMetaData.getColumnCodeTypes(PRIMARY_KEYS));
         executor.executeProcedure(ProcedureCallFactory.getProcedureCall(tableMetaData.getTableName(),
-                DELETE_PROCEDURE_CALL), columnCodeValues);
+                DELETE_PROCEDURE_CALL), columnValues);
 
         removeRow(index);
         fireTableDataChanged();
@@ -256,11 +262,23 @@ public class TableModel extends DefaultTableModel {
         DBConnection.getConnection()
                 .setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
 
-        String[] result = tableHelper.getDbRowByPks(tableHelper.getPkValues(getRowValues(index)));
+        String[] oldPkValues = tableHelper.getPkValues(getRowValues(index));
+        String[] result = tableHelper.getDbRowByPks(oldPkValues);
 
-        String errorMessage = checkUpdatedDeleted(index, result, newValues);
+        String errorMessage = checkUpdatedDeleted(index, result, getRowValues(index));
 
-        if (errorMessage == null)
+        String[] newPkValues = tableHelper.getPkValues(newValues);
+
+        boolean newKey = false;
+        int i = 0;
+        for (String oldPkValue : oldPkValues) {
+            if (!oldPkValue.equals(newPkValues[i++])) {
+                newKey = true;
+                break;
+            }
+        }
+
+        if (errorMessage == null && newKey)
             checkRowInsert(newValues);
 
         DBConnection.getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);

@@ -47,8 +47,6 @@ public class TableMetaData {
 
             if (column.isPartOfPK())
                 primaryKeyColumns.add(column.getCode());
-
-            // TODO filter out columns - hide, etc
         }
     }
 
@@ -70,7 +68,8 @@ public class TableMetaData {
 
             switch (columnGroup) {
                 case ALL_WITHOUT_LOOKUP:
-                    // TODO
+                    if(columnMetaData.isLookupColumn())
+                        validInsert = false;
                     break;
                 case PRIMARY_KEYS:
                     if (!columnMetaData.isPrimaryKey())

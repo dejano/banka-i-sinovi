@@ -11,46 +11,44 @@ import java.sql.SQLException;
 
 public class CommitAction extends AbstractAction {
 
-	private static final long serialVersionUID = 1L;
-	private Form form;
+    private static final long serialVersionUID = 1L;
+    private Form form;
 
-	public CommitAction(Form form) {
-		putValue(SMALL_ICON,
-				new ImageIcon(getClass().getResource("/img/commit.gif")));
-		putValue(SHORT_DESCRIPTION, "Commit");
-		this.form = form;
-	}
+    public CommitAction(Form form) {
+        putValue(SMALL_ICON,
+                new ImageIcon(getClass().getResource("/img/commit.gif")));
+        putValue(SHORT_DESCRIPTION, "Commit");
+        this.form = form;
+    }
 
-	public void actionPerformed(ActionEvent e) {
-		FormModeEnum mode = form.getMode();
+    public void actionPerformed(ActionEvent e) {
+        FormModeEnum mode = form.getMode();
 
-		try {
-			int newRowIndex = -1;
+        try {
+            int newRowIndex = -1;
 
-			switch (mode) {
-			case ADD:
-				newRowIndex = form.getTableModel().insertRow(new String []{"4", "a", "a", "a", "a", "a", "7", "4"});
+            switch (mode) {
+                case ADD:
+                    newRowIndex = form.getTableModel().insertRow(new String[]{"5", "8", "11", "a"});
 
-				break;
-			case EDIT:
-	//				form.getTableModel().updateRow(form.getDataPanel().getValues());
-				newRowIndex = form.getTableModel().updateRow(form.getDataTable().getSelectedRow(),
-						new String []{"5", "a", "b", "a", "b", "a", "1", "4"});
+                    break;
+                case EDIT:
+                    //				form.getTableModel().updateRow(form.getDataPanel().getValues());
+                    newRowIndex = form.getTableModel().updateRow(form.getDataTable().getSelectedRow(),
+                            new String[]{"5", "8", "11", "b"});
 
-				break;
-			default:
-				break;
-			}
+                    break;
+            }
 
-			if(newRowIndex != -1)
-				form.getDataTable().setRowSelectionInterval(newRowIndex, newRowIndex);
-		} catch (SQLException exception) {
-			if(exception.getErrorCode() == ErrorMessages.CUSTOM_ERROR_CODE){
-				JOptionPane.showConfirmDialog(form, exception.getMessage(), "Greska",
-						JOptionPane.OK_OPTION, JOptionPane.ERROR_MESSAGE);
-			} else {
-				exception.printStackTrace();
-			}
-		}
-	}
+            if (newRowIndex != -1)
+                form.getDataTable().setRowSelectionInterval(newRowIndex, newRowIndex);
+        } catch (SQLException exception) {
+            if (exception.getErrorCode() == ErrorMessages.CUSTOM_ERROR_CODE) {
+                JOptionPane.showConfirmDialog(form, exception.getMessage(), "Greska",
+                        JOptionPane.OK_OPTION, JOptionPane.ERROR_MESSAGE);
+            } else {
+                exception.printStackTrace();
+            }
+        }
+    }
 }

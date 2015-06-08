@@ -16,8 +16,8 @@
       "formName": "kopija",
       "columnCodeMapping": [
         {
-          "columnCode1": "SIFRA_FILMA",
-          "columnCode2": "SIFRA_FILMA"
+          "from": "SIFRA_FILMA",
+          "to": "SIFRA_FILMA"
         }
       ]
     },
@@ -25,8 +25,8 @@
       "formName": "kopija",
       "columnCodeMapping": [
         {
-          "columnCode1": "SIFRA_FILMA",
-          "columnCode2": "SIFRA_FILMA"
+          "from": "SIFRA_FILMA",
+          "to": "SIFRA_FILMA"
         }
       ]
     }

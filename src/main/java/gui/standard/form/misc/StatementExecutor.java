@@ -1,6 +1,7 @@
 package gui.standard.form.misc;
 
 import database.DBConnection;
+import gui.standard.Column;
 
 import java.sql.*;
 import java.util.*;
@@ -16,26 +17,26 @@ public class StatementExecutor {
         this.columnCodeTypes = columnCodeTypes;
     }
 
-    public void executeProcedure(String procedureCall, Map<String, String> columnCodeValues) throws SQLException {
+    public void executeProcedure(String procedureCall, List<Column> columnValues) throws SQLException {
         System.out.println("Executing : \n" + procedureCall);
 
         CallableStatement statement = DBConnection.getConnection().prepareCall(
                 procedureCall);
 
-        int i = 0;
-        for (String columnCode : columnCodeValues.keySet()) {
-            String columnTypeClass = columnCodeTypes.get(columnCode);
+        int i = 1;
+        for (Column column : columnValues) {
+            String columnTypeClass = columnCodeTypes.get(column.getName());
 
-            String value = columnCodeValues.get(columnCode);
+            String value = column.getValue();
             switch (columnTypeClass) {
                 case "java.lang.String":
-                    statement.setString(i + 1, value);
+                    statement.setString(i, value);
                     break;
                 case "java.math.BigDecimal":
                     try{
-                        statement.setInt(i + 1, Integer.parseInt(value));
+                        statement.setInt(i, Integer.parseInt(value));
                     } catch (NumberFormatException e){
-                        statement.setDouble(i + 1, Double.parseDouble(value));
+                        statement.setDouble(i, Double.parseDouble(value));
                     }
                     break;
             }
@@ -44,6 +45,9 @@ public class StatementExecutor {
         }
 
         statement.execute();
+        statement.close();
+
+        DBConnection.getConnection().commit();
     }
 
     public List<String[]> execute(String query, Set<String> columnCodes) throws SQLException {
