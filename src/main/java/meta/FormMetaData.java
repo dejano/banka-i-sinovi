@@ -1,16 +1,16 @@
 package meta;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-@XmlRootElement
 public class FormMetaData {
 
 	private String title;
 	private String tableName;
-	private String tableLabel;
 
+	private Map<String, Lookup> lookupMap = new HashMap<>();
 	private List<NextMetaData> nextData = new ArrayList<>();
 
 	public String getTitle() {
@@ -29,19 +29,19 @@ public class FormMetaData {
 		this.tableName = tableName;
 	}
 
-	public String getTableLabel() {
-		return tableLabel;
-	}
-
-	public void setTableLabel(String tableLabel) {
-		this.tableLabel = tableLabel;
-	}
-
 	public List<NextMetaData> getNextData() {
 		return nextData;
 	}
 
 	public void setNextData(List<NextMetaData> nextData) {
 		this.nextData = nextData;
+	}
+
+	public Map<String, Lookup> getLookupMap() {
+		return lookupMap;
+	}
+
+	public void putLookup(String columnCode, Lookup lookup) {
+		this.lookupMap.put(columnCode, lookup);
 	}
 }

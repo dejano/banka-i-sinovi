@@ -1,7 +1,5 @@
 {
-   "formMetaData" : {
-      "nextData" : [ ],
-      "tableName" : "KOPIJA",
-      "title" : "Kopija"
-   }
+  "title": "Kopija",
+  "tableName": "KOPIJA",
+  "nextData": []
 }

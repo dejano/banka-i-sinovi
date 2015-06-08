@@ -2,111 +2,85 @@ package gui.standard.form;
 
 import database.DBConnection;
 import gui.standard.SortUtils;
+import gui.standard.form.misc.*;
 import org.apache.commons.lang3.ArrayUtils;
-import rs.mgifos.mosquito.model.MetaColumn;
-import rs.mgifos.mosquito.model.MetaTable;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.sql.*;
 import java.util.*;
 
+import static gui.standard.form.misc.ProcedureCallFactory.ProcedureCallEnum.*;
+import static gui.standard.form.misc.TableMetaData.ColumnGroupsEnum.*;
+
 public class TableModel extends DefaultTableModel {
 
-    public static final int CUSTOM_ERROR_CODE = 50000;
     private static final long serialVersionUID = 1L;
-    private static final String ERROR_RECORD_ALREADY_EXISTS = "Slog sa datim kljucem vec postoji";
-    private static final String ERROR_RECORD_WAS_CHANGED = "Slog je promenjen od strane drugog korisnika. Molim vas, pogledajte njegovu trenutnu vrednost";
-    private static final String ERROR_RECORD_WAS_DELETED = "Slog je obrisan od strane drugog korisnika";
-    private String tableCode;
-    private Map<String, MetaColumn> columns = new LinkedHashMap<>();
-    private List<String> pkColumns = new ArrayList<>();
-    private Map<String, Integer> columnCodeIndexes = new LinkedHashMap<>();
-    private Map<QueryProcedureCallEnum, String> cachedQueriesParameterCalls = new HashMap<>();
+
+    private TableMetaData tableMetaData;
     private Map<String, String> nextColumnCodeValues;
-    public TableModel(MetaTable metaTable) {
-        this.tableCode = metaTable.getCode();
 
-        initMetaTableData(metaTable);
+    private TableQueries tableQueries;
+
+    private TableHelper tableHelper;
+
+    public TableModel(TableMetaData tableMetaData) {
+        this.tableMetaData = tableMetaData;
+        this.tableQueries = new TableQueries(tableMetaData);
+        this.tableHelper = new TableHelper(tableQueries, tableMetaData);
+
+        initColumnNames();
     }
-    public TableModel(MetaTable metaTable, Map<String, String> nextColumnCodeValues) {
-        this(metaTable);
 
-        if (!nextColumnCodeValues.isEmpty())
+    public TableModel(TableMetaData tableMetaData, Map<String, String> nextColumnCodeValues) {
+        this(tableMetaData);
+
+        if (!nextColumnCodeValues.isEmpty()) {
             this.nextColumnCodeValues = nextColumnCodeValues;
-    }
-
-    private void initMetaTableData(MetaTable metaTable) {
-        Vector<String> columnNames = new Vector<>(metaTable.getTotalColumns());
-        @SuppressWarnings("unchecked")
-        Vector<MetaColumn> metaColumns = (Vector<MetaColumn>) metaTable.cColumns();
-        for (int i = 0; i < metaTable.getTotalColumns(); i++) {
-            MetaColumn column = metaColumns.get(i);
-
-            columnNames.add(column.getName());
-
-            columns.put(column.getCode(), column);
-            columnCodeIndexes.put(column.getCode(), i);
-
-            if (column.isPartOfPK())
-                pkColumns.add(column.getCode());
-
-            // TODO filter out columns - hide, etc
         }
 
+        this.tableQueries = new TableQueries(tableMetaData, this.nextColumnCodeValues);
+    }
+
+    private void initColumnNames() {
+        List<String> columnNames = tableMetaData.getColumnNames();
         @SuppressWarnings("rawtypes")
         Vector vector = new Vector(columnNames.size());
         vector.setSize(columnNames.size());
-        setDataVector(vector, columnNames);
+        setDataVector(vector, new Vector(columnNames));
     }
 
-    public String getValue(int selectedRowIndex, String columnCode) {
-        return (String) getValueAt(selectedRowIndex, columnCodeIndexes.get(columnCode));
+    public String getValue(int rowIndex, String columnCode) {
+        return (String) getValueAt(rowIndex, tableMetaData.getColumnIndex(columnCode));
     }
 
     public void open() throws SQLException {
         if (nextColumnCodeValues == null) {
-            fillData(getBasicQuery()
-                    + getOrderByQuery());
+            fillData(tableQueries.getBasicQuery()
+//                    + tableQueries.getOrderByQuery()
+            );
         } else {
-            fillData(getBasicQuery()
-                    + " WHERE " + getNextWhereQuery()
-                    + getOrderByQuery());
+            fillData(tableQueries.getBasicQuery()
+                    + tableQueries.getNextWhereQuery()
+//                    + tableQueries.getOrderByQuery()
+            );
         }
     }
 
     private void fillData(String query) throws SQLException {
         setRowCount(0);
 
-        ResultSet resultSet;
-        Statement stmt;
+        List<String[]> results;
+        StatementExecutor executor = new StatementExecutor(tableMetaData.getColumnCodeTypes(ALL_WITHOUT_LOOKUP));
         if (nextColumnCodeValues != null) {
-            stmt = DBConnection.getConnection().prepareStatement(query);
-            PreparedStatement pStmt = (PreparedStatement) stmt;
-
-            int count = 1;
-            for (String nextValue : nextColumnCodeValues.values()) {
-                pStmt.setString(count++, nextValue);
-            }
-
-            resultSet = pStmt.executeQuery();
+            results = executor.execute(query, tableMetaData.getColumns().keySet(), nextColumnCodeValues);
         } else {
-            stmt = DBConnection.getConnection().createStatement();
-            resultSet = stmt.executeQuery(query);
+            results = executor.execute(query, tableMetaData.getColumns().keySet());
         }
 
-        String[] rowValues = new String[getColumnCount()];
-        while (resultSet.next()) {
-            int count = 0;
-            for (String columnName : columns.keySet()) {
-                rowValues[count++] = resultSet.getString(columnName);
-            }
-
+        for (String[] rowValues : results) {
             addRow(rowValues);
         }
-
-        resultSet.close();
-        stmt.close();
 
         fireTableDataChanged();
     }
@@ -116,16 +90,11 @@ public class TableModel extends DefaultTableModel {
 
         checkRowInsert(values);
 
-        CallableStatement proc = DBConnection.getConnection().prepareCall(
-                getCreateProcedureCall());
+        StatementExecutor executor = new StatementExecutor(
+                tableMetaData.getColumnCodeTypes(ALL_WITHOUT_LOOKUP));
 
-        setParametersAllCols(proc, values);
-
-        proc.execute();
-
-        proc.close();
-
-        DBConnection.getConnection().commit();
+        executor.executeProcedure(ProcedureCallFactory.getProcedureCall(tableMetaData.getTableName(),
+                CREATE_PROCEDURE_CALL), tableHelper.createMap(tableMetaData.getColumns().keySet(), values));
 
         retVal = sortedInsert(values);
         fireTableDataChanged();
@@ -138,27 +107,17 @@ public class TableModel extends DefaultTableModel {
 
         checkRowUpdate(rowIndex, values);
 
-        CallableStatement proc = DBConnection.getConnection().prepareCall(
-                getUpdateProcedureCall());
+        String[] pkValues = tableHelper.getPkValues(getRowValues(rowIndex));
 
-        // TODO refactor pk column values
-        String[] pkValues = new String[pkColumns.size()];
-        int i = 0;
-        for (String columnCode : pkColumns) {
-            pkValues[i++] = (String) getValueAt(rowIndex,
-                    columnCodeIndexes.get(columnCode));
-        }
+        List<String> columnCodes = new ArrayList<>(tableMetaData.getPrimaryKeyColumns());
+        columnCodes.addAll(tableMetaData.getColumns().keySet());
 
-        List<String> both = new ArrayList<>(pkValues.length + values.length);
-        Collections.addAll(both, pkValues);
-        Collections.addAll(both, values);
+        Map<String, String> columnCodeValues = tableHelper.createMap(columnCodes,
+                ArrayUtils.addAll(pkValues, values));
 
-        setParametersPkAllCols(proc, both.toArray(new String[both.size()]));
-
-        proc.execute();
-        proc.close();
-
-        DBConnection.getConnection().commit();
+        StatementExecutor executor = new StatementExecutor(tableMetaData.getColumnCodeTypes(ALL_WITHOUT_LOOKUP));
+        executor.executeProcedure(ProcedureCallFactory.getProcedureCall(tableMetaData.getTableName(),
+                UPDATE_PROCEDURE_CALL), columnCodeValues);
 
         removeRow(rowIndex);
         retVal = sortedInsert(values);
@@ -193,8 +152,8 @@ public class TableModel extends DefaultTableModel {
     private int comparePkValues(String[] values, int rowIndex) {
         int ret = 0;
 
-        for (String columnCode : pkColumns) {
-            int columnIndex = columnCodeIndexes.get(columnCode);
+        for (String columnCode : tableMetaData.getPrimaryKeyColumns()) {
+            int columnIndex = tableMetaData.getColumnIndex(columnCode);
 
             String value = values[columnIndex];
             String tableValue = (String) getValueAt(rowIndex, columnIndex);
@@ -221,23 +180,13 @@ public class TableModel extends DefaultTableModel {
     public void deleteRow(int index) throws SQLException {
         checkRowDelete(index);
 
-        CallableStatement proc = DBConnection.getConnection().prepareCall(
-                getDeleteProcedureCall());
+        String[] pkValues = tableHelper.getPkValues(getRowValues(index));
+        Map<String, String> columnCodeValues =
+                tableHelper.createMap(tableMetaData.getPrimaryKeyColumns(), pkValues);
 
-        String[] values = new String[pkColumns.size()];
-        int count = 0;
-        for (String columnCode : pkColumns) {
-            int columnIndex = columnCodeIndexes.get(columnCode);
-            values[count++] = (String) getValueAt(index, columnIndex);
-        }
-
-        setParametersPkCols(proc, values);
-
-        proc.execute();
-
-        proc.close();
-
-        DBConnection.getConnection().commit();
+        StatementExecutor executor = new StatementExecutor(tableMetaData.getColumnCodeTypes(PRIMARY_KEYS));
+        executor.executeProcedure(ProcedureCallFactory.getProcedureCall(tableMetaData.getTableName(),
+                DELETE_PROCEDURE_CALL), columnCodeValues);
 
         removeRow(index);
         fireTableDataChanged();
@@ -246,14 +195,16 @@ public class TableModel extends DefaultTableModel {
     public int search(String[] values) throws SQLException {
         int retVal = 0;
 
+//        StatementExecutor executor = new StatementExecutor(tableMetaData.getColumnCodeTypes())
         PreparedStatement stmt = DBConnection.getConnection().prepareStatement(
-                getBasicQuery() + getWhereQuery() + getNextWhereQuery() + getOrderByQuery());
+                tableQueries.getBasicQuery() + tableQueries.getWhereQuery()
+                        + tableQueries.getNextWhereQuery() + tableQueries.getOrderByQuery());
 
-        if (nextColumnCodeValues == null)
-            setParametersLike(stmt, values);
-        else
-            setParametersLike(stmt, ArrayUtils.addAll(values,
-                    nextColumnCodeValues.values().toArray(new String[nextColumnCodeValues.size()])));
+//        if (nextColumnCodeValues == null)
+//            setParametersLike(stmt, values);
+//        else
+//            setParametersLike(stmt, ArrayUtils.addAll(values,
+//                    nextColumnCodeValues.values().toArray(new String[nextColumnCodeValues.size()])));
 
         ResultSet resultSet = stmt.executeQuery();
 
@@ -266,7 +217,7 @@ public class TableModel extends DefaultTableModel {
             while (resultSet.next()) {
                 rowValues.clear();
 
-                for (String columnName : columns.keySet()) {
+                for (String columnName : tableMetaData.getColumns().keySet()) {
                     resultSet.getString(columnName);
                 }
 
@@ -287,91 +238,30 @@ public class TableModel extends DefaultTableModel {
         return retVal;
     }
 
-    private void checkRowInsert(String[] values) throws SQLException {
+    public void checkRowInsert(String[] values) throws SQLException {
         DBConnection.getConnection()
                 .setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
 
-        PreparedStatement stmt = DBConnection.getConnection().prepareStatement(
-                getBasicQuery() + getWhereByPksQuery());
-
-        String[] pkValues = new String[pkColumns.size()];
-        int i = 0;
-        for (String columnCode : pkColumns) {
-            pkValues[i++] = values[columnCodeIndexes.get(columnCode)];
-        }
-
-        setParametersPkCols(stmt, pkValues);
-
-        ResultSet rset = stmt.executeQuery();
-
-        String errorMessage = null;
-        if (rset.isBeforeFirst()) { // if has results
-            errorMessage = ERROR_RECORD_ALREADY_EXISTS;
-        }
-
-        rset.close();
-        stmt.close();
+        String[] result = tableHelper.getDbRowByPks(tableHelper.getPkValues(values));
 
         DBConnection.getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 
-        if (errorMessage != null) {
+        if (result != null) {
             DBConnection.getConnection().commit();
-            throw new SQLException(errorMessage, "", CUSTOM_ERROR_CODE);
+            throw new SQLException(ErrorMessages.ERROR_RECORD_ALREADY_EXISTS, "", ErrorMessages.CUSTOM_ERROR_CODE);
         }
     }
 
-    private void checkRowUpdate(int index, String[] values) throws SQLException {
+    public void checkRowUpdate(int index, String[] newValues) throws SQLException {
         DBConnection.getConnection()
                 .setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
 
-        int columnCount = getColumnCount();
+        String[] result = tableHelper.getDbRowByPks(tableHelper.getPkValues(getRowValues(index)));
 
-        PreparedStatement stmt = DBConnection.getConnection().prepareStatement(
-                getBasicQuery() + getWhereByPksQuery());
+        String errorMessage = checkUpdatedDeleted(index, result, newValues);
 
-        String[] pkValues = new String[pkColumns.size()];
-        int i = 0;
-        for (String columnCode : pkColumns) {
-            pkValues[i++] = (String) getValueAt(index,
-                    columnCodeIndexes.get(columnCode));
-        }
-
-        setParametersPkCols(stmt, pkValues);
-
-        ResultSet rset = stmt.executeQuery();
-
-        String errorMessage = null;
-        if (rset.isBeforeFirst()) { // if has results
-            boolean changed = false;
-
-            // move to result
-            rset.next();
-
-            // check if values changed
-            for (i = 0; i < columnCount; i++) {
-                if (!rset.getString(i + 1).equals(getValueAt(index, i))) {
-                    changed = true;
-                    break;
-                }
-            }
-
-            if (changed) {
-                for (i = 0; i < columnCount; i++) {
-                    setValueAt(rset.getString(i + 1), index, i);
-                }
-
-                errorMessage = ERROR_RECORD_WAS_CHANGED;
-            }
-        } else { // already deleted
-            removeRow(index);
-            fireTableDataChanged();
-            errorMessage = ERROR_RECORD_WAS_DELETED;
-        }
-
-        rset.close();
-        stmt.close();
-
-        checkRowInsert(values);
+        if (errorMessage == null)
+            checkRowInsert(newValues);
 
         DBConnection.getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 
@@ -381,390 +271,66 @@ public class TableModel extends DefaultTableModel {
             errorMessageDialog.setVisible(true);
 
             DBConnection.getConnection().commit();
-            throw new SQLException(errorMessage, "", CUSTOM_ERROR_CODE);
+            throw new SQLException(errorMessage, "", ErrorMessages.CUSTOM_ERROR_CODE);
         }
     }
 
-    private void checkRowDelete(int index) throws SQLException {
+    public void checkRowDelete(int index) throws SQLException {
         DBConnection.getConnection()
                 .setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
 
-        int columnCount = getColumnCount();
+        String[] values = getRowValues(index);
+        String[] result = tableHelper.getDbRowByPks(tableHelper.getPkValues(values));
 
-        PreparedStatement stmt = DBConnection.getConnection().prepareStatement(
-                getBasicQuery() + getWhereByPksQuery());
-
-        String[] pkValues = new String[pkColumns.size()];
-        int i = 0;
-        for (String columnCode : pkColumns) {
-            pkValues[i++] = (String) getValueAt(index,
-                    columnCodeIndexes.get(columnCode));
-        }
-
-        setParametersPkCols(stmt, pkValues);
-
-        ResultSet rset = stmt.executeQuery();
+        DBConnection.getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 
         String errorMessage = null;
-        if (rset.isBeforeFirst()) { // if has results
+        if (result != null)
+            errorMessage = checkUpdatedDeleted(index, result, values);
+
+        if (errorMessage != null) {
+            DBConnection.getConnection().commit();
+            throw new SQLException(errorMessage, "", ErrorMessages.CUSTOM_ERROR_CODE);
+        }
+    }
+
+    private String checkUpdatedDeleted(int index, String[] result, String[] values) {
+        String errorMessage = null;
+
+        if (result != null) { // if has results
             boolean changed = false;
 
-            // move to result
-            rset.next();
-
             // check if values changed
-            for (i = 0; i < columnCount; i++) {
-                if (!rset.getString(i + 1).equals(getValueAt(index, i))) {
+            for (int i = 0; i < values.length; i++) {
+                if (!result[i].equals(values[i])) {
                     changed = true;
                     break;
                 }
             }
 
             if (changed) {
-                for (i = 0; i < columnCount; i++) {
-                    setValueAt(rset.getString(i + 1), index, i);
+                for (int i = 0; i < values.length; i++) {
+                    setValueAt(result[i], index, i);
                 }
 
-                errorMessage = ERROR_RECORD_WAS_CHANGED;
+                errorMessage = ErrorMessages.ERROR_RECORD_WAS_CHANGED;
             }
         } else { // already deleted
             removeRow(index);
             fireTableDataChanged();
-            errorMessage = ERROR_RECORD_WAS_DELETED;
+            errorMessage = ErrorMessages.ERROR_RECORD_WAS_DELETED;
         }
 
-        rset.close();
-        stmt.close();
-
-        DBConnection.getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
-
-        if (errorMessage != null) {
-            JOptionPane errorMessageDialog = new JOptionPane(errorMessage,
-                    JOptionPane.ERROR_MESSAGE);
-            errorMessageDialog.setVisible(true);
-
-            DBConnection.getConnection().commit();
-            throw new SQLException(errorMessage, "", CUSTOM_ERROR_CODE);
-        }
+        return errorMessage;
     }
 
-    public String getBasicQuery() {
-        String basicQuery = cachedQueriesParameterCalls.get(QueryProcedureCallEnum.BASIC_QUERY);
-
-        if (basicQuery == null) {
-            StringBuilder sb = new StringBuilder();
-
-            sb.append("SELECT ");
-
-            for (String column : columns.keySet()) {
-                sb.append(column);
-                sb.append(", ");
-            }
-
-            int lastCommaIndex = sb.lastIndexOf(", ");
-            sb.delete(lastCommaIndex, lastCommaIndex + 2);
-            sb.append(" FROM ");
-            sb.append(tableCode);
-
-            basicQuery = sb.toString();
-            cachedQueriesParameterCalls.put(QueryProcedureCallEnum.BASIC_QUERY, basicQuery);
-        }
-
-        return basicQuery;
-    }
-
-    public String getOrderByQuery() {
-        String orderByQuery = cachedQueriesParameterCalls
-                .get(QueryProcedureCallEnum.ORDER_BY_QUERY);
-
-        if (orderByQuery == null) {
-            StringBuilder sb = new StringBuilder();
-
-            sb.append(" ORDER BY ");
-
-            // order by all pks
-            for (String column : pkColumns) {
-                sb.append(column);
-                sb.append(", ");
-            }
-
-            int lastCommaIndex = sb.lastIndexOf(", ");
-            sb.delete(lastCommaIndex, lastCommaIndex + 2);
-
-            // order by first pk
-            // sb.append(pkColumns.keySet().iterator().next());
-
-            orderByQuery = sb.toString();
-            cachedQueriesParameterCalls.put(QueryProcedureCallEnum.ORDER_BY_QUERY, orderByQuery);
-        }
-
-        return orderByQuery;
-    }
-
-    public String getWhereByPksQuery() {
-        String whereByPksQuery = cachedQueriesParameterCalls
-                .get(QueryProcedureCallEnum.WHERE_PKS_QUERY);
-
-        if (whereByPksQuery == null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(" WHERE ");
-
-            for (String column : pkColumns) {
-                sb.append(column);
-                sb.append("=? AND ");
-            }
-
-            int lastAndIndex = sb.lastIndexOf(" AND ");
-            sb.delete(lastAndIndex, lastAndIndex + 5);
-
-            whereByPksQuery = sb.toString();
-
-            cachedQueriesParameterCalls
-                    .put(QueryProcedureCallEnum.WHERE_PKS_QUERY, whereByPksQuery);
-        }
-
-        return whereByPksQuery;
-    }
-
-    public String getWhereQuery() {
-        String whereQuery = cachedQueriesParameterCalls.get(QueryProcedureCallEnum.WHERE_QUERY);
-
-        if (whereQuery == null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(" WHERE ");
-
-            for (String column : columns.keySet()) {
-                sb.append(column);
-                sb.append(" LIKE ? AND ");
-            }
-
-            int lastAndIndex = sb.lastIndexOf(" AND ");
-            sb.delete(lastAndIndex, lastAndIndex + 5);
-
-            whereQuery = sb.toString();
-
-            cachedQueriesParameterCalls.put(QueryProcedureCallEnum.WHERE_QUERY, whereQuery);
-        }
-
-        return whereQuery;
-    }
-
-    public String getNextWhereQuery() {
-        String nextWhereQuery = cachedQueriesParameterCalls.get(QueryProcedureCallEnum.NEXT_WHERE_QUERY);
-
-        if (nextWhereQuery == null) {
-            if (nextColumnCodeValues == null) {
-                nextWhereQuery = "";
-                cachedQueriesParameterCalls.put(QueryProcedureCallEnum.WHERE_QUERY, nextWhereQuery);
-            } else {
-                StringBuilder sb = new StringBuilder();
-
-                for (String column : nextColumnCodeValues.keySet()) {
-                    sb.append(column);
-                    sb.append(" = ? AND ");
-                }
-
-                int lastAndIndex = sb.lastIndexOf(" AND ");
-                sb.delete(lastAndIndex, lastAndIndex + 5);
-
-                nextWhereQuery = sb.toString();
-                cachedQueriesParameterCalls.put(QueryProcedureCallEnum.NEXT_WHERE_QUERY, nextWhereQuery);
-            }
-        }
-
-        return nextWhereQuery;
-    }
-
-    private String getProcedureCall(String prefix, ProcedureCallStyle pcs) {
-        StringBuilder sb = new StringBuilder();
-
-        int columnsCount = 0;
-
-        switch (pcs) {
-            case USE_ALL_COLS:
-                columnsCount = getColumnCount();
-                break;
-            case USE_PK_COLS:
-                columnsCount = pkColumns.size();
-                break;
-            case USE_PK_ALL_COLS:
-                columnsCount = getColumnCount() + pkColumns.size();
-                break;
-        }
-
-        sb.append("{ call ");
-        sb.append(prefix);
-        sb.append("_");
-        sb.append(tableCode);
-        sb.append("( ");
-
-        for (int i = 0; i < columnsCount; i++) {
-            sb.append("?, ");
-        }
-
-        int lastCommaIndex = sb.lastIndexOf(", ");
-        sb.delete(lastCommaIndex, lastCommaIndex + 2);
-        sb.append(" )}");
-
-        return sb.toString();
-    }
-
-    public String getCreateProcedureCall() {
-        String createProcedureCall = cachedQueriesParameterCalls
-                .get(QueryProcedureCallEnum.CREATE_PROCEDURE_CALL);
-
-        // { call c_tableName(?,...,?)}
-
-        if (createProcedureCall == null) {
-            createProcedureCall = getProcedureCall("c",
-                    ProcedureCallStyle.USE_ALL_COLS);
-
-            cachedQueriesParameterCalls.put(
-                    QueryProcedureCallEnum.CREATE_PROCEDURE_CALL,
-                    createProcedureCall);
-        }
-
-        return createProcedureCall;
-    }
-
-    public String getUpdateProcedureCall() {
-        String updateProcedureCall = cachedQueriesParameterCalls
-                .get(QueryProcedureCallEnum.UPDATE_PROCEDURE_CALL);
-
-        // { call u_tableName(?,...,?)}
-
-        if (updateProcedureCall == null) {
-            updateProcedureCall = getProcedureCall("u",
-                    ProcedureCallStyle.USE_PK_ALL_COLS);
-
-            cachedQueriesParameterCalls.put(
-                    QueryProcedureCallEnum.UPDATE_PROCEDURE_CALL,
-                    updateProcedureCall);
-        }
-
-        return updateProcedureCall;
-    }
-
-    public String getDeleteProcedureCall() {
-        String deleteProcedureCall = cachedQueriesParameterCalls
-                .get(QueryProcedureCallEnum.DELETE_PROCEDURE_CALL);
-
-        if (deleteProcedureCall == null) {
-            deleteProcedureCall = getProcedureCall("d",
-                    ProcedureCallStyle.USE_PK_COLS);
-
-            cachedQueriesParameterCalls.put(
-                    QueryProcedureCallEnum.DELETE_PROCEDURE_CALL,
-                    deleteProcedureCall);
-        }
-
-        return deleteProcedureCall;
-    }
-
-    private void setParametersLike(PreparedStatement stmt, String[] values)
-            throws SQLException {
-        Iterator<MetaColumn> it = columns.values().iterator();
-
-        for (int i = 0; i < values.length; i++) {
-            MetaColumn column = it.next();
-
-            String columnTypeClass = column.getJClassName();
-
-            switch (columnTypeClass) {
-                case "java.lang.String":
-                    stmt.setString(i + 1, "%" + values[i] + "%");
-            }
-        }
-    }
-
-    private void setParametersPkCols(PreparedStatement stmt, String[] values)
-            throws SQLException {
-        Iterator<String> it = pkColumns.iterator();
-
-        for (int i = 0; i < values.length; i++) {
-            MetaColumn column = columns.get(it.next());
-
-            String columnTypeClass = column.getJClassName();
-
-            // TODO handle all types
-            switch (columnTypeClass) {
-                case "java.lang.String":
-                    stmt.setString(i + 1, values[i]);
-                    break;
-                case "java.math.BigDecimal":
-                    try {
-                        Integer value = Integer.parseInt(values[i]);
-                        stmt.setInt(i + 1, value);
-                    } catch (Exception e) {
-                        stmt.setDouble(i + 1, Double.parseDouble(values[i]));
-                    }
-                    break;
-            }
-        }
-    }
-
-    private void setParametersAllCols(PreparedStatement stmt, String[] values)
-            throws SQLException {
-        Iterator<String> it = columns.keySet().iterator();
-
-        for (int i = 0; i < values.length; i++) {
-            MetaColumn column = columns.get(it.next());
-
-            String columnTypeClass = column.getJClassName();
-
-            // TODO handle all types
-            switch (columnTypeClass) {
-                case "java.lang.String":
-                    stmt.setString(i + 1, values[i]);
-                    break;
-                case "java.math.BigDecimal":
-                    try {
-                        Integer value = Integer.parseInt(values[i]);
-                        stmt.setInt(i + 1, value);
-                    } catch (Exception e) {
-                        stmt.setDouble(i + 1, Double.parseDouble(values[i]));
-                    }
-                    break;
-            }
-        }
-    }
-
-    private void setParametersPkAllCols(PreparedStatement stmt, String[] values)
-            throws SQLException {
-        List<String> columnCodes = new ArrayList<>(pkColumns);
-        columnCodes.addAll(columns.keySet());
-
-        Iterator<String> it = columnCodes.iterator();
-
-        for (int i = 0; i < values.length; i++) {
-            MetaColumn column = columns.get(it.next());
-
-            String columnTypeClass = column.getJClassName();
-
-            // TODO handle all types
-            switch (columnTypeClass) {
-                case "java.lang.String":
-                    stmt.setString(i + 1, values[i]);
-                    break;
-                case "java.math.BigDecimal":
-                    stmt.setDouble(i + 1, Double.parseDouble(values[i]));
-                    break;
-            }
-        }
+    private String[] getRowValues(int index) {
+        Vector rowValues = (Vector) dataVector.get(index);
+        return (String[]) rowValues.toArray(new String[rowValues.size()]);
     }
 
     public Map<String, String> getNextColumnCodeValues() {
         return nextColumnCodeValues;
     }
-
-    private enum QueryProcedureCallEnum {
-        BASIC_QUERY, ORDER_BY_QUERY, WHERE_PKS_QUERY, WHERE_QUERY, NEXT_WHERE_QUERY, UPDATE_PROCEDURE_CALL,
-        DELETE_PROCEDURE_CALL, CREATE_PROCEDURE_CALL
-    }
-
-    private enum ProcedureCallStyle {
-        USE_ALL_COLS, USE_PK_COLS, USE_PK_ALL_COLS
-    }
-
 
 }

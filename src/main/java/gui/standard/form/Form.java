@@ -4,6 +4,7 @@ import actions.standard.*;
 import gui.standard.Column;
 import gui.standard.ColumnList;
 import gui.standard.form.StatusBar.FormModeEnum;
+import gui.standard.form.misc.TableMetaData;
 import meta.FormMetaData;
 import meta.MosquitoSingletone;
 import meta.NextMetaData;
@@ -170,7 +171,7 @@ public class Form extends JDialog {
                 .getMetaTable(fmd.getTableName());
 
         if (nextColumnCodeValues == null) {
-            tableModel = new TableModel(metaTable);
+            tableModel = new TableModel(new TableMetaData(metaTable, fmd.getLookupMap()));
         } else {
             List<String> removeColumnCodes = new ArrayList<>();
             for (String columnCode : nextColumnCodeValues.keySet()) {
@@ -179,7 +180,7 @@ public class Form extends JDialog {
             }
             nextColumnCodeValues.keySet().removeAll(removeColumnCodes);
 
-            tableModel = new TableModel(metaTable, nextColumnCodeValues);
+            tableModel = new TableModel(new TableMetaData(metaTable, fmd.getLookupMap()), nextColumnCodeValues);
         }
 
         dataTable.setModel(tableModel);

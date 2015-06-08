@@ -1,119 +1,87 @@
 package meta;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.stream.StreamSource;
-
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import gui.standard.ColumnMapping;
-import org.eclipse.persistence.jaxb.MarshallerProperties;
-import org.eclipse.persistence.jaxb.UnmarshallerProperties;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class JsonHelper {
 
-	public static void marshall(FormMetaData fmd, String filename) {
-		File file = new File("src/main/resources/");
-		
-		try {
-			File jsonFile = new File(file, filename);
-			if (!jsonFile.exists()) {
-				jsonFile.createNewFile();
-			}
-			
-			OutputStream out = new FileOutputStream(jsonFile);
-			
-			JAXBContext jc = JAXBContext.newInstance(FormMetaData.class);
+    public static void marshall(FormMetaData fmd, String filename) {
+        File file = new File("src/main/resources/");
 
-			Marshaller marshaller = jc.createMarshaller();
+        try {
+            File jsonFile = new File(file, filename);
+            if (!jsonFile.exists()) {
+                jsonFile.createNewFile();
+            }
 
-			marshaller.setProperty(MarshallerProperties.MEDIA_TYPE,
-					"application/json");
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-			marshaller
-					.setProperty(MarshallerProperties.JSON_INCLUDE_ROOT, true);
+            String json = gson.toJson(fmd);
 
-			marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            FileWriter writer = new FileWriter(jsonFile);
+            writer.write(json);
+            writer.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-			marshaller.marshal(fmd, out);
-		} catch (JAXBException e) {
-			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+    public static FormMetaData unmarshall(String filename) {
+        FormMetaData ret = null;
 
-	public static FormMetaData unmarshall(String filename) {
-		FormMetaData ret = null;
+        File file = new File("src/main/resources/");
 
-		File file = new File("src/main/resources/");
+        Gson gson = new Gson();
 
-		try {
-			InputStream in = new FileInputStream(new File(file, filename));
+        try {
+            BufferedReader br = new BufferedReader(
+                    new FileReader(new File(file, filename)));
 
-			JAXBContext jc = JAXBContext.newInstance(FormMetaData.class);
+            ret = gson.fromJson(br, FormMetaData.class);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
 
-			Unmarshaller unmarshaller = jc.createUnmarshaller();
+        return ret;
+    }
 
-			unmarshaller.setProperty(UnmarshallerProperties.MEDIA_TYPE,
-					"application/json");
+    public static void main(String[] args) {
+        FormMetaData fmd1 = new FormMetaData();
+        fmd1.setTableName("VIDEOTEKA");
+        fmd1.setTitle("Videoteka");
 
-			unmarshaller.setProperty(UnmarshallerProperties.JSON_INCLUDE_ROOT,
-					true);
+        NextMetaData nmd1 = new NextMetaData();
+        nmd1.setFormName("film");
+        nmd1.getColumnCodeMapping().add(new ColumnMapping("SIFRA_VIDEOTEKE", "SIFRA_VIDEOTEKE"));
+        fmd1.getNextData().add(nmd1);
 
-			ret = unmarshaller.unmarshal(new StreamSource(in),
-					FormMetaData.class).getValue();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (JAXBException e) {
-			e.printStackTrace();
-		}
+        marshall(fmd1, "videoteka.json");
 
-		return ret;
-	}
-	
-	public static void main(String[] args) {
-		FormMetaData fmd1 = new FormMetaData();
-		fmd1.setTableName("VIDEOTEKA");
-		fmd1.setTitle("Videoteka");
+        FormMetaData fmd2 = new FormMetaData();
+        fmd2.setTableName("FILM");
+        fmd2.setTitle("Film");
 
-		NextMetaData nmd1 = new NextMetaData();
-		nmd1.setFormName("film");
-		nmd1.getColumnCodeMapping().add(new ColumnMapping("SIFRA_VIDEOTEKE", "SIFRA_VIDEOTEKE"));
-		fmd1.getNextData().add(nmd1);
+        NextMetaData nmd2 = new NextMetaData();
+        nmd2.setFormName("kopija");
+        nmd2.getColumnCodeMapping().add(new ColumnMapping("SIFRA_FILMA", "SIFRA_FILMA"));
+        fmd2.getNextData().add(nmd2);
 
-		marshall(fmd1, "videoteka.json");
+        NextMetaData nmd22 = new NextMetaData();
+        nmd22.setFormName("kopija");
+        nmd22.getColumnCodeMapping().add(new ColumnMapping("SIFRA_FILMA", "SIFRA_FILMA"));
+        fmd2.getNextData().add(nmd22);
+        List<String> lookups = new ArrayList<>();
+        lookups.add("NAZIV");
+        Lookup l1 = new Lookup("VIDEOTEKA", "SIFRA_VIDEOTEKE", "SIFRA_VIDEOTEKE", lookups);
+        fmd2.putLookup("SIFRA_VIDEOTEKE", l1);
 
-		FormMetaData fmd2 = new FormMetaData();
-		fmd2.setTableName("FILM");
-		fmd2.setTitle("Film");
-
-		NextMetaData nmd2 = new NextMetaData();
-		nmd2.setFormName("kopija");
-		nmd2.getColumnCodeMapping().add(new ColumnMapping("SIFRA_FILMA", "SIFRA_FILMA"));
-		fmd2.getNextData().add(nmd2);
-
-		NextMetaData nmd22 = new NextMetaData();
-		nmd22.setFormName("kopija");
-		nmd22.getColumnCodeMapping().add(new ColumnMapping("SIFRA_FILMA", "SIFRA_FILMA"));
-		fmd2.getNextData().add(nmd22);
-
-		marshall(fmd2, "film.json");
-
-		FormMetaData fmd3 = new FormMetaData();
-		fmd3.setTableName("KOPIJA");
-		fmd3.setTitle("Kopija");
-
-		marshall(fmd3, "kopija.json");
-	}
+        marshall(fmd2, "film.json");
+    }
 }

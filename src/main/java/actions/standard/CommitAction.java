@@ -1,8 +1,8 @@
 package actions.standard;
 
+import gui.standard.form.misc.ErrorMessages;
 import gui.standard.form.Form;
 import gui.standard.form.StatusBar.FormModeEnum;
-import gui.standard.form.TableModel;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -29,12 +29,13 @@ public class CommitAction extends AbstractAction {
 
 			switch (mode) {
 			case ADD:
-				newRowIndex = form.getTableModel().insertRow(new String []{"4", "4", "7"});
+				newRowIndex = form.getTableModel().insertRow(new String []{"4", "a", "a", "a", "a", "a", "7", "4"});
 
 				break;
 			case EDIT:
 	//				form.getTableModel().updateRow(form.getDataPanel().getValues());
-				newRowIndex = form.getTableModel().updateRow(form.getDataTable().getSelectedRow(), new String[]{ "8", "11", "8"});
+				newRowIndex = form.getTableModel().updateRow(form.getDataTable().getSelectedRow(),
+						new String []{"5", "a", "b", "a", "b", "a", "1", "4"});
 
 				break;
 			default:
@@ -44,7 +45,7 @@ public class CommitAction extends AbstractAction {
 			if(newRowIndex != -1)
 				form.getDataTable().setRowSelectionInterval(newRowIndex, newRowIndex);
 		} catch (SQLException exception) {
-			if(exception.getErrorCode() == TableModel.CUSTOM_ERROR_CODE){
+			if(exception.getErrorCode() == ErrorMessages.CUSTOM_ERROR_CODE){
 				JOptionPane.showConfirmDialog(form, exception.getMessage(), "Greska",
 						JOptionPane.OK_OPTION, JOptionPane.ERROR_MESSAGE);
 			} else {
