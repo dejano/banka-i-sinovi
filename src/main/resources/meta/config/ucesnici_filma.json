@@ -1,0 +1,59 @@
+{
+  "tableCode": "UCESNICI_FILMA",
+  "title": "Ucesnici filma",
+  "lookups": [
+    {
+      "table": "VIDEOTEKA",
+      "from": "SIFRA_VIDEOTEKE",
+      "to": "SIFRA_VIDEOTEKE",
+      "columns": [
+        {
+          "name":"VIDEOTEKA.NAZIV",
+          "label":"Naziv Videoteke" // moze iz pdm-a
+        }
+      ]
+    }
+  ,
+    {
+      "table": "FILM",
+      "from": "SIFRA_FILMA",
+      "to": "SIFRA_FILMA",
+      "columns": [
+        {
+          "name":"FILM.NAZIV_FILMA",
+          "label":"Naziv Filma"
+        }
+      ]
+    }, {
+      "table": "UCESNIK_FILMA",
+      "from": "SIFRA_UCESNIKA",
+      "to": "SIFRA_UCESNIKA",
+      "columns": [
+        {
+          "name":"UCESNIK_FILMA.PREZIME",
+          "label":"Prezime Ucesnika"
+        },
+        {
+          "name":"UCESNIK_FILMA.IME",
+          "label":"Ime Ucesnika"
+        }
+      ]
+    }
+  ],
+  "zoomData": [
+    {
+      "table": "FILM",
+      "columnCode": "SIFRA_FILMA",
+      "columns": [
+        "FILM.SIFRA_FILMA","SIFRA_VIDEOTEKE"//, "VIDEOTEKA.NAZIV"
+      ]
+    },
+    {
+      "table": "UCESNIK_FILMA",
+      "columnCode": "SIFRA_UCESNIKA",
+      "columns": [
+        "UCESNIK_FILMA.SIFRA_UCESNIKA"
+      ]
+    }
+  ]
+}

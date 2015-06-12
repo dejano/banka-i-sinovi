@@ -1,0 +1,75 @@
+{
+  "tableCode": "FILM",
+  "title": "Film",
+  "lookups": [
+    {
+      "table": "ZEMLJA_POREKLA",
+      "from": "SIFRA_ZEMLJE",
+      "to": "SIFRA_ZEMLJE",
+      "columns": [
+        {
+          "name": "ZEMLJA_POREKLA.NAZIV",
+          "label": "Naziv Zemlje"
+        }
+      ]
+    },
+    {
+      "table": "ZANR",
+      "from": "SIFRA_ZANRA",
+      "to": "SIFRA_ZANRA",
+      "columns": [
+        {
+          "name": "ZANR.NAZIV",
+          "label": "Naziv Zanra"
+        }
+      ]
+    },
+    {
+      "table": "VIDEOTEKA",
+      "from": "SIFRA_VIDEOTEKE",
+      "to": "SIFRA_VIDEOTEKE",
+      "columns": [
+        {
+          "name": "VIDEOTEKA.NAZIV",
+          "label": "Naziv Videoteke"
+        }
+      ]
+    }
+  ],
+  "zoomData": [
+    {
+      "table": "ZEMLJA_POREKLA",
+      "columnCode": "SIFRA_ZEMLJE",
+      "columns": [
+        "ZEMLJA_POREKLA.SIFRA_ZEMLJE","ZEMLJA_POREKLA.NAZIV"//, "VIDEOTEKA.NAZIV"
+      ]
+    },
+    {
+      "table": "UCESNIK_FILMA",
+      "columnCode": "SIFRA_UCESNIKA",
+      "columns": [
+        "UCESNIK_FILMA.SIFRA_UCESNIKA"
+      ]
+    }
+  ],
+  "nextData": [
+    {
+      "formName": "Film",
+      "columnCodeMapping": [
+        {
+          "from": "SIFRA_FILMA",
+          "to": "SIFRA_FILMA"
+        }
+      ]
+    },
+    {
+      "formName": "kopija",
+      "columnCodeMapping": [
+        {
+          "from": "SIFRA_FILMA",
+          "to": "SIFRA_FILMA"
+        }
+      ]
+    }
+  ]
+}
