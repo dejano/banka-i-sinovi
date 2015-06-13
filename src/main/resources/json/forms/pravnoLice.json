@@ -1,0 +1,20 @@
+{
+  "title": "Pravna lica",
+  "tableName": "PRAVNA_LICA",
+  "condition": "PR_BANKA=0",
+  "hideColumns": [
+    "PR_BANKA",
+    "SWIFT"
+  ],
+  "nextData": [
+    {
+      "formName": "klijent",
+      "columnCodeMapping": [
+        {
+          "from": "PR_PIB",
+          "to": "PR_PIB"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "title": "Film",
+  "tableName": "FILM",
+  "lookupMap": {
+    "SIFRA_VIDEOTEKE": {
+      "table": "VIDEOTEKA",
+      "from": "SIFRA_VIDEOTEKE",
+      "to": "SIFRA_VIDEOTEKE",
+      "columns": [
+        "NAZIV"
+      ]
+    }
+  },
+  "nextData": [
+    {
+      "formName": "kopija",
+      "columnCodeMapping": [
+        {
+          "from": "SIFRA_FILMA",
+          "to": "SIFRA_FILMA"
+        }
+      ]
+    },
+    {
+      "formName": "kopija",
+      "columnCodeMapping": [
+        {
+          "from": "SIFRA_FILMA",
+          "to": "SIFRA_FILMA"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "title": "Videoteka",
+  "tableName": "VIDEOTEKA",
+  "lookupMap": {},
+  "nextData": [
+    {
+      "formName": "film",
+      "columnCodeMapping": [
+        {
+          "from": "SIFRA_VIDEOTEKE",
+          "to": "SIFRA_VIDEOTEKE"
+        }
+      ]
+    }
+  ]
+}
