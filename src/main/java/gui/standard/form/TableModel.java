@@ -7,12 +7,18 @@ import gui.standard.form.misc.*;
 import messages.ErrorMessages;
 import messages.WarningMessages;
 
+
 import javax.swing.table.DefaultTableModel;
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
 import static gui.standard.form.misc.ProcedureCallFactory.ProcedureCallEnum.*;
-import static gui.standard.form.misc.TableMetaData.ColumnGroupsEnum.*;
+import static gui.standard.form.misc.TableMetaData.ColumnGroupsEnum.ALL_WITHOUT_LOOKUP;
+import static gui.standard.form.misc.TableMetaData.ColumnGroupsEnum.PRIMARY_KEYS;
 
 public class TableModel extends DefaultTableModel {
 
