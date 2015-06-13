@@ -1,6 +1,7 @@
 package actions.standard;
 
 import gui.standard.form.Form;
+import messages.QuestionMessages;
 
 import java.awt.event.ActionEvent;
 
@@ -22,9 +23,7 @@ public class DeleteAction extends AbstractAction {
 	}
 
 	public void actionPerformed(ActionEvent arg0) {
-		// TODO add to json delete message and column
-		if (JOptionPane.showConfirmDialog(form,
-				"Da li ste sigurni da zelite da obrisete " + "?", "Pitanje",
+		if (JOptionPane.showConfirmDialog(form, QuestionMessages.DELETE_ROW, QuestionMessages.TITLE,
 				JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 
 			form.removeRow();

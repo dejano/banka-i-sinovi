@@ -1,0 +1,14 @@
+{
+  "title": "Klijenti",
+  "tableName": "KLIJENT",
+  "lookupMap": {
+    "PR_PIB": {
+      "table": "PRAVNA_LICA",
+      "from": "PR_PIB",
+      "to": "PR_PIB",
+      "columns": [
+        "PR_NAZIV"
+      ]
+    }
+  }
+}

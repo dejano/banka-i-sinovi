@@ -7,20 +7,22 @@ import java.sql.SQLException;
 import java.util.Map;
 import java.util.Set;
 
-public class StandardFormCreator {
+public class FormCreator {
+
+	private static final String DIRECTORY ="src/main/resources/json/forms";
 
 	public static Form getStandardForm(String formName) throws SQLException{
-		FormMetaData fmd = JsonHelper.unmarshall(formName + ".json");
+		FormMetaData fmd = JsonHelper.unmarshall(DIRECTORY + "/" + formName + ".json", FormMetaData.class);
 		
 		return new Form(fmd);
 	}
 
 	public static Form getNextStandardForm(String formName, Map<String,
 			String> nextColumnCodeValues) throws SQLException{
-		FormMetaData fmd = JsonHelper.unmarshall(formName + ".json");
+		FormMetaData fmd = JsonHelper.unmarshall(DIRECTORY + "/" + formName + ".json", FormMetaData.class);
 
 		return new Form(fmd, nextColumnCodeValues);
 	}
 	
-	private StandardFormCreator(){}
+	private FormCreator(){}
 }

@@ -7,41 +7,47 @@ import java.util.Map;
 
 public class FormMetaData {
 
-	private String title;
-	private String tableName;
+    private String title;
+    private String tableName;
+    private String condition;
+    private List<String> hideColumns = new ArrayList<>();
 
-	private Map<String, Lookup> lookupMap = new HashMap<>();
-	private List<NextMetaData> nextData = new ArrayList<>();
+    private Map<String, Lookup> lookupMap = new HashMap<>();
+    private List<NextMetaData> nextData = new ArrayList<>();
 
-	public String getTitle() {
-		return title;
-	}
+    public String getTitle() {
+        return title;
+    }
 
-	public void setTitle(String title) {
-		this.title = title;
-	}
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-	public String getTableName() {
-		return tableName;
-	}
+    public String getTableName() {
+        return tableName;
+    }
 
-	public void setTableName(String tableName) {
-		this.tableName = tableName;
-	}
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
 
-	public List<NextMetaData> getNextData() {
-		return nextData;
-	}
+    public String getCondition() {
+        return condition;
+    }
 
-	public void setNextData(List<NextMetaData> nextData) {
-		this.nextData = nextData;
-	}
+    public List<NextMetaData> getNextData() {
+        return nextData;
+    }
 
-	public Map<String, Lookup> getLookupMap() {
-		return lookupMap;
-	}
+    public Map<String, Lookup> getLookupMap() {
+        return lookupMap;
+    }
 
-	public void putLookup(String columnCode, Lookup lookup) {
-		this.lookupMap.put(columnCode, lookup);
-	}
+    public List<String> getHideColumns() {
+        return hideColumns;
+    }
+
+    public void putLookup(String columnCode, Lookup lookup) {
+        this.lookupMap.put(columnCode, lookup);
+    }
 }

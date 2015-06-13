@@ -4,9 +4,9 @@ import database.DBConnection;
 import gui.standard.Column;
 import gui.standard.SortUtils;
 import gui.standard.form.misc.*;
-import org.apache.commons.lang3.ArrayUtils;
+import messages.ErrorMessages;
+import messages.WarningMessages;
 
-import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.sql.*;
 import java.util.*;
@@ -21,14 +21,14 @@ public class TableModel extends DefaultTableModel {
     private TableMetaData tableMetaData;
     private Map<String, String> nextColumnCodeValues;
 
-    private TableQueries tableQueries;
+    private TableQueriesBuilder tableQueriesBuilder;
 
     private TableHelper tableHelper;
 
     public TableModel(TableMetaData tableMetaData) {
         this.tableMetaData = tableMetaData;
-        this.tableQueries = new TableQueries(tableMetaData);
-        this.tableHelper = new TableHelper(tableQueries, tableMetaData);
+        this.tableQueriesBuilder = new TableQueriesBuilder(tableMetaData);
+        this.tableHelper = new TableHelper(tableQueriesBuilder, tableMetaData);
 
         initColumnNames();
     }
@@ -40,7 +40,7 @@ public class TableModel extends DefaultTableModel {
             this.nextColumnCodeValues = nextColumnCodeValues;
         }
 
-        this.tableQueries = new TableQueries(tableMetaData, this.nextColumnCodeValues);
+        this.tableQueriesBuilder = new TableQueriesBuilder(tableMetaData, this.nextColumnCodeValues);
     }
 
     private void initColumnNames() {
@@ -49,6 +49,8 @@ public class TableModel extends DefaultTableModel {
         Vector vector = new Vector(columnNames.size());
         vector.setSize(columnNames.size());
         setDataVector(vector, new Vector(columnNames));
+
+        setColumnIdentifiers(tableMetaData.getColumnCodes().toArray());
     }
 
     public String getValue(int rowIndex, String columnCode) {
@@ -57,14 +59,12 @@ public class TableModel extends DefaultTableModel {
 
     public void open() throws SQLException {
         if (nextColumnCodeValues == null) {
-            fillData(tableQueries.getBasicQuery()
-//                    + tableQueries.getOrderByQuery()
-            );
+            fillData(tableQueriesBuilder.getBasicQuery().getOrderByQuery().build());
         } else {
-            fillData(tableQueries.getBasicQuery()
-                            + tableQueries.getNextWhereQuery()
-//                    + tableQueries.getOrderByQuery()
-            );
+            fillData(tableQueriesBuilder.getBasicQuery()
+                    .getNextWhereQuery()
+                    .getOrderByQuery()
+                    .build());
         }
     }
 
@@ -204,17 +204,16 @@ public class TableModel extends DefaultTableModel {
         StatementExecutor executor = new StatementExecutor(tableMetaData.getColumnCodeTypes(ALL_WITHOUT_LOOKUP));
         executor.setFuzzy(true);
         List<String[]> results = executor.execute(
-                tableQueries.getBasicQuery() + tableQueries.getWhereQuery() + tableQueries.getOrderByQuery(),
+                tableQueriesBuilder.getBasicQuery().getWhereLikeQuery().getOrderByQuery().build(),
                 tableMetaData.getColumns().keySet(),
                 tableHelper.createMap(tableMetaData.getColumns().keySet(), values));
 
-        // TODO no results
-//        if (!resultSet.isBeforeFirst())
-//            throw new SQLException();
+        if (results.isEmpty())
+            throw new SQLException(WarningMessages.SEARCH_NO_RESULTS, "",
+                    WarningMessages.CUSTOM_CODE);
 
         this.setRowCount(0);
-
-        for(String[] rowValues : results){
+        for (String[] rowValues : results) {
             addRow(rowValues);
         }
 
@@ -233,7 +232,8 @@ public class TableModel extends DefaultTableModel {
 
         if (result != null) {
             DBConnection.getConnection().commit();
-            throw new SQLException(ErrorMessages.ERROR_RECORD_ALREADY_EXISTS, "", ErrorMessages.CUSTOM_ERROR_CODE);
+            throw new SQLException(ErrorMessages.RECORD_ALREADY_EXISTS, "",
+                    ErrorMessages.CUSTOM_CODE);
         }
     }
 
@@ -263,12 +263,8 @@ public class TableModel extends DefaultTableModel {
         DBConnection.getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 
         if (errorMessage != null) {
-            JOptionPane errorMessageDialog = new JOptionPane(errorMessage,
-                    JOptionPane.ERROR_MESSAGE);
-            errorMessageDialog.setVisible(true);
-
             DBConnection.getConnection().commit();
-            throw new SQLException(errorMessage, "", ErrorMessages.CUSTOM_ERROR_CODE);
+            throw new SQLException(errorMessage, "", ErrorMessages.CUSTOM_CODE);
         }
     }
 
@@ -287,7 +283,7 @@ public class TableModel extends DefaultTableModel {
 
         if (errorMessage != null) {
             DBConnection.getConnection().commit();
-            throw new SQLException(errorMessage, "", ErrorMessages.CUSTOM_ERROR_CODE);
+            throw new SQLException(errorMessage, "", ErrorMessages.CUSTOM_CODE);
         }
     }
 
@@ -310,12 +306,12 @@ public class TableModel extends DefaultTableModel {
                     setValueAt(result[i], index, i);
                 }
 
-                errorMessage = ErrorMessages.ERROR_RECORD_WAS_CHANGED;
+                errorMessage = ErrorMessages.RECORD_WAS_CHANGED;
             }
         } else { // already deleted
             removeRow(index);
             fireTableDataChanged();
-            errorMessage = ErrorMessages.ERROR_RECORD_WAS_DELETED;
+            errorMessage = ErrorMessages.RECORD_WAS_DELETED;
         }
 
         return errorMessage;
@@ -330,4 +326,8 @@ public class TableModel extends DefaultTableModel {
         return nextColumnCodeValues;
     }
 
+    @Override
+    public boolean isCellEditable(int row, int column) {
+        return false;
+    }
 }

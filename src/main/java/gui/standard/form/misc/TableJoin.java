@@ -1,4 +1,4 @@
-package gui.standard.form;
+package gui.standard.form.misc;
 
 /**
  * Created by Nikola on 8.6.2015..

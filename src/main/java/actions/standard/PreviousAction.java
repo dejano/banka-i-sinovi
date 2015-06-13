@@ -22,14 +22,15 @@ public class PreviousAction extends AbstractAction {
 	}
 
 	public void actionPerformed(ActionEvent arg0) {
-		int br = form.getDataTable().getSelectedRow();
+		int selectedRowIndex = form.getDataTable().getSelectedRow();
 		int rowCount = form.getTableModel().getRowCount();
 
 		if (rowCount > 0) {
-			if (br > 0) {
-				form.getDataTable().setRowSelectionInterval(br - 1, br - 1);
+			if (selectedRowIndex > 0) {
+				form.getDataTable().setRowSelectionInterval(selectedRowIndex - 1, selectedRowIndex - 1);
+			} else {
+				form.getDataTable().setRowSelectionInterval(rowCount - 1, rowCount - 1);
 			}
-
 		}
 	}
 }

@@ -2,8 +2,9 @@ package actions.standard;
 
 import gui.standard.ColumnMapping;
 import gui.standard.form.Form;
+import messages.WarningMessages;
 import meta.NextMetaData;
-import meta.StandardFormCreator;
+import meta.FormCreator;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -40,11 +41,21 @@ public class NextFormAction extends AbstractAction {
                 break;
         }
 
-        if(nextData != null)
-            createNextForm(nextData);
+        if (nextData != null) {
+            try {
+                createNextForm(nextData);
+            } catch (SQLException exception) {
+                if (exception.getErrorCode() == WarningMessages.CUSTOM_CODE) {
+                    JOptionPane.showMessageDialog(form, exception.getMessage(), WarningMessages.TITLE,
+                            JOptionPane.WARNING_MESSAGE);
+                } else {
+                    exception.printStackTrace();
+                }
+            }
+        }
     }
 
-    private void createNextForm(NextMetaData nextData) {
+    private void createNextForm(NextMetaData nextData) throws SQLException {
         Map<String, String> nextValues = new HashMap<>();
         for (ColumnMapping columnCodeMappingEntry : nextData.getColumnCodeMapping()) {
             nextValues.put(columnCodeMappingEntry.getTo(),
@@ -56,12 +67,8 @@ public class NextFormAction extends AbstractAction {
         if (currFormNextValues != null)
             nextValues.putAll(currFormNextValues);
 
-        try {
-            Form nextForm = StandardFormCreator.getNextStandardForm(nextData.getFormName(), nextValues);
-            nextForm.setVisible(true);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        Form nextForm = FormCreator.getNextStandardForm(nextData.getFormName(), nextValues);
+        nextForm.setVisible(true);
     }
 
     private NextMetaData showNextFormSelectionDialog() {

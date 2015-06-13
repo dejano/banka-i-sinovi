@@ -12,6 +12,7 @@ import rs.mgifos.mosquito.model.MetaTable;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -157,7 +158,9 @@ public class Form extends JDialog {
         add(bottomPanel, "grow, wrap");
     }
 
-    private void initTable(FormMetaData fmd, Map<String, String> nextColumnCodeValues) throws SQLException {
+    // TODO create separate table class
+    private void initTable(FormMetaData fmd, Map<String, String> nextColumnCodeValues)
+            throws SQLException {
         JScrollPane scrollPane = new JScrollPane(dataTable);
         add(scrollPane, "grow, wrap");
 
@@ -165,7 +168,8 @@ public class Form extends JDialog {
                 .getMetaTable(fmd.getTableName());
 
         if (nextColumnCodeValues == null) {
-            tableModel = new TableModel(new TableMetaData(metaTable, fmd.getLookupMap()));
+            tableModel = new TableModel(new TableMetaData(metaTable, fmd.getCondition(),
+                    fmd.getLookupMap()));
         } else {
             List<String> removeColumnCodes = new ArrayList<>();
             for (String columnCode : nextColumnCodeValues.keySet()) {
@@ -174,17 +178,16 @@ public class Form extends JDialog {
             }
             nextColumnCodeValues.keySet().removeAll(removeColumnCodes);
 
-            tableModel = new TableModel(new TableMetaData(metaTable, fmd.getLookupMap()), nextColumnCodeValues);
+            tableModel = new TableModel(new TableMetaData(metaTable, fmd.getCondition(),
+                    fmd.getLookupMap()), nextColumnCodeValues);
         }
 
         dataTable.setModel(tableModel);
-
         tableModel.open();
 
         dataTable.setRowSelectionAllowed(true);
         dataTable.setColumnSelectionAllowed(false);
         dataTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
         dataTable.getSelectionModel().addListSelectionListener(
                 new ListSelectionListener() {
                     public void valueChanged(ListSelectionEvent e) {
@@ -203,14 +206,19 @@ public class Form extends JDialog {
                         sync();
                     }
                 });
+
+        for(String columnCode : fmd.getHideColumns()){
+            TableColumn tableColumn = dataTable.getColumn(columnCode);
+            dataTable.removeColumn(tableColumn);
+        }
     }
 
     private void sync() {
-        int index = dataTable.getSelectedRow();
-        if (index < 0) {
+//        int index = dataTable.getSelectedRow();
+//        if (index < 0) {
             // tfSifra.setText("");
             // tfNaziv.setText("");
-        }
+//        }
         // String sifra = (String) tableModel.getValueAt(index, 0);
         // String naziv = (String) tableModel.getValueAt(index, 1);
         // tfSifra.setText(sifra);

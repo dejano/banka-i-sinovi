@@ -1,14 +1,7 @@
 package gui.standard.form.misc;
 
-import database.DBConnection;
 import gui.standard.Column;
 
-import javax.swing.*;
-import javax.swing.plaf.nimbus.State;
-import java.beans.Statement;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -17,11 +10,11 @@ import java.util.*;
  */
 public class TableHelper {
 
-    private TableQueries tableQueries;
+    private TableQueriesBuilder tableQueriesBuilder;
     private TableMetaData tableMetaData;
 
-    public TableHelper(TableQueries tableQueries, TableMetaData tableMetaData) {
-        this.tableQueries = tableQueries;
+    public TableHelper(TableQueriesBuilder tableQueriesBuilder, TableMetaData tableMetaData) {
+        this.tableQueriesBuilder = tableQueriesBuilder;
         this.tableMetaData = tableMetaData;
     }
 
@@ -70,7 +63,7 @@ public class TableHelper {
         }
 
         List<String[]> results = executor.execute(
-                tableQueries.getBasicQuery() + tableQueries.getWhereByPksQuery(),
+                tableQueriesBuilder.getBasicQuery().getWhereByPksQuery().build(),
                 tableMetaData.getColumns().keySet(), pkColumnCodeValues);
 
         if (!results.isEmpty())
