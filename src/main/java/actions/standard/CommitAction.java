@@ -1,6 +1,6 @@
 package actions.standard;
 
-import gui.standard.form.misc.ErrorMessages;
+import messages.ErrorMessages;
 import gui.standard.form.Form;
 import gui.standard.form.StatusBar.FormModeEnum;
 
@@ -21,6 +21,7 @@ public class CommitAction extends AbstractAction {
         this.form = form;
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
         FormModeEnum mode = form.getMode();
 
@@ -29,13 +30,18 @@ public class CommitAction extends AbstractAction {
 
             switch (mode) {
                 case ADD:
-                    newRowIndex = form.getTableModel().insertRow(new String[]{"5", "8", "11", "a"});
+                    newRowIndex = form.getTableModel().insertRow(
+                            new String[]{"6", "a", "a", "a", "a", "a", "8", "1"} // videoteka
+//                            new String[]{"5", "8", "11", "0"} // kopija
+                    );
 
                     break;
                 case EDIT:
                     //				form.getTableModel().updateRow(form.getDataPanel().getValues());
                     newRowIndex = form.getTableModel().updateRow(form.getDataTable().getSelectedRow(),
-                            new String[]{"5", "8", "11", "b"});
+                            new String[]{"6", "a", "b", "a", "b", "a", "1", "8"} // videoteka
+//                            new String[]{"5", "8", "11", "9"} // kopija
+                    );
 
                     break;
             }
@@ -43,9 +49,9 @@ public class CommitAction extends AbstractAction {
             if (newRowIndex != -1)
                 form.getDataTable().setRowSelectionInterval(newRowIndex, newRowIndex);
         } catch (SQLException exception) {
-            if (exception.getErrorCode() == ErrorMessages.CUSTOM_ERROR_CODE) {
-                JOptionPane.showConfirmDialog(form, exception.getMessage(), "Greska",
-                        JOptionPane.OK_OPTION, JOptionPane.ERROR_MESSAGE);
+            if (exception.getErrorCode() == ErrorMessages.CUSTOM_CODE) {
+                JOptionPane.showMessageDialog(form, exception.getMessage(), ErrorMessages.TITLE,
+                        JOptionPane.ERROR_MESSAGE);
             } else {
                 exception.printStackTrace();
             }

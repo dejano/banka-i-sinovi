@@ -10,18 +10,16 @@ import java.util.List;
 
 public class JsonHelper {
 
-    public static void marshall(FormMetaData fmd, String filename) {
-        File file = new File("src/main/resources/");
-
+    public static void marshall(Object object, String filename) {
         try {
-            File jsonFile = new File(file, filename);
+            File jsonFile = new File(filename);
             if (!jsonFile.exists()) {
                 jsonFile.createNewFile();
             }
 
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
-            String json = gson.toJson(fmd);
+            String json = gson.toJson(object);
 
             FileWriter writer = new FileWriter(jsonFile);
             writer.write(json);
@@ -33,18 +31,16 @@ public class JsonHelper {
         }
     }
 
-    public static FormMetaData unmarshall(String filename) {
-        FormMetaData ret = null;
-
-        File file = new File("src/main/resources/");
+    public static <T> T unmarshall(String filename, Class<T> clazz) {
+        T ret = null;
 
         Gson gson = new Gson();
 
         try {
             BufferedReader br = new BufferedReader(
-                    new FileReader(new File(file, filename)));
+                    new FileReader(new File(filename)));
 
-            ret = gson.fromJson(br, FormMetaData.class);
+            ret = gson.fromJson(br, clazz);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -62,7 +58,7 @@ public class JsonHelper {
         nmd1.getColumnCodeMapping().add(new ColumnMapping("SIFRA_VIDEOTEKE", "SIFRA_VIDEOTEKE"));
         fmd1.getNextData().add(nmd1);
 
-        marshall(fmd1, "videoteka.json");
+        marshall(fmd1, "json/forms/videoteka.json");
 
         FormMetaData fmd2 = new FormMetaData();
         fmd2.setTableName("FILM");
@@ -82,6 +78,6 @@ public class JsonHelper {
         Lookup l1 = new Lookup("VIDEOTEKA", "SIFRA_VIDEOTEKE", "SIFRA_VIDEOTEKE", lookups);
         fmd2.putLookup("SIFRA_VIDEOTEKE", l1);
 
-        marshall(fmd2, "film.json");
+        marshall(fmd2, "json");
     }
 }

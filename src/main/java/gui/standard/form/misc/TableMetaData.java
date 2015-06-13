@@ -1,6 +1,5 @@
 package gui.standard.form.misc;
 
-import gui.standard.form.TableJoin;
 import meta.Lookup;
 import meta.MosquitoSingletone;
 import rs.mgifos.mosquito.model.MetaColumn;
@@ -14,12 +13,14 @@ import java.util.*;
 public class TableMetaData {
 
     private String tableName;
+    private String condition;
     private Map<String, ColumnMetaData> columns = new LinkedHashMap<>();
     private List<String> primaryKeyColumns = new ArrayList<>();
     private Map<String, TableJoin> lookupJoins = new HashMap<>();
 
-    public TableMetaData(MetaTable metaTable, Map<String, Lookup> lookups) {
+    public TableMetaData(MetaTable metaTable, String condition, Map<String, Lookup> lookups) {
         this.tableName = metaTable.getCode();
+        this.condition = condition;
 
         Vector<MetaColumn> metaColumns = (Vector<MetaColumn>) metaTable.cColumns();
         int columnIndex = 0;
@@ -60,6 +61,10 @@ public class TableMetaData {
         return columnNames;
     }
 
+    public Set<String> getColumnCodes() {
+        return columns.keySet();
+    }
+
     public Map<String, String> getColumnCodeTypes(ColumnGroupsEnum columnGroup) {
         Map<String, String> ret = new LinkedHashMap<>();
 
@@ -68,7 +73,7 @@ public class TableMetaData {
 
             switch (columnGroup) {
                 case ALL_WITHOUT_LOOKUP:
-                    if(columnMetaData.isLookupColumn())
+                    if (columnMetaData.isLookupColumn())
                         validInsert = false;
                     break;
                 case PRIMARY_KEYS:
@@ -103,6 +108,10 @@ public class TableMetaData {
 
     public Map<String, TableJoin> getLookupJoins() {
         return lookupJoins;
+    }
+
+    public String getCondition() {
+        return condition;
     }
 
     public enum ColumnGroupsEnum {

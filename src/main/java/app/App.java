@@ -1,23 +1,22 @@
 package app;
 
-import gui.standard.form.Form;
+import gui.MainFrame;
+import meta.JsonHelper;
+import meta.mainframe.MainFrameMetaData;
 
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-
-import meta.StandardFormCreator;
+import javax.swing.*;
 
 public class App {
-	public static void main(String[] args) {
-		try {
-			Form form = StandardFormCreator.getStandardForm("videoteka");
-//			Map<String, String> nccv = new HashMap<>();
-//			nccv.put("SIFRA_VIDEOTEKE", "1");
-//			Form form = StandardFormCreator.getNextStandardForm("film", nccv);
-			form.setVisible(true);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+	public static void main(String[] args) throws ClassNotFoundException,
+			UnsupportedLookAndFeelException, InstantiationException, IllegalAccessException {
+		UIManager.put("OptionPane.yesButtonText", "Da");
+		UIManager.put("OptionPane.noButtonText", "Ne");
+		UIManager.put("OptionPane.cancelButtonText", "Otkaži");
+
+		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+
+		MainFrameMetaData mfmt = JsonHelper.unmarshall(MainFrameMetaData.LOCATION, MainFrameMetaData.class);
+		MainFrame mf = new MainFrame(mfmt);
+		mf.setVisible(true);
 	}
 }
