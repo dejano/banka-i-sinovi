@@ -2,17 +2,20 @@ package gui.standard.form;
 
 import actions.standard.*;
 import gui.standard.form.StatusBar.FormModeEnum;
+import gui.standard.form.misc.ColumnMetaData;
 import gui.standard.form.misc.TableMetaData;
 import meta.FormMetaData;
 import meta.MosquitoSingletone;
 import meta.NextMetaData;
 import net.miginfocom.swing.MigLayout;
+import rs.mgifos.mosquito.model.MetaColumn;
 import rs.mgifos.mosquito.model.MetaTable;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -141,14 +144,21 @@ public class Form extends JDialog {
         JButton btnCommit = new JButton(new CommitAction(this));
         JButton btnRollback = new JButton(new RollbackAction(this));
 
-        // JLabel lblSifra = new JLabel("Šifra države:");
-        // JLabel lblNaziv = new JLabel("Naziv države:");
-        //
-        // dataPanel.add(lblSifra);
-        // // dataPanel.add(tfSifra, "wrap");
-        // dataPanel.add(lblNaziv);
-        // // dataPanel.add(tfNaziv);
-        // bottomPanel.add(dataPanel);
+        Map<String, ColumnMetaData> columns = tableModel.getTableMetaData().getColumns();
+        for (ColumnMetaData metaColumn : columns.values()) {
+
+            JLabel label = new JLabel(metaColumn.getName());
+            JTextField textField = new JTextField(40);
+            textField.setName(metaColumn.getCode());
+            if (tableModel.getTableMetaData().getPrimaryKeyColumns().contains(metaColumn.getCode())) {
+                textField.setEditable(false);
+            }
+
+            dataPanel.add(label);
+            dataPanel.add(textField, "wrap");
+        }
+
+        bottomPanel.add(dataPanel);
 
         buttonsPanel.setLayout(new MigLayout("wrap"));
         buttonsPanel.add(btnCommit);
@@ -214,15 +224,17 @@ public class Form extends JDialog {
     }
 
     private void sync() {
-//        int index = dataTable.getSelectedRow();
-//        if (index < 0) {
-            // tfSifra.setText("");
-            // tfNaziv.setText("");
-//        }
-        // String sifra = (String) tableModel.getValueAt(index, 0);
-        // String naziv = (String) tableModel.getValueAt(index, 1);
-        // tfSifra.setText(sifra);
-        // tfNaziv.setText(naziv);
+        int index = dataTable.getSelectedRow();
+        if (index < 0) {
+            return;
+        }
+        for (Component component : dataPanel.getComponents()) {
+            if (component instanceof JTextComponent) {
+                JTextComponent textComponent = (JTextComponent) component;
+                String value = tableModel.getValue(index, textComponent.getName());
+                textComponent.setText(value);
+            }
+        }
     }
 
     public String getSelectedRowValue(String columnCode) {

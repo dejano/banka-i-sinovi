@@ -27,7 +27,7 @@ public class StatementExecutor {
         int i = 1;
         for (Column column : columnValues) {
             String columnTypeClass = columnCodeTypes.get(column.getName());
-
+            System.out.println(column.getName()+":" + column.getValue());
             String value = column.getValue();
             switch (columnTypeClass) {
                 case "java.lang.String":
@@ -68,8 +68,8 @@ public class StatementExecutor {
         int i = 1;
         for (String columnCode : columnCodeValues.keySet()) {
             String columnTypeClass = columnCodeTypes.get(columnCode);
-
             String value = columnCodeValues.get(columnCode);
+            System.out.println(columnCode+":"+value);
             if (value.equals("")) {
                 statement.setString(i, "%");
             } else {

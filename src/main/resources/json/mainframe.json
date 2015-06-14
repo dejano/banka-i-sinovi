@@ -1,23 +1,23 @@
 {
   "title": "Banka i Sinovi",
   "menus": [
-//    {
-//      "text": "Videoteka",
-//      "menuItems": [
-//        {
-//          "text": "Videoteka",
-//          "formName": "videoteka"
-//        },
-//        {
-//          "text": "Film",
-//          "formName": "film"
-//        },
-//        {
-//          "text": "Kopija",
-//          "formName": "kopija"
-//        }
-//      ]
-//    },
+    {
+      "text": "Videoteka",
+      "menuItems": [
+        {
+          "text": "Videoteka",
+          "formName": "videoteka"
+        },
+        {
+          "text": "Film",
+          "formName": "film"
+        },
+        {
+          "text": "Kopija",
+          "formName": "kopija"
+        }
+      ]
+    },
     {
       "text": "Banka",
       "menuItems": [

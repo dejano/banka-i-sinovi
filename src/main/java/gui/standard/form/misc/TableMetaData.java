@@ -37,11 +37,12 @@ public class TableMetaData {
 
                 MetaTable lookupTable = MosquitoSingletone.getInstance().getMetaTable(lookup.getTable());
 
-                for (String lookupColumnCode : lookup.getColumns()) {
+                for (Lookup.LookupColumn lookupColumnCode : lookup.getColumns()) {
                     MetaColumn lookupMetaColumn = (MetaColumn) lookupTable
-                            .getColByTableDotColumnCode(lookupTable.getCode() + "." + lookupColumnCode);
-
-                    columns.put(lookupMetaColumn.getCode(), new ColumnMetaData(lookupMetaColumn, columnIndex++, true));
+                            .getColByTableDotColumnCode(lookupColumnCode.getCode());
+                    ColumnMetaData columnMetaData = new ColumnMetaData(lookupMetaColumn, columnIndex++, true);
+                    columnMetaData.setName(lookupColumnCode.getName());
+                    columns.put(lookupMetaColumn.getCode(), columnMetaData);
                 }
 
             }
@@ -112,6 +113,17 @@ public class TableMetaData {
 
     public String getCondition() {
         return condition;
+    }
+
+    public String[] getBaseColumnCodes() {
+        List<String> result = new ArrayList<>();
+        for (ColumnMetaData columnMetaData : columns.values()) {
+            if (!columnMetaData.isLookupColumn()) {
+                result.add(columnMetaData.getCode());
+            }
+        }
+
+        return result.toArray(new String[result.size()]);
     }
 
     public enum ColumnGroupsEnum {

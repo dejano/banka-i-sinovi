@@ -284,7 +284,7 @@ public class GenericForm extends JDialog {
 //                for (Lookup lookup : fmd.getLookups()) {
 //                    if (lookup.getFrom().equals(metaColumn.getCode())) {
 //                        for (Lookup.LookupColumn lookupColumn : lookup.getColumns()) {
-//                            gui.standard.temp.model.Column refColumn = new gui.standard.temp.model.Column(lookupColumn.getLabel(), lookupColumn.getName(), true, false);
+//                            gui.standard.temp.model.Column refColumn = new gui.standard.temp.model.Column(lookupColumn.getName(), lookupColumn.getName(), true, false);
 //                            column.setReferencedTableName(lookup.getTable());
 //                            columnList.add(refColumn);
 //                            foreignKeys.put(column, refColumn);

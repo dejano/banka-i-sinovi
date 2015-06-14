@@ -336,4 +336,8 @@ public class TableModel extends DefaultTableModel {
     public boolean isCellEditable(int row, int column) {
         return false;
     }
+
+    public TableMetaData getTableMetaData() {
+        return tableMetaData;
+    }
 }

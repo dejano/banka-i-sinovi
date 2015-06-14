@@ -7,7 +7,10 @@
       "from": "SIFRA_VIDEOTEKE",
       "to": "SIFRA_VIDEOTEKE",
       "columns": [
-        "NAZIV"
+        {
+          "code": "VIDEOTEKA.NAZIV",
+          "name": "Naziv videoteke"
+        }
       ]
     }
   },

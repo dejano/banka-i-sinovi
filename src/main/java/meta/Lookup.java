@@ -10,23 +10,23 @@ public class Lookup {
     private String table;
     private String from;
     private String to;
-    private List<String> columns;
+    private List<LookupColumn> columns;
 
     public Lookup() {
     }
 
-    public Lookup(String table, String from, String to, List<String> columns) {
+    public Lookup(String table, String from, String to, List<LookupColumn> columns) {
         this.table = table;
         this.from = from;
         this.to = to;
         this.columns = columns;
     }
 
-    public List<String> getColumns() {
+    public List<LookupColumn> getColumns() {
         return columns;
     }
 
-    public void setColumns(List<String> columns) {
+    public void setColumns(List<LookupColumn> columns) {
         this.columns = columns;
     }
 
@@ -62,5 +62,42 @@ public class Lookup {
                 ", to='" + to + '\'' +
                 ", columns=" + columns +
                 '}';
+    }
+
+    public class LookupColumn {
+        private String code;
+        private String name;
+
+        public LookupColumn() {
+        }
+
+        public LookupColumn(String code, String name) {
+            this.code = code;
+            this.name = name;
+        }
+
+        public String getCode() {
+            return code;
+        }
+
+        public void setCode(String code) {
+            this.code = code;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return "LookupColumn{" +
+                    "code='" + code + '\'' +
+                    ", name='" + name + '\'' +
+                    '}';
+        }
     }
 }
