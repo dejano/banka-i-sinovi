@@ -1,25 +1,8 @@
 {
   "title": "Banka i Sinovi",
   "menus": [
-//    {
-//      "text": "Videoteka",
-//      "menuItems": [
-//        {
-//          "text": "Videoteka",
-//          "formName": "videoteka"
-//        },
-//        {
-//          "text": "Film",
-//          "formName": "film"
-//        },
-//        {
-//          "text": "Kopija",
-//          "formName": "kopija"
-//        }
-//      ]
-//    },
     {
-      "text": "Banka",
+      "text": "Podaci",
       "menuItems": [
         {
           "text": "Klijenti",
@@ -30,6 +13,29 @@
           "formName": "pravnoLice"
         }
       ]
+    },
+    {
+      "text": "Medjubankarski promet",
+      "menuItems": [
+        {
+          "actionName": "ExportClearingAction"
+        },
+        {
+          "actionName": "ImportPaymentOrderAction"
+        }
+      ]
     }
+//    },
+//    {
+//      "text": "Izveštaji",
+//      "menuItems": [
+//        {
+//          "actionName": "BankStatementAction"
+//        },
+//        {
+//          "actionName": "BankAccountsAction"
+//        }
+//      ]
+//    }
   ]
 }

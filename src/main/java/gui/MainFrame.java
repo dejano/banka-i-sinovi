@@ -17,6 +17,8 @@ import java.util.List;
  */
 public class MainFrame extends JFrame {
 
+    private static final String ACTIONS_PACKAGE = "actions.";
+
     public MainFrame(MainFrameMetaData mfmt) {
         this.setTitle(mfmt.getTitle());
         this.setLayout(new BorderLayout());
@@ -47,8 +49,24 @@ public class MainFrame extends JFrame {
             menuBar.add(menu);
 
             for (MetaMenuItem metaMenuItem : metaMenu.getMenuItems()) {
-                OpenFormAction formAction = new OpenFormAction(metaMenuItem.getText(), metaMenuItem.getFormName());
-                JMenuItem menuItem = new JMenuItem(formAction);
+                JMenuItem menuItem = null;
+
+                if(metaMenuItem.getFormName() != null) {
+                    OpenFormAction formAction = new OpenFormAction(metaMenuItem.getText(), metaMenuItem.getFormName());
+                    menuItem = new JMenuItem(formAction);
+                } else {
+                    try {
+                        menuItem = new JMenuItem((Action) Class.forName(ACTIONS_PACKAGE
+                                + metaMenuItem.getActionName()).newInstance());
+                    } catch (InstantiationException e) {
+                        e.printStackTrace();
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                }
+
                 menu.add(menuItem);
             }
         }

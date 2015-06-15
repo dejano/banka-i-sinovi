@@ -12,6 +12,7 @@ public class App {
 		UIManager.put("OptionPane.yesButtonText", "Da");
 		UIManager.put("OptionPane.noButtonText", "Ne");
 		UIManager.put("OptionPane.cancelButtonText", "Otkaži");
+//		UIManager.put("OptionPane.okButtonText", "Potvrdi");
 
 		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 

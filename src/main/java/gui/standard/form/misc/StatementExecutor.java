@@ -4,7 +4,12 @@ import database.DBConnection;
 import gui.standard.Column;
 
 import java.sql.*;
-import java.util.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Nikola on 8.6.2015..
@@ -40,6 +45,23 @@ public class StatementExecutor {
                         statement.setDouble(i, Double.parseDouble(value));
                     }
                     break;
+                case "java.lang.Boolean":
+                    try {
+                        statement.setBoolean(i, Boolean.parseBoolean(value));
+                    } catch (NumberFormatException e) {
+                        int intValue = Integer.parseInt(value);
+                        statement.setBoolean(i, intValue == 1 ? true : false);
+                    }
+
+                    break;
+//                case "java.sql.Date":
+//                    try {
+//                        statement.setDate(i, ;
+//                    } catch (ParseException e) {
+//                        e.printStackTrace();
+//                    }
+//
+//                    break;
             }
 
             i++;

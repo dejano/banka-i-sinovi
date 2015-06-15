@@ -93,6 +93,8 @@ public class QueryBuilder {
         if (!where) {
             whereBuilder.append(WHERE);
             where = true;
+        } else {
+            and();
         }
 
         whereBuilder.append(condition);
@@ -117,6 +119,8 @@ public class QueryBuilder {
         if (!where) {
             whereBuilder.append(WHERE);
             where = true;
+        } else {
+            and();
         }
 
         for (String columnName : columnNames) {
@@ -133,6 +137,8 @@ public class QueryBuilder {
         if (!where) {
             whereBuilder.append(WHERE);
             where = true;
+        } else {
+            and();
         }
 
         for (String columnName : columnNames) {

@@ -295,7 +295,11 @@ public class TableModel extends DefaultTableModel {
 
             // check if values changed
             for (int i = 0; i < values.length; i++) {
-                if (!result[i].equals(values[i])) {
+                String resultValue = result[i];
+                String value = values[i];
+
+                if ((resultValue != null && !resultValue.equals(value))
+                        || (value != null && !value.equals(resultValue))) {
                     changed = true;
                     break;
                 }
