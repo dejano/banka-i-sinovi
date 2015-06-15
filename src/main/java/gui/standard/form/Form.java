@@ -51,7 +51,7 @@ public class Form extends JDialog {
 
         initCenterOnScreen();
         initTable(fmd, null);
-        initGui();
+        initGui(fmd);
         initToolbar();
         initStatusBar();
     }
@@ -65,7 +65,7 @@ public class Form extends JDialog {
 
         initCenterOnScreen();
         initTable(fmd, nextColumnCodeValues);
-        initGui();
+        initGui(fmd);
         initToolbar();
         initStatusBar();
     }
@@ -135,7 +135,7 @@ public class Form extends JDialog {
         add(statusBar, "dock south");
     }
 
-    private void initGui() {
+    private void initGui(FormMetaData fmd) {
         JPanel bottomPanel = new JPanel();
         bottomPanel.setLayout(new MigLayout("fillx"));
 
@@ -149,39 +149,39 @@ public class Form extends JDialog {
         Map<String, ColumnMetaData> columns = tableModel.getTableMetaData().getColumns();
         boolean span = false;
         for (ColumnMetaData metaColumn : columns.values()) {
-
-            JLabel label = new JLabel(metaColumn.getName());
-            String type = tableModel.getTableMetaData().getColumnCodeTypes(TableMetaData.ColumnGroupsEnum.ALL).get(metaColumn.getCode());
-            System.out.println(type);
-            JTextField textField = new JTextField(40);
-            textField.setName(metaColumn.getCode());
-            if (tableModel.getTableMetaData().getPrimaryKeyColumns().contains(metaColumn.getCode())
-                    || tableModel.getTableMetaData().getZoomBaseColumns().contains(metaColumn.getCode())
-                    || tableModel.getTableMetaData().getLookupColumns().containsKey(metaColumn.getCode())) {
-                textField.setEditable(false);
-            }
-
-
-            if (tableModel.getTableMetaData().getZoomBaseColumns().contains(metaColumn.getCode())) {
-                dataPanel.add(label);
-                dataPanel.add(textField);
-                System.out.println("TABLE:" + tableModel.getTableMetaData().getZoomTableCode(metaColumn.getCode()));
-                JButton zoomBtn = new JButton(new ZoomFormAction(this, tableModel.getTableMetaData().getZoomTableCode(metaColumn.getCode())));
-                dataPanel.add(zoomBtn);
-                span = true;
-            } else if (tableModel.getTableMetaData().getLookupColumns().containsKey(metaColumn.getCode())) {
-                dataPanel.add(label);
-                dataPanel.add(textField);
-                span = true;
-            } else {
-                if (span) {
-                    dataPanel.add(new JLabel(" "),"wrap");
+            if(!fmd.getHideColumns().contains(metaColumn.getCode())) {
+                JLabel label = new JLabel(metaColumn.getName());
+                String type = tableModel.getTableMetaData().getColumnCodeTypes(TableMetaData.ColumnGroupsEnum.ALL).get(metaColumn.getCode());
+                System.out.println(type);
+                JTextField textField = new JTextField(40);
+                textField.setName(metaColumn.getCode());
+                if (tableModel.getTableMetaData().getPrimaryKeyColumns().contains(metaColumn.getCode())
+                        || tableModel.getTableMetaData().getZoomBaseColumns().contains(metaColumn.getCode())
+                        || tableModel.getTableMetaData().getLookupColumns().containsKey(metaColumn.getCode())) {
+                    textField.setEditable(false);
                 }
-                dataPanel.add(label);
-                dataPanel.add(textField, "wrap");
-                span = false;
-            }
 
+
+                if (tableModel.getTableMetaData().getZoomBaseColumns().contains(metaColumn.getCode())) {
+                    dataPanel.add(label);
+                    dataPanel.add(textField);
+                    System.out.println("TABLE:" + tableModel.getTableMetaData().getZoomTableCode(metaColumn.getCode()));
+                    JButton zoomBtn = new JButton(new ZoomFormAction(this, tableModel.getTableMetaData().getZoomTableCode(metaColumn.getCode())));
+                    dataPanel.add(zoomBtn);
+                    span = true;
+                } else if (tableModel.getTableMetaData().getLookupColumns().containsKey(metaColumn.getCode())) {
+                    dataPanel.add(label);
+                    dataPanel.add(textField);
+                    span = true;
+                } else {
+                    if (span) {
+                        dataPanel.add(new JLabel(" "), "wrap");
+                    }
+                    dataPanel.add(label);
+                    dataPanel.add(textField, "wrap");
+                    span = false;
+                }
+            }
         }
 
         bottomPanel.add(dataPanel);
@@ -205,7 +205,7 @@ public class Form extends JDialog {
 
         if (nextColumnCodeValues == null) {
             tableModel = new TableModel(new TableMetaData(metaTable, fmd.getCondition(),
-                    fmd.getLookupMap(), fmd.getZoomData()));
+                    fmd.getLookupMap(), fmd.getZoomData(), fmd.getDefaultValues()));
         } else {
             List<String> removeColumnCodes = new ArrayList<>();
             for (String columnCode : nextColumnCodeValues.keySet()) {
@@ -215,7 +215,7 @@ public class Form extends JDialog {
             nextColumnCodeValues.keySet().removeAll(removeColumnCodes);
 
             tableModel = new TableModel(new TableMetaData(metaTable, fmd.getCondition(),
-                    fmd.getLookupMap(), fmd.getZoomData()), nextColumnCodeValues);
+                    fmd.getLookupMap(), fmd.getZoomData(), fmd.getDefaultValues()), nextColumnCodeValues);
         }
 
         dataTable.setModel(tableModel);

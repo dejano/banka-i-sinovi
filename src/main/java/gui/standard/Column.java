@@ -2,12 +2,12 @@ package gui.standard;
 
 public class Column {
     private String name;
-    private String value;
+    private Object value;
 
     public Column() {
     }
 
-    public Column(String name, String value) {
+    public Column(String name, Object value) {
         this.name = name;
         this.value = value;
     }
@@ -16,7 +16,7 @@ public class Column {
         return name;
     }
 
-    public String getValue() {
+    public Object getValue() {
         return value;
     }
 

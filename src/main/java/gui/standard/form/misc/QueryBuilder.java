@@ -133,7 +133,7 @@ public class QueryBuilder {
         return this;
     }
 
-    public QueryBuilder whereLike(String tableName, List<String> columnNames) {
+    public QueryBuilder whereLike(String tableName, Collection<String> columnNames) {
         if (!where) {
             whereBuilder.append(WHERE);
             where = true;

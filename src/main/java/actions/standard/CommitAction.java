@@ -9,7 +9,7 @@ import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.*;
 
 
 public class CommitAction extends AbstractAction {
@@ -37,6 +37,9 @@ public class CommitAction extends AbstractAction {
                 case EDIT:
                     newRowIndex = update();
                     break;
+                case SEARCH:
+                    search();
+                    break;
             }
 
             if (newRowIndex != -1)
@@ -52,31 +55,44 @@ public class CommitAction extends AbstractAction {
     }
 
     private int add() throws SQLException {
-        java.util.List<String> values = new ArrayList<>();
-
-        for (Component component : form.getDataPanel().getComponents()) {
-            if (component instanceof JTextComponent) {
-                if (form.getTableModel().getTableMetaData().getBaseColumns().containsKey(component.getName()))
-                    values.add(((JTextComponent) component).getText());
-            }
-        }
-
+        java.util.List<String> values = getValues();
         return form.getTableModel().insertRow(values.toArray(new String[values.size()]));
     }
 
     private int update() throws SQLException {
-//        int index = form.getDataTable().getSelectedRow();
-//        String[] values = form.getTableModel().getRowValues(index);
+        java.util.List<String> values = getValues();
 
-        java.util.List<String> values = new ArrayList<>();
+        return form.getTableModel().updateRow(form.getDataTable().getSelectedRow(),
+                values.toArray(new String[values.size()]));
+    }
 
-        for (Component component : form.getDataPanel().getComponents()) {
-            if (component instanceof JTextComponent) {
-                values.add(((JTextComponent) component).getText());
+    private void search() throws SQLException {
+        java.util.List<String> values = getValues();
+        form.getTableModel().search(values.toArray(new String[values.size()]));
+    }
+
+    // TODO move to DataPanel?
+    private java.util.List<String> getValues(){
+        java.util.List<String> ret = new ArrayList<>();
+
+        for (String columnCode : form.getTableModel().getTableMetaData().getColumnCodes()) {
+            boolean setValue = false;
+
+            for (Component component : form.getDataPanel().getComponents()) {
+                String componentName = component.getName();
+                if (componentName != null && componentName.equals(columnCode)) {
+                    if (component instanceof JTextComponent) {
+                        ret.add(((JTextComponent) component).getText());
+                        // TODO handle other inputs
+                        setValue = true;
+                    }
+                }
             }
+
+            if(!setValue)
+                ret.add(form.getTableModel().getTableMetaData().getDefaultValues().get(columnCode));
         }
 
-        return form.getTableModel().updateRow(form.getDataTable().getSelectedRow(), values.toArray(new String[values.size()])
-        );
+        return ret;
     }
 }

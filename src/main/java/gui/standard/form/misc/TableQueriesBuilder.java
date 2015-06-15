@@ -43,7 +43,7 @@ public class TableQueriesBuilder {
     }
 
     public TableQueriesBuilder getWhereLikeQuery() {
-        queryBuilder.whereLike(tableMetaData.getTableName(), tableMetaData.getColumnNames());
+        queryBuilder.whereLike(tableMetaData.getTableName(), tableMetaData.getBaseColumnCodes());
         return this;
     }
 

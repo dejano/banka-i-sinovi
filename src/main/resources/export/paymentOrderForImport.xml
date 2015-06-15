@@ -1,0 +1,20 @@
+<po:paymentOrder messageId="777" xmlns:cmn="http://www.ftn.uns.ac.rs/xws/xsd/common" xmlns:po="http://www.ftn.uns.ac.rs/xws/xsd/paymentOrder" xmlns:pos="http://www.ftn.uns.ac.rs/xws/xsd/pos">
+    <cmn:debtor>dejan</cmn:debtor>
+    <cmn:paymentPurpose>raspberi</cmn:paymentPurpose>
+    <cmn:creditor>dealxtremah</cmn:creditor>
+    <cmn:orderDate>2015-06-15+02:00</cmn:orderDate>
+    <cmn:debtorAccountDetails>
+        <cmn:accountNumber>9U4KWP</cmn:accountNumber>
+        <cmn:model>38</cmn:model>
+        <cmn:referenceNumber>BQ</cmn:referenceNumber>
+    </cmn:debtorAccountDetails>
+    <cmn:creditorAccountDetails>
+        <cmn:accountNumber>VW3JXNRZK60AT73</cmn:accountNumber>
+        <cmn:model>38</cmn:model>
+        <cmn:referenceNumber>BQ</cmn:referenceNumber>
+    </cmn:creditorAccountDetails>
+    <cmn:amount>10</cmn:amount>
+    <po:currencyDate>2015-06-15+02:00</po:currencyDate>
+    <po:currencyCode>2P</po:currencyCode>
+    <po:urgent>false</po:urgent>
+</po:paymentOrder>

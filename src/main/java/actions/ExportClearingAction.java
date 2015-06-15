@@ -27,6 +27,7 @@ import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.logging.MemoryHandler;
 
 import static gui.standard.form.misc.ProcedureCallFactory.ProcedureCallEnum.CREATE_PROCEDURE_CALL;
 
@@ -41,13 +42,20 @@ public class ExportClearingAction extends AbstractAction {
 
     private SuperMetaTable orderMetaTable;
     private SuperMetaTable orderItemMetaTable;
+    private SuperMetaTable paymentOrderMetaTable;
+
+    // TODO replace
+    private static final String bankPib = "LGCXHK";
 
     public ExportClearingAction() {
         super(TITLE);
 
-        // TODO
-        orderMetaTable = new SuperMetaTable(MosquitoSingletone.getInstance().getMetaTable("MEDJUBANKARSKI_NALOG"));
-        orderItemMetaTable = new SuperMetaTable(MosquitoSingletone.getInstance().getMetaTable("ANALITIKA_STAVKE"));
+        this.orderMetaTable =
+                new SuperMetaTable(MosquitoSingletone.getInstance().getMetaTable("MEDJUBANKARSKI_NALOG"));
+        this.orderItemMetaTable =
+                new SuperMetaTable(MosquitoSingletone.getInstance().getMetaTable("ANALITIKA_STAVKE"));
+        this.paymentOrderMetaTable =
+                new SuperMetaTable(MosquitoSingletone.getInstance().getMetaTable("ANALITIKA_IZVODA"));
     }
 
     @Override
@@ -63,21 +71,21 @@ public class ExportClearingAction extends AbstractAction {
                     List<PaymentOrder> paymentOrders = createPaymentOrders();
                     List<Mt102> mt102s = createMt102s(paymentOrders);
 
-                    marshallMt102(mt102s.get(0));
-//                    try {
-//                        saveMt102(mt102s.get(0));
-//                    } catch (SQLException e1) {
-//                        e1.printStackTrace();
-//                    }
                     try {
-                        Thread.sleep(2500);
-                    } catch (InterruptedException e1) {
+                        for (Mt102 mt102 : mt102s) {
+                            XmlHelper.writeToFile(mt102, "mt102_" + mt102.getMessageId());
+
+                            saveClearingOrder(mt102);
+                            for (Mt102Payment mt102Payment : mt102.getPayments().getPayment()) {
+                                saveClearingOrderItem(mt102, mt102Payment);
+                            }
+
+                            for (PaymentOrder paymentOrder : paymentOrders)
+                                updatePaymentOrderStatus(paymentOrder);
+                        }
+                    } catch (SQLException e1) {
                         e1.printStackTrace();
                     }
-//                for (Mt102 mt102 : mt102s) {
-//                    marshallMt102(mt102);
-//                    saveMt102(mt102);
-//                }
 
                     Toast.show("Poruke poslate.");
                 }
@@ -89,7 +97,8 @@ public class ExportClearingAction extends AbstractAction {
     private List<PaymentOrder> createPaymentOrders() {
         List<PaymentOrder> ret = null;
         try {
-            CallableStatement cs = DBConnection.getConnection().prepareCall("{ call getUnprocessedPayments ()}");
+            CallableStatement cs = DBConnection.getConnection().prepareCall("{ call getUnprocessedPayments (?)}");
+            cs.setString(1, bankPib);
             ResultSet resultSet = cs.executeQuery();
 
             if (!resultSet.isBeforeFirst()) {
@@ -102,6 +111,7 @@ public class ExportClearingAction extends AbstractAction {
 
                     GregorianCalendar cal;
 
+                    paymentOrder.setMessageId(resultSet.getString("ASI_BROJSTAVKE"));
                     paymentOrder.setDebtor(resultSet.getString("ASI_DUZNIK"));
                     paymentOrder.setPaymentPurpose(resultSet.getString("ASI_SVRHA"));
                     paymentOrder.setCreditor(resultSet.getString("ASI_POVERILAC"));
@@ -212,25 +222,9 @@ public class ExportClearingAction extends AbstractAction {
         return mt102Payment;
     }
 
-    private void marshallMt102(Mt102 mt102) {
-        String marshalledMt102 = XmlHelper.marshall(mt102);
 
-        try {
-            File file = new File("src/main/resources/export/mt102_" + mt102.getMessageId() + ".xml");
-            if (!file.exists())
-                file.createNewFile();
 
-            FileWriter writer = new FileWriter(file);
-            writer.write(marshalledMt102);
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void saveMt102(Mt102 mt102) throws SQLException {
-        // TODO save to db
-        // save mb nalog
+    private void saveClearingOrder(Mt102 mt102) throws SQLException {
         StatementExecutor orderExecutor = new StatementExecutor(orderMetaTable.getBaseColumnTypes());
 
         List<Column> values = new ArrayList<>();
@@ -238,34 +232,51 @@ public class ExportClearingAction extends AbstractAction {
         Iterator<String> it = orderMetaTable.getBaseColumnCodes().iterator();
 
         values.add(new Column(it.next(), mt102.getMessageId()));
-        // TODO change
-        values.add(new Column(it.next(), Integer.toString(301)));
-        values.add(new Column(it.next(), Integer.toString(410)));
-        values.add(new Column(it.next(), mt102.getTotalAmount().toString()));
-        values.add(new Column(it.next(), mt102.getDate().toString()));// TODO format?
-        values.add(new Column(it.next(), Integer.toString(0)));
-        values.add(new Column(it.next(), Integer.toString(1))); // TODO real value
+        values.add(new Column(it.next(), 838)); // TODO real value
+        values.add(new Column(it.next(), 410));
+        // TODO update table to support larger amount
+        values.add(new Column(it.next(), mt102.getPayments().getPayment().get(0).getAmount()));
+        values.add(new Column(it.next(), mt102.getDate()));
+        values.add(new Column(it.next(), false)); // TODO real value
+        values.add(new Column(it.next(), 1));
 
         orderExecutor.executeProcedure(ProcedureCallFactory.getProcedureCall("MEDJUBANKARSKI_NALOG",
                 CREATE_PROCEDURE_CALL), values);
+    }
 
-        int i = 1;
-        for (Mt102Payment mt102Payment : mt102.getPayments().getPayment()) {
-            //save analitika stavke
-            StatementExecutor orderItemExecutor = new StatementExecutor(orderItemMetaTable.getBaseColumnTypes());
+    private void saveClearingOrderItem(Mt102 mt102, Mt102Payment mt102Payment) throws SQLException {
+        StatementExecutor orderItemExecutor = new StatementExecutor(orderItemMetaTable.getBaseColumnTypes());
 
-            values = new ArrayList<>();
-            it = orderItemMetaTable.getBaseColumnCodes().iterator();
+        List<Column> values = new ArrayList<>();
+        Iterator<String> it = orderItemMetaTable.getBaseColumnCodes().iterator();
 
-            values.add(new Column(it.next(), Integer.toString(i++)));
-            values.add(new Column(it.next(), mt102Payment.getDebtorAccountDetails().getAccountNumber()));
-            values.add(new Column(it.next(), mt102Payment.getPaymentOrderId()));
-            values.add(new Column(it.next(), mt102.getDate().toString()));// TODO format?
-            values.add(new Column(it.next(), Integer.toString(0)));
-            values.add(new Column(it.next(), Integer.toString(1))); // TODO real value
+        values.add(new Column(it.next(), i++));
+        values.add(new Column(it.next(), mt102Payment.getDebtorAccountDetails().getAccountNumber()));
+        values.add(new Column(it.next(), mt102Payment.getPaymentOrderId()));
+        values.add(new Column(it.next(), mt102.getDate()));
+        values.add(new Column(it.next(), 0));
+        values.add(new Column(it.next(), 1)); // TODO real value
 
-            orderItemExecutor.executeProcedure(ProcedureCallFactory.getProcedureCall("ANALITIKA_STAVKE",
-                    CREATE_PROCEDURE_CALL), values);
-        }
+        orderItemExecutor.executeProcedure(ProcedureCallFactory.getProcedureCall("ANALITIKA_STAVKE",
+                CREATE_PROCEDURE_CALL), values);
+    }
+
+    private void updatePaymentOrderStatus(PaymentOrder paymentOrder) throws SQLException {
+        Map<String, String> columnTypes = paymentOrderMetaTable.getPkColumnTypes();
+        columnTypes.put("ASI_STATUS", "java.lang.String");
+
+        StatementExecutor orderItemExecutor = new StatementExecutor(columnTypes);
+
+        List<Column> values = new ArrayList<>();
+        List<String> columnCodes = paymentOrderMetaTable.getPkColumnCodes();
+        columnCodes.add("ASI_STATUS");
+        Iterator<String> it = columnCodes.iterator();
+
+        values.add(new Column(it.next(), paymentOrder.getDebtorAccountDetails().getAccountNumber()));
+        values.add(new Column(it.next(), 340)); // TODO use valid value
+        values.add(new Column(it.next(), paymentOrder.getMessageId()));
+        values.add(new Column(it.next(), "P"));
+
+        orderItemExecutor.executeProcedure("{ call updateAnalitikaIzvodaStatus(?,?,?,?)}", values);
     }
 }

@@ -6,6 +6,10 @@
     "PR_BANKA",
     "SWIFT"
   ],
+  "defaultValues": {
+    "PR_BANKA": "0",
+    "SWIFT": ""
+  },
   "nextData": [
     {
       "formName": "klijent",

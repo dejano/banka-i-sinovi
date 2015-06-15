@@ -5,3 +5,5 @@ PoslovnaInformatika.iml
 target
 .classpath
 .project
+lib
+src/main/resources/export

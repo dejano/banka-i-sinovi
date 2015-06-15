@@ -11,8 +11,8 @@ public class FormMetaData {
     private String tableName;
     private String condition;
     private List<String> hideColumns = new ArrayList<>();
-
     private Map<String, Lookup> lookupMap = new HashMap<>();
+    private Map<String, String> defaultValues = new HashMap<>();
 
     private List<Zoom> zoomData = new ArrayList<>();
 
@@ -59,5 +59,13 @@ public class FormMetaData {
 
     public void setZoomData(List<Zoom> zoomData) {
         this.zoomData = zoomData;
+    }
+
+    public Map<String, String> getDefaultValues() {
+        return defaultValues;
+    }
+
+    public void setDefaultValues(Map<String, String> defaultValues) {
+        this.defaultValues = defaultValues;
     }
 }

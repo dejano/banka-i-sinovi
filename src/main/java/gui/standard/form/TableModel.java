@@ -56,7 +56,7 @@ public class TableModel extends DefaultTableModel {
         vector.setSize(columnNames.size());
         setDataVector(vector, new Vector(columnNames));
 
-//        setColumnIdentifiers(tableMetaData.getColumnCodes().toArray());
+        setColumnIdentifiers(tableMetaData.getColumnCodes().toArray());
     }
 
     public String getValue(int rowIndex, String columnCode) {

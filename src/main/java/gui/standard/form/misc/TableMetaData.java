@@ -19,13 +19,17 @@ public class TableMetaData {
     private Map<String, ColumnMetaData> columns = new LinkedHashMap<>();
     private List<String> primaryKeyColumns = new ArrayList<>();
     private Map<String, TableJoin> lookupJoins = new HashMap<>();
+    private Map<String, String> defaultValues = new HashMap<>();
+
 
     private List<Zoom> zoomData;
 
-    public TableMetaData(MetaTable metaTable, String condition, Map<String, Lookup> lookups, List<Zoom> zoomData) {
+    public TableMetaData(MetaTable metaTable, String condition, Map<String, Lookup> lookups,
+                         List<Zoom> zoomData, Map<String, String> defaultValues) {
         this.zoomData = zoomData;
         this.tableName = metaTable.getCode();
         this.condition = condition;
+        this.defaultValues = defaultValues;
 
         Vector<MetaColumn> metaColumns = (Vector<MetaColumn>) metaTable.cColumns();
         int columnIndex = 0;
@@ -153,7 +157,7 @@ public class TableMetaData {
         return condition;
     }
 
-    public String[] getBaseColumnCodes() {
+    public List<String> getBaseColumnCodes() {
         List<String> result = new ArrayList<>();
         for (ColumnMetaData columnMetaData : columns.values()) {
             if (!columnMetaData.isLookupColumn()) {
@@ -161,7 +165,7 @@ public class TableMetaData {
             }
         }
 
-        return result.toArray(new String[result.size()]);
+        return result;
     }
 
     public List<String> getZoomBaseColumns() {
@@ -206,6 +210,10 @@ public class TableMetaData {
 
     public void setZoomData(List<Zoom> zoomData) {
         this.zoomData = zoomData;
+    }
+
+    public Map<String, String> getDefaultValues() {
+        return defaultValues;
     }
 
     public enum ColumnGroupsEnum {

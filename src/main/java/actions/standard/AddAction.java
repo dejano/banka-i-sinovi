@@ -27,6 +27,8 @@ public class AddAction extends AbstractAction {
     public void actionPerformed(ActionEvent e) {
         form.setMode(FormModeEnum.ADD);
         form.getDataTable().clearSelection();
+
+        // TODO move to DataPanel?
         for (Component component : form.getDataPanel().getComponents()) {
             if (component instanceof JTextComponent) {
                 if (form.getTableModel().getTableMetaData().getBaseColumns().containsKey(component.getName())) {
@@ -35,6 +37,5 @@ public class AddAction extends AbstractAction {
                 ((JTextComponent) component).setText("");
             }
         }
-
     }
 }
