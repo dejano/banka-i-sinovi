@@ -158,7 +158,7 @@ public class QueryBuilder {
         }
 
         for (String columnName : columnNames) {
-            orderByBuilder.append(tableName).append(DOT).append(columnName).append(LIKE).append(COMMA);
+            orderByBuilder.append(tableName).append(DOT).append(columnName).append(COMMA);
         }
 
         removeLastComma(orderByBuilder);
@@ -168,7 +168,7 @@ public class QueryBuilder {
 
     public String build() {
         return queryBuilder.append(selectBuilder).append(fromBuilder)
-                .append(relationBuilder).append(whereBuilder).toString();
+                .append(relationBuilder).append(whereBuilder).append(orderByBuilder).toString();
     }
 
     private void removeLastAnd() {

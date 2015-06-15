@@ -1,50 +1,47 @@
 package gui.standard.form;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 public class StatusBar extends JPanel {
 
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
+    private FormModeEnum mode;
+    private JLabel statusText;
+    public StatusBar() {
+        statusText = new JLabel();
+        setMode(FormModeEnum.DEFAULT);
+        this.add(statusText);
+    }
 
-	public enum FormModeEnum {
-		DEFAULT, ADD, EDIT, SEARCH
-	}
+    public FormModeEnum getMode() {
+        return mode;
+    }
 
-	private FormModeEnum mode;
-	private JLabel statusText;
+    public void setMode(FormModeEnum mode) {
+        String text = null;
 
-	public StatusBar() {
-		statusText = new JLabel();
-		setMode(FormModeEnum.DEFAULT);
-		this.add(statusText);
-	}
+        this.mode = mode;
+        System.out.println(mode);
+        switch (mode) {
+            case ADD:
+                text = "Dodavanje novog sloga";
+                break;
+            case EDIT:
+                text = "Izmena sloga";
+                break;
+            case SEARCH:
+                text = "Pretraga";
+                break;
+            case DEFAULT:
+                text = " ";
+                break;
+        }
 
-	public FormModeEnum getMode() {
-		return mode;
-	}
+        statusText.setText(text);
+    }
 
-	public void setMode(FormModeEnum mode) {
-		String text = null;
-
-		this.mode = mode;
-
-		switch (mode) {
-		case ADD:
-			text = "Dodavanje novog sloga";
-			break;
-		case EDIT:
-			text = "Izmena sloga";
-			break;
-		case SEARCH:
-			text = "Pretraga";
-			break;
-		case DEFAULT:
-			text = " ";
-			break;
-		}
-
-		statusText.setText(text);
-	}
+    public enum FormModeEnum {
+        DEFAULT, ADD, EDIT, SEARCH
+    }
 
 }

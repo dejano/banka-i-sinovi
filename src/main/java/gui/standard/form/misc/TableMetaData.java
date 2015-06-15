@@ -1,7 +1,9 @@
 package gui.standard.form.misc;
 
+import gui.standard.ColumnMapping;
 import meta.Lookup;
 import meta.MosquitoSingletone;
+import meta.Zoom;
 import rs.mgifos.mosquito.model.MetaColumn;
 import rs.mgifos.mosquito.model.MetaTable;
 
@@ -18,7 +20,10 @@ public class TableMetaData {
     private List<String> primaryKeyColumns = new ArrayList<>();
     private Map<String, TableJoin> lookupJoins = new HashMap<>();
 
-    public TableMetaData(MetaTable metaTable, String condition, Map<String, Lookup> lookups) {
+    private List<Zoom> zoomData;
+
+    public TableMetaData(MetaTable metaTable, String condition, Map<String, Lookup> lookups, List<Zoom> zoomData) {
+        this.zoomData = zoomData;
         this.tableName = metaTable.getCode();
         this.condition = condition;
 
@@ -99,6 +104,39 @@ public class TableMetaData {
         return columns;
     }
 
+    public Map<String, ColumnMetaData> getBaseColumns() {
+        Map<String, ColumnMetaData> result = new LinkedHashMap<>();
+        for (Map.Entry<String, ColumnMetaData> entry : columns.entrySet()) {
+            if (!entry.getValue().isLookupColumn()) {
+                result.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return result;
+    }
+
+    public Map<String, ColumnMetaData> getLookupColumns() {
+        Map<String, ColumnMetaData> result = new LinkedHashMap<>();
+        for (Map.Entry<String, ColumnMetaData> entry : columns.entrySet()) {
+            if (entry.getValue().isLookupColumn()) {
+                result.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return result;
+    }
+
+    public Map<String, ColumnMetaData> getLookupColumns(String tableCode) {
+        Map<String, ColumnMetaData> result = new LinkedHashMap<>();
+        for (Map.Entry<String, ColumnMetaData> entry : columns.entrySet()) {
+            if (entry.getValue().isLookupColumn() && entry.getValue().getTableName().equals(tableCode)) {
+                result.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        return result;
+    }
+
     public List<String> getPrimaryKeyColumns() {
         return primaryKeyColumns;
     }
@@ -126,8 +164,52 @@ public class TableMetaData {
         return result.toArray(new String[result.size()]);
     }
 
+    public List<String> getZoomBaseColumns() {
+        List<String> result = new ArrayList<>();
+        for (Zoom zoom : zoomData) {
+            for (ColumnMapping columnMapping : zoom.getColumns()) {
+                result.add(columnMapping.getFrom());
+            }
+        }
+
+        return result;
+    }
+
+    public List<String> getZoomColumns(String tableCode) {
+        List<String> result = new ArrayList<>();
+        for (Zoom zoom : zoomData) {
+            if (tableCode.equals(zoom.getTableCode())) {
+                for (ColumnMapping columnMapping : zoom.getColumns()) {
+                    result.add(columnMapping.getTo());
+                }
+            }
+        }
+
+        return result;
+    }
+
+    public String getZoomTableCode(String columnName) {
+        for (Zoom zoom : zoomData) {
+            for (ColumnMapping columnMapping : zoom.getColumns()) {
+                if (columnMapping.getFrom().equals(columnName)) {
+                    return zoom.getTableCode();
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public List<Zoom> getZoomData() {
+        return zoomData;
+    }
+
+    public void setZoomData(List<Zoom> zoomData) {
+        this.zoomData = zoomData;
+    }
+
     public enum ColumnGroupsEnum {
-        ALL, ALL_WITHOUT_LOOKUP, PRIMARY_KEYS
+        ALL, ALL_WITHOUT_LOOKUP, PRIMARY_KEYS;
     }
 }
 

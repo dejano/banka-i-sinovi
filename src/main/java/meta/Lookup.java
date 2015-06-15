@@ -2,9 +2,6 @@ package meta;
 
 import java.util.List;
 
-/**
- * Created by dejan on 6/7/2015.
- */
 public class Lookup {
 
     private String table;

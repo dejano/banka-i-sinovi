@@ -26,8 +26,9 @@ public class StatementExecutor {
 
         int i = 1;
         for (Column column : columnValues) {
+
+            System.out.println("Column: " + column);
             String columnTypeClass = columnCodeTypes.get(column.getName());
-            System.out.println(column.getName()+":" + column.getValue());
             String value = column.getValue();
             switch (columnTypeClass) {
                 case "java.lang.String":

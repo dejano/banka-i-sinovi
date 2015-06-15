@@ -27,26 +27,15 @@ public class CommitAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         FormModeEnum mode = form.getMode();
-
         try {
             int newRowIndex = -1;
 
             switch (mode) {
                 case ADD:
-//                    newRowIndex = form.getTableModel().insertRow(
-//                            new String[]{"6", "a", "a", "a", "a", "a", "8", "1"} // videoteka
-////                            new String[]{"5", "8", "11", "0"} // kopija
-//                    );
-
                     newRowIndex = add();
                     break;
                 case EDIT:
-                    //				form.getTableModel().updateRow(form.getDataPanel().getValues());
-//                    newRowIndex = form.getTableModel().updateRow(form.getDataTable().getSelectedRow(),
-//                            new String[]{"6", "a", "b", "a", "b", "a", "1", "8"} // videoteka
-////                            new String[]{"5", "8", "11", "9"} // kopija
-//                    );
-                    newRowIndex = add();
+                    newRowIndex = update();
                     break;
             }
 
@@ -64,19 +53,30 @@ public class CommitAction extends AbstractAction {
 
     private int add() throws SQLException {
         java.util.List<String> values = new ArrayList<>();
-        java.util.List<String> columns = new ArrayList<String>();
-        for (String s : form.getTableModel().getTableMetaData().getBaseColumnCodes()) {
-            columns.add(s);
-        }
+
         for (Component component : form.getDataPanel().getComponents()) {
             if (component instanceof JTextComponent) {
-                if (columns.contains(component.getName()))
+                if (form.getTableModel().getTableMetaData().getBaseColumns().containsKey(component.getName()))
                     values.add(((JTextComponent) component).getText());
             }
         }
 
-        return form.getTableModel().updateRow(form.getDataTable().getSelectedRow(),
-                values.toArray(new String[values.size()])
+        return form.getTableModel().insertRow(values.toArray(new String[values.size()]));
+    }
+
+    private int update() throws SQLException {
+//        int index = form.getDataTable().getSelectedRow();
+//        String[] values = form.getTableModel().getRowValues(index);
+
+        java.util.List<String> values = new ArrayList<>();
+
+        for (Component component : form.getDataPanel().getComponents()) {
+            if (component instanceof JTextComponent) {
+                values.add(((JTextComponent) component).getText());
+            }
+        }
+
+        return form.getTableModel().updateRow(form.getDataTable().getSelectedRow(), values.toArray(new String[values.size()])
         );
     }
 }
