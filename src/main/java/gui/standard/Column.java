@@ -19,4 +19,12 @@ public class Column {
     public String getValue() {
         return value;
     }
+
+    @Override
+    public String toString() {
+        return "Column{" +
+                "name='" + name + '\'' +
+                ", value='" + value + '\'' +
+                '}';
+    }
 }

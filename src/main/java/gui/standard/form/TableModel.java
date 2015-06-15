@@ -7,12 +7,18 @@ import gui.standard.form.misc.*;
 import messages.ErrorMessages;
 import messages.WarningMessages;
 
+
 import javax.swing.table.DefaultTableModel;
-import java.sql.*;
-import java.util.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
 import static gui.standard.form.misc.ProcedureCallFactory.ProcedureCallEnum.*;
-import static gui.standard.form.misc.TableMetaData.ColumnGroupsEnum.*;
+import static gui.standard.form.misc.TableMetaData.ColumnGroupsEnum.ALL_WITHOUT_LOOKUP;
+import static gui.standard.form.misc.TableMetaData.ColumnGroupsEnum.PRIMARY_KEYS;
 
 public class TableModel extends DefaultTableModel {
 
@@ -50,7 +56,7 @@ public class TableModel extends DefaultTableModel {
         vector.setSize(columnNames.size());
         setDataVector(vector, new Vector(columnNames));
 
-        setColumnIdentifiers(tableMetaData.getColumnCodes().toArray());
+//        setColumnIdentifiers(tableMetaData.getColumnCodes().toArray());
     }
 
     public String getValue(int rowIndex, String columnCode) {
@@ -95,7 +101,7 @@ public class TableModel extends DefaultTableModel {
                 tableMetaData.getColumnCodeTypes(ALL_WITHOUT_LOOKUP));
 
         executor.executeProcedure(ProcedureCallFactory.getProcedureCall(tableMetaData.getTableName(),
-                CREATE_PROCEDURE_CALL), tableHelper.getColumnList(tableMetaData.getColumns().keySet(), values));
+                CREATE_PROCEDURE_CALL), tableHelper.getColumnList(tableMetaData.getBaseColumns().keySet(), values));
 
         retVal = sortedInsert(values);
         fireTableDataChanged();
@@ -116,9 +122,9 @@ public class TableModel extends DefaultTableModel {
             columnValues.add(new Column(pkColumnCode, pkValues[i++]));
         }
 
-        i = 0;
-        for (String columnCode : tableMetaData.getColumns().keySet()) {
-            columnValues.add(new Column(columnCode, values[i++]));
+        for (String columnCode : tableMetaData.getBaseColumns().keySet()) {
+            int colIndex = tableMetaData.getColumnIndex(columnCode);
+            columnValues.add(new Column(columnCode, values[colIndex]));
         }
 
         StatementExecutor executor = new StatementExecutor(tableMetaData.getColumnCodeTypes(ALL_WITHOUT_LOOKUP));
@@ -226,7 +232,7 @@ public class TableModel extends DefaultTableModel {
         DBConnection.getConnection()
                 .setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
 
-        String[] result = tableHelper.getDbRowByPks(tableHelper.getPkValues(values));
+        String[] result = tableHelper.getDbRowByPks(tableHelper.getPkValues1(values));
 
         DBConnection.getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 
@@ -321,7 +327,7 @@ public class TableModel extends DefaultTableModel {
         return errorMessage;
     }
 
-    private String[] getRowValues(int index) {
+    public String[] getRowValues(int index) {
         Vector rowValues = (Vector) dataVector.get(index);
         return (String[]) rowValues.toArray(new String[rowValues.size()]);
     }
@@ -333,5 +339,13 @@ public class TableModel extends DefaultTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         return false;
+    }
+
+    public TableMetaData getTableMetaData() {
+        return tableMetaData;
+    }
+
+    public TableHelper getTableHelper() {
+        return tableHelper;
     }
 }

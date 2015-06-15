@@ -32,6 +32,13 @@
             <artifactId>jcalendar</artifactId>
             <version>1.4</version>
         </dependency>
+        <dependency>
+            <groupId>rs.mgifos</groupId>
+            <artifactId>mosquito</artifactId>
+            <version>1.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/lib/mosquito-1.0.7.jar</systemPath>
+        </dependency>
     </dependencies>
 
     <build>

@@ -13,8 +13,10 @@ public class FormMetaData {
     private List<String> hideColumns = new ArrayList<>();
 
     private Map<String, Lookup> lookupMap = new HashMap<>();
-    private List<NextMetaData> nextData = new ArrayList<>();
 
+    private List<Zoom> zoomData = new ArrayList<>();
+
+    private List<NextMetaData> nextData = new ArrayList<>();
     public String getTitle() {
         return title;
     }
@@ -49,5 +51,13 @@ public class FormMetaData {
 
     public void putLookup(String columnCode, Lookup lookup) {
         this.lookupMap.put(columnCode, lookup);
+    }
+
+    public List<Zoom> getZoomData() {
+        return zoomData;
+    }
+
+    public void setZoomData(List<Zoom> zoomData) {
+        this.zoomData = zoomData;
     }
 }

@@ -1,11 +1,11 @@
 package meta;
 
 import gui.standard.form.Form;
+import gui.standard.form.misc.ColumnMetaData;
 
 import javax.swing.*;
 import java.sql.SQLException;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class FormCreator {
 
@@ -23,6 +23,6 @@ public class FormCreator {
 
 		return new Form(fmd, nextColumnCodeValues);
 	}
-	
+
 	private FormCreator(){}
 }

@@ -62,4 +62,8 @@ public class ColumnMetaData {
     public boolean isLookupColumn() {
         return lookupColumn;
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

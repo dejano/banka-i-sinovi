@@ -7,10 +7,33 @@
       "from": "SIFRA_VIDEOTEKE",
       "to": "SIFRA_VIDEOTEKE",
       "columns": [
-        "NAZIV"
+        {
+          "code": "VIDEOTEKA.NAZIV",
+          "name": "Naziv videoteke"
+        }
       ]
     }
   },
+  "zoomData": [
+    {
+      "tableCode": "VIDEOTEKA",
+      "columns": [
+        {
+          "from": "SIFRA_VIDEOTEKE",
+          "to": "SIFRA_VIDEOTEKE"
+        }
+      ]
+    },
+    {
+      "tableCode": "ZEMLJA_POREKLA",
+      "columns": [
+        {
+          "from": "SIFRA_ZEMLJE",
+          "to": "SIFRA_ZEMLJE"
+        }
+      ]
+    }
+  ],
   "nextData": [
     {
       "formName": "kopija",

@@ -20,10 +20,14 @@ public class TableHelper {
 
     public List<Column> getColumnList(Collection<String> keys, String[] values){
         List<Column> ret = new ArrayList<>();
+//        String[] clearedVals = new String[keys.size()];
+
 
         Iterator<String> it = keys.iterator();
         for (String value : values) {
-            ret.add(new Column(it.next(), value));
+            String next = it.next();
+            System.out.println(next + ":" + value);
+            ret.add(new Column(next, value));
         }
 
         return ret;
@@ -50,6 +54,15 @@ public class TableHelper {
         return pkValues;
     }
 
+    public String[] getPkValues1(String[] baseColumnValues) {
+        String[] pkValues = new String[tableMetaData.getPrimaryKeyColumns().size()];
+        for (int i = 0; i < tableMetaData.getPrimaryKeyColumns().size(); i++) {
+            pkValues[i] = baseColumnValues[i];
+        }
+
+        return pkValues;
+    }
+
     public String[] getDbRowByPks(String[] pkValues) throws SQLException {
         String[] ret = null;
 
@@ -58,8 +71,9 @@ public class TableHelper {
         StatementExecutor executor = new StatementExecutor(columnCodeTypes);
 
         Map<String, String> pkColumnCodeValues = new LinkedHashMap<>();
+        int i = 0;
         for (String columnCode : tableMetaData.getPrimaryKeyColumns()) {
-            pkColumnCodeValues.put(columnCode, pkValues[tableMetaData.getColumnIndex(columnCode)]);
+            pkColumnCodeValues.put(columnCode, pkValues[i++]);
         }
 
         List<String[]> results = executor.execute(

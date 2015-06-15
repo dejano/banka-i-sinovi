@@ -22,18 +22,19 @@ public class MainFrame extends JFrame {
     public MainFrame(MainFrameMetaData mfmt) {
         this.setTitle(mfmt.getTitle());
         this.setLayout(new BorderLayout());
-        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        this.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent e) {
-                int result = JOptionPane.showConfirmDialog(MainFrame.this, WarningMessages.MAINFRAME_CLOSING,
-                        WarningMessages.TITLE, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-
-                if (result == JOptionPane.YES_OPTION) {
-                    System.exit(0);
-                }
-            }
-        });
+        this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+//        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+//        this.addWindowListener(new WindowAdapter() {
+//            @Override
+//            public void windowClosing(WindowEvent e) {
+//                int result = JOptionPane.showConfirmDialog(MainFrame.this, WarningMessages.MAINFRAME_CLOSING,
+//                        WarningMessages.TITLE, JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+//
+//                if (result == JOptionPane.YES_OPTION) {
+//                    System.exit(0);
+//                }
+//            }
+//        });
         // TODO fill
 
         initWindow();

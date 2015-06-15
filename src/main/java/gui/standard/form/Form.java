@@ -2,6 +2,7 @@ package gui.standard.form;
 
 import actions.standard.*;
 import gui.standard.form.StatusBar.FormModeEnum;
+import gui.standard.form.misc.ColumnMetaData;
 import gui.standard.form.misc.TableMetaData;
 import meta.FormMetaData;
 import meta.MosquitoSingletone;
@@ -13,6 +14,7 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -25,16 +27,20 @@ public class Form extends JDialog {
 
     private JButton btnDelete;
     private JButton btnNextForm;
+
     private JButton btnPickup;
 
     private JTable dataTable = new JTable();
+
     private TableModel tableModel;
-
     private DataPanel dataPanel;
-    private StatusBar statusBar;
 
+    private StatusBar statusBar;
     private List<NextMetaData> nextData = new ArrayList<>();
 
+    private Form parentForm;
+
+    private Map<String, String> callbackZoomData;
     public Form(FormMetaData fmd) throws SQLException {
         setLayout(new MigLayout("fill"));
         setSize(new Dimension(800, 600));
@@ -49,7 +55,6 @@ public class Form extends JDialog {
         initToolbar();
         initStatusBar();
     }
-
     public Form(FormMetaData fmd, Map<String, String> nextColumnCodeValues) throws SQLException {
         setLayout(new MigLayout("fill"));
         setSize(new Dimension(800, 600));
@@ -141,14 +146,45 @@ public class Form extends JDialog {
         JButton btnCommit = new JButton(new CommitAction(this));
         JButton btnRollback = new JButton(new RollbackAction(this));
 
-        // JLabel lblSifra = new JLabel("Šifra države:");
-        // JLabel lblNaziv = new JLabel("Naziv države:");
-        //
-        // dataPanel.add(lblSifra);
-        // // dataPanel.add(tfSifra, "wrap");
-        // dataPanel.add(lblNaziv);
-        // // dataPanel.add(tfNaziv);
-        // bottomPanel.add(dataPanel);
+        Map<String, ColumnMetaData> columns = tableModel.getTableMetaData().getColumns();
+        boolean span = false;
+        for (ColumnMetaData metaColumn : columns.values()) {
+
+            JLabel label = new JLabel(metaColumn.getName());
+            String type = tableModel.getTableMetaData().getColumnCodeTypes(TableMetaData.ColumnGroupsEnum.ALL).get(metaColumn.getCode());
+            System.out.println(type);
+            JTextField textField = new JTextField(40);
+            textField.setName(metaColumn.getCode());
+            if (tableModel.getTableMetaData().getPrimaryKeyColumns().contains(metaColumn.getCode())
+                    || tableModel.getTableMetaData().getZoomBaseColumns().contains(metaColumn.getCode())
+                    || tableModel.getTableMetaData().getLookupColumns().containsKey(metaColumn.getCode())) {
+                textField.setEditable(false);
+            }
+
+
+            if (tableModel.getTableMetaData().getZoomBaseColumns().contains(metaColumn.getCode())) {
+                dataPanel.add(label);
+                dataPanel.add(textField);
+                System.out.println("TABLE:" + tableModel.getTableMetaData().getZoomTableCode(metaColumn.getCode()));
+                JButton zoomBtn = new JButton(new ZoomFormAction(this, tableModel.getTableMetaData().getZoomTableCode(metaColumn.getCode())));
+                dataPanel.add(zoomBtn);
+                span = true;
+            } else if (tableModel.getTableMetaData().getLookupColumns().containsKey(metaColumn.getCode())) {
+                dataPanel.add(label);
+                dataPanel.add(textField);
+                span = true;
+            } else {
+                if (span) {
+                    dataPanel.add(new JLabel(" "),"wrap");
+                }
+                dataPanel.add(label);
+                dataPanel.add(textField, "wrap");
+                span = false;
+            }
+
+        }
+
+        bottomPanel.add(dataPanel);
 
         buttonsPanel.setLayout(new MigLayout("wrap"));
         buttonsPanel.add(btnCommit);
@@ -169,7 +205,7 @@ public class Form extends JDialog {
 
         if (nextColumnCodeValues == null) {
             tableModel = new TableModel(new TableMetaData(metaTable, fmd.getCondition(),
-                    fmd.getLookupMap()));
+                    fmd.getLookupMap(), fmd.getZoomData()));
         } else {
             List<String> removeColumnCodes = new ArrayList<>();
             for (String columnCode : nextColumnCodeValues.keySet()) {
@@ -179,7 +215,7 @@ public class Form extends JDialog {
             nextColumnCodeValues.keySet().removeAll(removeColumnCodes);
 
             tableModel = new TableModel(new TableMetaData(metaTable, fmd.getCondition(),
-                    fmd.getLookupMap()), nextColumnCodeValues);
+                    fmd.getLookupMap(), fmd.getZoomData()), nextColumnCodeValues);
         }
 
         dataTable.setModel(tableModel);
@@ -197,32 +233,41 @@ public class Form extends JDialog {
                         if (Form.this.getDataTable().getSelectedRow() == -1) {
                             btnDelete.setEnabled(false);
                             btnNextForm.setEnabled(false);
+                            btnPickup.setEnabled(false);
                         } else {
+                            if (parentForm != null) {
+                                btnPickup.setEnabled(true);
+                            }
                             btnDelete.setEnabled(true);
                             btnNextForm.setEnabled(!nextData.isEmpty());
                         }
-
-                        Form.this.setMode(FormModeEnum.EDIT);
                         sync();
                     }
                 });
 
-        for(String columnCode : fmd.getHideColumns()){
+        for (String columnCode : fmd.getHideColumns()) {
             TableColumn tableColumn = dataTable.getColumn(columnCode);
             dataTable.removeColumn(tableColumn);
         }
     }
 
     private void sync() {
-//        int index = dataTable.getSelectedRow();
-//        if (index < 0) {
-            // tfSifra.setText("");
-            // tfNaziv.setText("");
-//        }
-        // String sifra = (String) tableModel.getValueAt(index, 0);
-        // String naziv = (String) tableModel.getValueAt(index, 1);
-        // tfSifra.setText(sifra);
-        // tfNaziv.setText(naziv);
+        int index = dataTable.getSelectedRow();
+        if (index < 0) {
+            return;
+        }
+        Form.this.setMode(FormModeEnum.EDIT);
+        for (Component component : dataPanel.getComponents()) {
+            if (component instanceof JTextComponent) {
+                JTextComponent textComponent = (JTextComponent) component;
+                String value = tableModel.getValue(index, textComponent.getName());
+                textComponent.setText(value);
+                if (tableModel.getTableMetaData().getPrimaryKeyColumns().contains(textComponent.getName())
+                        || tableModel.getTableMetaData().getLookupJoins().containsKey(textComponent.getName())) {
+                    textComponent.setEditable(false);
+                }
+            }
+        }
     }
 
     public String getSelectedRowValue(String columnCode) {
@@ -289,5 +334,37 @@ public class Form extends JDialog {
 
     public void setNextData(List<NextMetaData> nextData) {
         this.nextData = nextData;
+    }
+
+    public void setParentForm(Form parentForm) {
+        this.parentForm = parentForm;
+    }
+
+    public Map<String, String> getCallbackZoomData() {
+        return callbackZoomData;
+    }
+
+    public void setCallbackZoomData(Map<String, String> callbackZoomData) {
+        this.callbackZoomData = callbackZoomData;
+    }
+
+    public JButton getBtnPickup() {
+        return btnPickup;
+    }
+
+    public Form getParentForm() {
+        return parentForm;
+    }
+
+    public void onZoomDialogClosed(Map<String, String> results) {
+        for (Map.Entry<String, String> entry : results.entrySet()) {
+            for (Component component : getDataPanel().getComponents()) {
+                if (component instanceof JTextComponent && component.getName().equals(entry.getKey())) {
+                    JTextComponent textComponent = (JTextComponent) component;
+                    textComponent.setText(entry.getValue());
+                }
+            }
+            System.out.println(entry.getKey() + ":" + entry.getValue());
+        }
     }
 }
