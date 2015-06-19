@@ -1,0 +1,15 @@
+{
+  "title": "Države",
+  "tableName": "DRZAVA",
+  "nextData": [
+    {
+      "formName": "naseljenoMesto",
+      "columnCodeMapping": [
+        {
+          "from": "DR_SIFRA",
+          "to": "DR_SIFRA"
+        }
+      ]
+    }
+  ]
+}

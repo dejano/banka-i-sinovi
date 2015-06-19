@@ -1,9 +1,11 @@
 package actions.standard;
 
+import gui.dialog.Toast;
 import gui.standard.form.Form;
 import messages.QuestionMessages;
 
 import java.awt.event.ActionEvent;
+import java.sql.SQLException;
 
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
@@ -26,7 +28,14 @@ public class DeleteAction extends AbstractAction {
 		if (JOptionPane.showConfirmDialog(form, QuestionMessages.DELETE_ROW, QuestionMessages.TITLE,
 				JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 
-			form.removeRow();
+			try {
+				form.removeRow();
+
+				Toast.show(form, "Slog uspešno obrisan.");
+			} catch (SQLException ex) {
+				JOptionPane.showMessageDialog(form, ex.getMessage(), "Greska",
+						JOptionPane.ERROR_MESSAGE);
+			}
 		}
 	}
 }

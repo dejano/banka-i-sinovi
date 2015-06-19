@@ -1,0 +1,28 @@
+{
+  "title": "Računi",
+  "tableName": "RACUNI_PRAVNIH_LICA",
+  "mapToAppData": {
+    "pib_banke": "PR_PIB"
+  },
+  "hideColumns": [
+    "PR_PIB"
+  ],
+  "hideInputs": [
+    "PR_PIB"
+  ],
+  "nextData": [
+    {
+      "formName": "izvrseneUplate",
+      "columnCodeMapping": [
+        {
+          "from": "PR_PIB",
+          "to": "PR_PIB"
+        },
+        {
+          "from": "BAR_RACUN",
+          "to": "BAR_RACUN"
+        }
+      ]
+    }
+  ]
+}

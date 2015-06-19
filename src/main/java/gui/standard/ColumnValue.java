@@ -1,19 +1,16 @@
 package gui.standard;
 
-public class Column {
-    private String name;
+public class ColumnValue {
+    private String code;
     private Object value;
 
-    public Column() {
-    }
-
-    public Column(String name, Object value) {
-        this.name = name;
+    public ColumnValue(String code, Object value) {
+        this.code = code;
         this.value = value;
     }
 
-    public String getName() {
-        return name;
+    public String getCode() {
+        return code;
     }
 
     public Object getValue() {
@@ -23,7 +20,7 @@ public class Column {
     @Override
     public String toString() {
         return "Column{" +
-                "name='" + name + '\'' +
+                "code='" + code + '\'' +
                 ", value='" + value + '\'' +
                 '}';
     }

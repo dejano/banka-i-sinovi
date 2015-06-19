@@ -23,6 +23,7 @@ public class MainFrame extends JFrame {
         this.setTitle(mfmt.getTitle());
         this.setLayout(new BorderLayout());
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        this.setExtendedState(JFrame.MAXIMIZED_BOTH);
 //        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 //        this.addWindowListener(new WindowAdapter() {
 //            @Override
@@ -35,7 +36,6 @@ public class MainFrame extends JFrame {
 //                }
 //            }
 //        });
-        // TODO fill
 
         initWindow();
         initToolbar(mfmt.getMenus());

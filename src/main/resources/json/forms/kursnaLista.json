@@ -1,0 +1,29 @@
+{
+  "title": "Kursne liste",
+  "tableName": "KURSNA_LISTA",
+  "customOrderBy": "KURSNA_LISTA.KL_DATUM desc",
+  "mapToAppData": {
+    "pib_banke": "PR_PIB"
+  },
+  "hideColumns": [
+    "PR_PIB"
+  ],
+  "hideInputs": [
+    "PR_PIB"
+  ],
+  "nextData": [
+    {
+      "formName": "kursUValuti",
+      "columnCodeMapping": [
+        {
+          "from": "PR_PIB",
+          "to": "PR_PIB"
+        },
+        {
+          "from": "KL_DATUM",
+          "to": "KL_DATUM"
+        }
+      ]
+    }
+  ]
+}

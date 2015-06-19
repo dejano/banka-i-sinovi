@@ -422,7 +422,7 @@ Drop=Yes
 Comment=Yes
 
 [FolderOptions\Physical Objects\Database Generation\Table&amp;&amp;Column\Trigger\Filter]
-For insert=Yes
+For lookupInsert=Yes
 For update=Yes
 For delete=Yes
 For other=Yes
@@ -460,7 +460,7 @@ Drop=Yes
 Comment=Yes
 
 [FolderOptions\Physical Objects\Database Generation\View\Trigger\Filter]
-For insert=Yes
+For lookupInsert=Yes
 For update=Yes
 For delete=Yes
 For other=Yes

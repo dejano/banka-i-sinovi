@@ -1,0 +1,12 @@
+{
+  "title": "Kurs u valuti",
+  "tableName": "KURS_U_VALUTI",
+  "mapToAppData": {
+    "pib_banke": "PR_PIB"
+  },
+  "hideColumns": [
+    "PR_PIB",
+    "KL_DATUM"
+  ]
+  // TODO lookup i zoomb
+}

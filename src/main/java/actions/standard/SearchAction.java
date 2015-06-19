@@ -2,14 +2,14 @@ package actions.standard;
 
 import gui.standard.form.Form;
 import gui.standard.form.StatusBar;
-import messages.WarningMessages;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.sql.SQLException;
 
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
+
+import static gui.standard.form.misc.FormData.ColumnGroupsEnum.ALL;
 
 public class SearchAction extends AbstractAction {
 
@@ -28,7 +28,7 @@ public class SearchAction extends AbstractAction {
         // TODO move to DataPanel?
         for (Component component : form.getDataPanel().getComponents()) {
             if (component instanceof JTextComponent) {
-                if (form.getTableModel().getTableMetaData().getBaseColumns().containsKey(component.getName())) {
+                if (form.getFormData().isInGroup(component.getName(), ALL)) {
                     ((JTextComponent) component).setEditable(true);
                 }
                 ((JTextComponent) component).setText("");

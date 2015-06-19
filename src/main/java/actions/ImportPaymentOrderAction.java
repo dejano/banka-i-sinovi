@@ -1,6 +1,8 @@
 package actions;
 
 import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
+import gui.standard.ColumnValue;
+import gui.standard.form.misc.QueryBuilder;
 import gui.standard.form.misc.StatementExecutor;
 import meta.MosquitoSingletone;
 import meta.SuperMetaTable;
@@ -19,6 +21,8 @@ import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.*;
+
+import static gui.standard.form.misc.QueryBuilder.Query.WhereTypesEnum.EQUALS;
 
 /**
  * Created by Nikola on 14.6.2015..
@@ -111,14 +115,14 @@ public class ImportPaymentOrderAction extends AbstractAction {
         BankDetails ret = null;
 
         StatementExecutor executor = new StatementExecutor(bankDetailsMetaTable.getPkColumnTypes());
-        Map<String, String> values = new HashMap<>();
+        List<ColumnValue> values = new ArrayList<>();
         List<String[]> results = null;
 
-        values.put("SIFRA_BANKE", bankCode);
+        values.add(new ColumnValue("SIFRA_BANKE", bankCode));
 
         try {
-            results = executor.execute("SELECT * FROM BANKA_POSLOVNOG_PARTNERA WHERE SIFRA_BANKE=?",
-                    bankDetailsMetaTable.getBaseColumnCodes(), values);
+            results = executor.execute(new QueryBuilder.Query("SELECT * FROM BANKA_POSLOVNOG_PARTNERA " +
+                            "WHERE SIFRA_BANKE=?", EQUALS), values, bankDetailsMetaTable.getBaseColumnCodes());
         } catch (SQLException e1) {
             e1.printStackTrace(); // error, show message
         }

@@ -1,0 +1,29 @@
+{
+  "title": "Izvršene uplate",
+  "tableName": "ANALITIKA_IZVODA",
+  "readOnly": true,
+  "condition": "ANALITIKA_IZVODA.ASI_STATUS='P'", // TODO change to I
+  "hideColumns": [
+    "PR_PIB",
+    "BAR_RACUN",
+    "DSR_IZVOD",
+    "ASI_BROJSTAVKE",
+    "VA_IFRA",
+    "NM_SIFRA",
+    "VPL_OZNAKA",
+    "ASI_DATPRI",
+    "ASI_DATVAL",
+    "ASI_HITNO",
+    "ASI_TIPGRESKE",
+    "ASI_STATUS"
+  ],
+  "hideInputs": [
+    "PR_PIB",
+    "BAR_RACUN",
+    "DSR_IZVOD",
+    "ASI_BROJSTAVKE",
+    "ASI_HITNO",
+    "ASI_TIPGRESKE",
+    "ASI_STATUS"
+  ]
+}

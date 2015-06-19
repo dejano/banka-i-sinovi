@@ -8,7 +8,7 @@
       "to": "SIFRA_VIDEOTEKE",
       "columns": [
         {
-          "code": "VIDEOTEKA.NAZIV",
+          "code": "NAZIV",
           "name": "Naziv videoteke"
         }
       ]

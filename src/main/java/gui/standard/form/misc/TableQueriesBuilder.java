@@ -1,6 +1,9 @@
 package gui.standard.form.misc;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
+
+import static gui.standard.form.misc.FormData.ColumnGroupsEnum.*;
 
 /**
  * Created by Nikola on 8.6.2015..
@@ -9,54 +12,54 @@ public class TableQueriesBuilder {
 
     private QueryBuilder queryBuilder = new QueryBuilder();
 
-    private TableMetaData tableMetaData;
-    private Map<String, String> nextColumnCodeValues;
+    private FormData formData;
 
-    public TableQueriesBuilder(TableMetaData tableMetaData) {
-        this.tableMetaData = tableMetaData;
-    }
-
-    public TableQueriesBuilder(TableMetaData tableMetaData, Map<String, String> nextColumnCodeValues) {
-        this.tableMetaData = tableMetaData;
-        this.nextColumnCodeValues = nextColumnCodeValues;
+    public TableQueriesBuilder(FormData formData) {
+        this.formData = formData;
     }
 
     public TableQueriesBuilder getBasicQuery() {
-        queryBuilder.select(tableMetaData.getColumns().values())
-                .from(tableMetaData.getTableName())
-                .leftOuterJoin(tableMetaData.getTableName(), tableMetaData.getLookupJoins().entrySet());
+        queryBuilder.select(formData.getColumns(ALL).values())
+                .from(formData.getTableName())
+                .leftOuterJoin(formData.getTableName(), formData.getLookupJoins());
 
-        if (tableMetaData.getCondition() != null)
-            queryBuilder.where(tableMetaData.getCondition());
+        if (formData.getCondition() != null)
+            queryBuilder.where(formData.getCondition());
 
-        return this;
-    }
-
-    public TableQueriesBuilder getOrderByQuery() {
-        queryBuilder.orderBy(tableMetaData.getTableName(), tableMetaData.getPrimaryKeyColumns());
         return this;
     }
 
     public TableQueriesBuilder getWhereByPksQuery() {
-        queryBuilder.where(tableMetaData.getTableName(), tableMetaData.getPrimaryKeyColumns());
+        queryBuilder.where(formData.getTableName(), formData.getColumnCodes(PRIMARY_KEYS));
         return this;
     }
 
     public TableQueriesBuilder getWhereLikeQuery() {
-        queryBuilder.whereLike(tableMetaData.getTableName(), tableMetaData.getBaseColumnCodes());
+        queryBuilder.whereLike(formData.getTableDotCodes(ALL));
         return this;
     }
 
     public TableQueriesBuilder getNextWhereQuery() {
-        if (nextColumnCodeValues != null) {
-            queryBuilder.where(tableMetaData.getTableName(), nextColumnCodeValues.keySet());
+        List<String> nextColumnCodes = formData.getColumnCodes(NEXT);
+
+        if (!nextColumnCodes.isEmpty()) {
+            queryBuilder.where(formData.getTableName(), nextColumnCodes);
         }
 
         return this;
     }
 
-    public String build() {
-        String ret = queryBuilder.build();
+    public TableQueriesBuilder getOrderByQuery() {
+        if (formData.getCustomOrderBy() != null)
+            queryBuilder.orderBy(formData.getCustomOrderBy());
+        else
+            queryBuilder.orderBy(formData.getTableName(), formData.getColumnCodes(PRIMARY_KEYS));
+
+        return this;
+    }
+
+    public QueryBuilder.Query build() {
+        QueryBuilder.Query ret = queryBuilder.build();
 
         // TODO replace with map for caching where key is hash
         queryBuilder = new QueryBuilder();

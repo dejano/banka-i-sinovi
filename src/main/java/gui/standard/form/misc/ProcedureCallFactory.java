@@ -7,6 +7,8 @@ import rs.mgifos.mosquito.model.MetaTable;
 import java.util.HashMap;
 import java.util.Map;
 
+import static gui.standard.form.misc.FormData.ColumnGroupsEnum.BASE;
+import static gui.standard.form.misc.FormData.ColumnGroupsEnum.PRIMARY_KEYS;
 import static gui.standard.form.misc.ProcedureCallFactory.ProcedureCallEnum.*;
 
 /**
@@ -20,34 +22,49 @@ public class ProcedureCallFactory {
     private ProcedureCallFactory() {
     }
 
-    public static String getProcedureCall(String tableName, ProcedureCallEnum type) {
+    public static String getCreateProcedureCall(String tableName, int columnCount) {
+        return getCreateProcedureCall(columnCount, 0, tableName, cachedParameterCalls.get(tableName));
+    }
+
+    public static String getProcedureCall(FormData formData, ProcedureCallEnum type) {
         String ret = null;
 
-        MetaTable table = MosquitoSingletone.getInstance().getMetaTable(tableName);
+        int columnCount = formData.getCount(BASE);
+        int pkColumnCount = formData.getCount(PRIMARY_KEYS);
 
-        int columnCount = table.cColumns().size();
-        int pkColumnCount = 0;
-
-        for (Object col : table.cColumns()) {
-            if (((MetaColumn) col).isPartOfPK())
-                pkColumnCount++;
-        }
-
-        Map<ProcedureCallEnum, String> tableCpc = cachedParameterCalls.get(tableName);
+        Map<ProcedureCallEnum, String> tableCpc = cachedParameterCalls.get(formData.getTableName());
         if (tableCpc == null) {
             tableCpc = new HashMap<>();
-            cachedParameterCalls.put(tableName, tableCpc);
+            cachedParameterCalls.put(formData.getTableName(), tableCpc);
         }
 
         switch (type) {
             case CREATE_PROCEDURE_CALL:
-                ret = getCreateProcedureCall(columnCount, pkColumnCount, tableName, tableCpc);
+                ret = formData.getCustomProcedures().get("create");
+                if (ret == null)
+                    ret = getCreateProcedureCall(columnCount, pkColumnCount,
+                            formData.getTableName(), tableCpc);
+                else
+                    ret += addParams(columnCount);
+
                 break;
             case UPDATE_PROCEDURE_CALL:
-                ret = getUpdateProcedureCall(columnCount, pkColumnCount, tableName, tableCpc);
+                ret = formData.getCustomProcedures().get("update");
+                if (ret == null)
+                    ret = getUpdateProcedureCall(columnCount, pkColumnCount,
+                            formData.getTableName(), tableCpc);
+                else
+                    ret += addParams(columnCount);
+
                 break;
             case DELETE_PROCEDURE_CALL:
-                ret = getDeleteProcedureCall(columnCount, pkColumnCount, tableName, tableCpc);
+                ret = formData.getCustomProcedures().get("delete");
+                if (ret == null)
+                    ret = getDeleteProcedureCall(columnCount, pkColumnCount,
+                            formData.getTableName(), tableCpc);
+                else
+                    ret += addParams(columnCount);
+
                 break;
         }
 
@@ -124,15 +141,24 @@ public class ProcedureCallFactory {
         sb.append(prefix);
         sb.append("_");
         sb.append(tableName);
-        sb.append("( ");
 
-        for (int i = 0; i < columnsCount; i++) {
-            sb.append("?, ");
-        }
+        sb.append(addParams(columnsCount));
 
         int lastCommaIndex = sb.lastIndexOf(", ");
         sb.delete(lastCommaIndex, lastCommaIndex + 2);
-        sb.append(" )}");
+        sb.append("}");
+
+        return sb.toString();
+    }
+
+    private static String addParams(int columnCount) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("( ");
+        for (int i = 0; i < columnCount; i++) {
+            sb.append("?, ");
+        }
+        sb.append(" )");
 
         return sb.toString();
     }

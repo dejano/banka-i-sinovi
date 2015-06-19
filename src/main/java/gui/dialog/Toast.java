@@ -7,7 +7,7 @@ import java.awt.*;
 public class Toast {
     private static final int MILLISECONDS = 2500;
 
-    public static void show(String message) {
+    public static void show(Window parent, String message) {
         final JDialog dialog = new JDialog();
 
         dialog.setUndecorated(true);
@@ -34,6 +34,7 @@ public class Toast {
         dialog.setLocation(dim.width / 2 - dialog.getSize().width / 2, y + half);
         panel.add(toastLabel);
         dialog.setVisible(true);
+        parent.requestFocus();
 
         new Thread() {
             public void run() {

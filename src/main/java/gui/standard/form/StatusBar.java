@@ -7,9 +7,9 @@ public class StatusBar extends JPanel {
     private static final long serialVersionUID = 1L;
     private FormModeEnum mode;
     private JLabel statusText;
+
     public StatusBar() {
         statusText = new JLabel();
-        setMode(FormModeEnum.DEFAULT);
         this.add(statusText);
     }
 

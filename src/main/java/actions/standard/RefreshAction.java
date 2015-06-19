@@ -11,6 +11,8 @@ import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.text.JTextComponent;
 
+import static gui.standard.form.misc.FormData.ColumnGroupsEnum.BASE;
+
 public class RefreshAction extends AbstractAction {
 
 	private static final long serialVersionUID = 1L;
@@ -31,7 +33,7 @@ public class RefreshAction extends AbstractAction {
 			form.getTableModel().open();
 			for (Component component : form.getDataPanel().getComponents()) {
 				if (component instanceof JTextComponent) {
-					if (form.getTableModel().getTableMetaData().getBaseColumns().containsKey(component.getName())) {
+					if (form.getFormData().isInGroup(component.getName(), BASE)) {
 						((JTextComponent) component).setEditable(true);
 					}
 					((JTextComponent) component).setText("");

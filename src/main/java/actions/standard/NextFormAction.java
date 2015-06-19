@@ -10,6 +10,7 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class NextFormAction extends AbstractAction {
@@ -28,12 +29,14 @@ public class NextFormAction extends AbstractAction {
     }
 
     public void actionPerformed(ActionEvent e) {
-        int nextFormsCount = form.getNextData().size();
+        List<NextMetaData> nextForms = form.getFormData().getNextForms();
+
+        int nextFormsCount = nextForms.size();
 
         NextMetaData nextData = null;
         switch (nextFormsCount) {
             case 1:
-                nextData = form.getNextData().get(0);
+                nextData = nextForms.get(0);
                 break;
             default:
                 nextData = showNextFormSelectionDialog();
@@ -63,7 +66,7 @@ public class NextFormAction extends AbstractAction {
         }
 
         // TODO check if exists column code in next form
-        Map<String, String> currFormNextValues = form.getTableModel().getNextColumnCodeValues();
+        Map<String, String> currFormNextValues = form.getFormData().getNextValuesMap();
         if (currFormNextValues != null)
             nextValues.putAll(currFormNextValues);
 
@@ -74,9 +77,11 @@ public class NextFormAction extends AbstractAction {
     private NextMetaData showNextFormSelectionDialog() {
         NextMetaData ret = null;
 
-        String[] nextFormNames = new String[form.getNextData().size()];
+        List<NextMetaData> nextForms = form.getFormData().getNextForms();
+
+        String[] nextFormNames = new String[nextForms.size()];
         int i = 0;
-        for (NextMetaData nd : form.getNextData()) {
+        for (NextMetaData nd : nextForms) {
             nextFormNames[i++] = nd.getFormName();
         }
 
@@ -89,7 +94,7 @@ public class NextFormAction extends AbstractAction {
                 nextFormNames[0]);
 
         if (selectedNextFormName != null) {
-            for (NextMetaData nd : form.getNextData()) {
+            for (NextMetaData nd : nextForms) {
                 if (selectedNextFormName.equals(nd.getFormName())) {
                     ret = nd;
                     break;

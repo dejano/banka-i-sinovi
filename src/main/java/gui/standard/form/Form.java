@@ -1,89 +1,91 @@
 package gui.standard.form;
 
 import actions.standard.*;
+import app.AppData;
 import gui.standard.form.StatusBar.FormModeEnum;
-import gui.standard.form.misc.ColumnMetaData;
-import gui.standard.form.misc.TableMetaData;
+import gui.standard.form.components.ComponentCreator;
+import gui.standard.form.misc.ColumnData;
+import gui.standard.form.misc.FormData;
 import meta.FormMetaData;
 import meta.MosquitoSingletone;
-import meta.NextMetaData;
 import net.miginfocom.swing.MigLayout;
 import rs.mgifos.mosquito.model.MetaTable;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static gui.standard.form.StatusBar.FormModeEnum.DEFAULT;
+import static gui.standard.form.StatusBar.FormModeEnum.EDIT;
+import static gui.standard.form.misc.FormData.ColumnGroupsEnum.*;
 
 public class Form extends JDialog {
 
     private static final long serialVersionUID = 1L;
 
+    private JButton btnCommit;
+    private JButton btnRollback;
+    private JButton btnApplySearch;
     private JButton btnDelete;
     private JButton btnNextForm;
-
     private JButton btnPickup;
 
+    private Form parentForm;
     private JTable dataTable = new JTable();
-
     private TableModel tableModel;
+    private StatusBar statusBar;
     private DataPanel dataPanel;
 
-    private StatusBar statusBar;
-    private List<NextMetaData> nextData = new ArrayList<>();
-
-    private Form parentForm;
+    private FormData formData;
 
     private Map<String, String> callbackZoomData;
+
     public Form(FormMetaData fmd) throws SQLException {
-        setLayout(new MigLayout("fill"));
-        setSize(new Dimension(800, 600));
-        setModal(true);
-        setTitle(fmd.getTitle());
-
-        this.nextData = fmd.getNextData();
-
-        initCenterOnScreen();
-        initTable(fmd, null);
-        initGui(fmd);
-        initToolbar();
-        initStatusBar();
+        this(fmd, null);
     }
+
     public Form(FormMetaData fmd, Map<String, String> nextColumnCodeValues) throws SQLException {
         setLayout(new MigLayout("fill"));
-        setSize(new Dimension(800, 600));
         setModal(true);
         setTitle(fmd.getTitle());
+        Rectangle bounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+        this.setBounds(bounds);
+        setResizable(false);
 
-        this.nextData = fmd.getNextData();
+        MetaTable metaTable = MosquitoSingletone.getInstance()
+                .getMetaTable(fmd.getTableName());
+
+        if (nextColumnCodeValues == null)
+            nextColumnCodeValues = new HashMap<>();
+
+        nextColumnCodeValues.putAll(AppData.getInstance().getValues(fmd.getMapToAppData()));
+        this.formData = new FormData(metaTable, fmd, nextColumnCodeValues);
 
         initCenterOnScreen();
-        initTable(fmd, nextColumnCodeValues);
+        initTable(fmd, metaTable, nextColumnCodeValues);
         initGui(fmd);
-        initToolbar();
+        initToolbar(fmd);
         initStatusBar();
     }
 
     private void initCenterOnScreen() {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        Point middle = new Point(screenSize.width / 2, screenSize.height / 2);
-        Point newLocation = new Point(middle.x - (getWidth() / 2),
-                middle.y - (getHeight() / 2));
+        Point newLocation = new Point(screenSize.width / 2 - (getWidth() / 2), 0);
         setLocation(newLocation);
-
-//        setLocationByPlatform(true);
-
-//        setLocationRelativeTo(null);
     }
 
-    private void initToolbar() {
+    private void initToolbar(FormMetaData fmd) {
         JToolBar toolBar = new JToolBar();
+        toolBar.setFloatable(false);
         JButton btnSearch = new JButton(new SearchAction(this));
         toolBar.add(btnSearch);
 
@@ -115,6 +117,7 @@ public class Form extends JDialog {
 
         JButton btnAdd = new JButton(new AddAction(this));
         toolBar.add(btnAdd);
+        btnAdd.setEnabled(!fmd.isReadOnly());
 
         btnDelete = new JButton(new DeleteAction(this));
         toolBar.add(btnDelete);
@@ -131,6 +134,7 @@ public class Form extends JDialog {
 
     private void initStatusBar() {
         statusBar = new StatusBar();
+        setMode(DEFAULT);
 
         add(statusBar, "dock south");
     }
@@ -139,87 +143,54 @@ public class Form extends JDialog {
         JPanel bottomPanel = new JPanel();
         bottomPanel.setLayout(new MigLayout("fillx"));
 
-        dataPanel = new DataPanel();
-        dataPanel.setLayout(new MigLayout("gapx 15px"));
+        dataPanel = new DataPanel(this, formData, fmd.isReadOnly());
 
         JPanel buttonsPanel = new JPanel();
-        JButton btnCommit = new JButton(new CommitAction(this));
-        JButton btnRollback = new JButton(new RollbackAction(this));
+        buttonsPanel.setLayout(new MigLayout("wrap"));
+        btnCommit = new JButton(new CommitAction(this));
+        buttonsPanel.add(btnCommit);
+        btnRollback = new JButton(new RollbackAction(this));
+        buttonsPanel.add(btnRollback);
+        btnApplySearch = new JButton(new ApplySearchAction(this));
+        btnApplySearch.setVisible(false);
+        buttonsPanel.add(btnApplySearch);
 
-        Map<String, ColumnMetaData> columns = tableModel.getTableMetaData().getColumns();
-        boolean span = false;
-        for (ColumnMetaData metaColumn : columns.values()) {
-            if(!fmd.getHideColumns().contains(metaColumn.getCode())) {
-                JLabel label = new JLabel(metaColumn.getName());
-                String type = tableModel.getTableMetaData().getColumnCodeTypes(TableMetaData.ColumnGroupsEnum.ALL).get(metaColumn.getCode());
-                System.out.println(type);
-                JTextField textField = new JTextField(40);
-                textField.setName(metaColumn.getCode());
-                if (tableModel.getTableMetaData().getPrimaryKeyColumns().contains(metaColumn.getCode())
-                        || tableModel.getTableMetaData().getZoomBaseColumns().contains(metaColumn.getCode())
-                        || tableModel.getTableMetaData().getLookupColumns().containsKey(metaColumn.getCode())) {
-                    textField.setEditable(false);
-                }
-
-
-                if (tableModel.getTableMetaData().getZoomBaseColumns().contains(metaColumn.getCode())) {
-                    dataPanel.add(label);
-                    dataPanel.add(textField);
-                    System.out.println("TABLE:" + tableModel.getTableMetaData().getZoomTableCode(metaColumn.getCode()));
-                    JButton zoomBtn = new JButton(new ZoomFormAction(this, tableModel.getTableMetaData().getZoomTableCode(metaColumn.getCode())));
-                    dataPanel.add(zoomBtn);
-                    span = true;
-                } else if (tableModel.getTableMetaData().getLookupColumns().containsKey(metaColumn.getCode())) {
-                    dataPanel.add(label);
-                    dataPanel.add(textField);
-                    span = true;
-                } else {
-                    if (span) {
-                        dataPanel.add(new JLabel(" "), "wrap");
-                    }
-                    dataPanel.add(label);
-                    dataPanel.add(textField, "wrap");
-                    span = false;
-                }
-            }
+        if (fmd.isReadOnly()) {
+            btnCommit.setVisible(false);
+            btnRollback.setVisible(false);
         }
 
         bottomPanel.add(dataPanel);
 
-        buttonsPanel.setLayout(new MigLayout("wrap"));
-        buttonsPanel.add(btnCommit);
-        buttonsPanel.add(btnRollback);
         bottomPanel.add(buttonsPanel, "dock east");
 
         add(bottomPanel, "grow, wrap");
     }
 
     // TODO create separate table class
-    private void initTable(FormMetaData fmd, Map<String, String> nextColumnCodeValues)
+    private void initTable(FormMetaData fmd, MetaTable metaTable, Map<String, String> nextValues)
             throws SQLException {
         JScrollPane scrollPane = new JScrollPane(dataTable);
         add(scrollPane, "grow, wrap");
 
-        MetaTable metaTable = MosquitoSingletone.getInstance()
-                .getMetaTable(fmd.getTableName());
-
-        if (nextColumnCodeValues == null) {
-            tableModel = new TableModel(new TableMetaData(metaTable, fmd.getCondition(),
-                    fmd.getLookupMap(), fmd.getZoomData(), fmd.getDefaultValues()));
+        if (nextValues == null) {
+            tableModel = new TableModel(formData);
         } else {
             List<String> removeColumnCodes = new ArrayList<>();
-            for (String columnCode : nextColumnCodeValues.keySet()) {
-                if (metaTable.getColByTableDotColumnCode(metaTable.getCode() + "." + columnCode) == null)
-                    removeColumnCodes.add(columnCode);
+            for (String columnCode : nextValues.keySet()) {
+                Object metaColumn = metaTable.getColByTableDotColumnCode(metaTable.getCode()
+                        + "." + columnCode);
+                if (metaColumn == null)
+                    removeColumnCodes.add(nextValues.get(columnCode));
             }
-            nextColumnCodeValues.keySet().removeAll(removeColumnCodes);
+            nextValues.keySet().removeAll(removeColumnCodes);
 
-            tableModel = new TableModel(new TableMetaData(metaTable, fmd.getCondition(),
-                    fmd.getLookupMap(), fmd.getZoomData(), fmd.getDefaultValues()), nextColumnCodeValues);
+            tableModel = new TableModel(formData);
         }
 
         dataTable.setModel(tableModel);
         tableModel.open();
+        //adjustColumns();
 
         dataTable.setRowSelectionAllowed(true);
         dataTable.setColumnSelectionAllowed(false);
@@ -230,42 +201,66 @@ public class Form extends JDialog {
                         if (e.getValueIsAdjusting())
                             return;
 
-                        if (Form.this.getDataTable().getSelectedRow() == -1) {
-                            btnDelete.setEnabled(false);
-                            btnNextForm.setEnabled(false);
-                            btnPickup.setEnabled(false);
-                        } else {
+                        if (Form.this.getDataTable().getSelectedRow() != -1) {
                             if (parentForm != null) {
                                 btnPickup.setEnabled(true);
                             }
-                            btnDelete.setEnabled(true);
-                            btnNextForm.setEnabled(!nextData.isEmpty());
+
+                            btnDelete.setEnabled(!formData.isReadOnly());
+                            btnNextForm.setEnabled(!formData.getNextForms().isEmpty());
+
+                            if (!formData.isReadOnly())
+                                setMode(EDIT);
+                            else {
+                                setMode(DEFAULT);
+                            }
+
+                            sync();
+                        } else if (Form.this.getDataTable().getSelectedRow() < 0) {
+                            if (getMode() == EDIT)
+                                setMode(DEFAULT);
                         }
-                        sync();
                     }
                 });
 
+        int i = 0;
         for (String columnCode : fmd.getHideColumns()) {
-            TableColumn tableColumn = dataTable.getColumn(columnCode);
+            int columnIndex = formData.getColumnIndex(columnCode, false);
+            TableColumn tableColumn = dataTable.getColumnModel().getColumn(columnIndex - i++);
             dataTable.removeColumn(tableColumn);
         }
     }
 
-    private void sync() {
-        int index = dataTable.getSelectedRow();
-        if (index < 0) {
-            return;
+    private void adjustColumns() {
+        for (int column = 0; column < dataTable.getColumnCount(); column++) {
+            TableColumn tableColumn = dataTable.getColumnModel().getColumn(column);
+            int preferredWidth = tableColumn.getMinWidth();
+            int maxWidth = tableColumn.getMaxWidth();
+
+            for (int row = 0; row < dataTable.getRowCount(); row++) {
+                TableCellRenderer cellRenderer = dataTable.getCellRenderer(row, column);
+                Component c = dataTable.prepareRenderer(cellRenderer, row, column);
+                int width = c.getPreferredSize().width + dataTable.getIntercellSpacing().width + 15;
+                preferredWidth = Math.max(preferredWidth, width);
+
+                if (preferredWidth >= maxWidth) {
+                    preferredWidth = maxWidth;
+                    break;
+                }
+            }
+
+            tableColumn.setPreferredWidth(preferredWidth);
         }
-        Form.this.setMode(FormModeEnum.EDIT);
+    }
+
+    private void sync() {
         for (Component component : dataPanel.getComponents()) {
             if (component instanceof JTextComponent) {
+                ((JTextComponent) component).setText("");
                 JTextComponent textComponent = (JTextComponent) component;
-                String value = tableModel.getValue(index, textComponent.getName());
+                String value = tableModel.getValue(dataTable.getSelectedRow(), textComponent.getName());
                 textComponent.setText(value);
-                if (tableModel.getTableMetaData().getPrimaryKeyColumns().contains(textComponent.getName())
-                        || tableModel.getTableMetaData().getLookupJoins().containsKey(textComponent.getName())) {
-                    textComponent.setEditable(false);
-                }
+                ((JTextComponent) component).setEditable(formData.isEditable(component.getName()));
             }
         }
     }
@@ -275,7 +270,7 @@ public class Form extends JDialog {
         return this.getTableModel().getValue(selectedRowIndex, columnCode);
     }
 
-    public void removeRow() {
+    public void removeRow() throws SQLException {
         int index = dataTable.getSelectedRow();
         if (index == -1)
             return;
@@ -285,15 +280,10 @@ public class Form extends JDialog {
         if (index == tableModel.getRowCount() - 1)
             newIndex--;
 
-        try {
-            tableModel.deleteRow(index);
+        tableModel.deleteRow(index);
 
-            if (tableModel.getRowCount() > 0)
-                dataTable.setRowSelectionInterval(newIndex, newIndex);
-        } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage(), "Greska",
-                    JOptionPane.ERROR_MESSAGE);
-        }
+        if (tableModel.getRowCount() > 0)
+            dataTable.setRowSelectionInterval(newIndex, newIndex);
     }
 
     public JTable getDataTable() {
@@ -309,6 +299,72 @@ public class Form extends JDialog {
     }
 
     public void setMode(FormModeEnum mode) {
+        switch (mode) {
+            case DEFAULT:
+                btnApplySearch.setVisible(false);
+                btnCommit.setVisible(false);
+                btnRollback.setVisible(false);
+
+                // TODO move to DataPanel
+                for (Component component : dataPanel.getComponents()) {
+                    if (component instanceof JTextComponent) {
+                        ((JTextComponent) component).setText("");
+                        ((JTextComponent) component).setEditable(false);
+                    }
+                }
+
+                break;
+            case ADD:
+                btnApplySearch.setVisible(false);
+                btnCommit.setVisible(true);
+                btnRollback.setVisible(true);
+
+                // TODO move to DataPanel?
+                for (Component component : dataPanel.getComponents()) {
+                    if (component instanceof JTextComponent) {
+                        JTextComponent textComponent = (JTextComponent) component;
+                        String defaultValue = formData.getDefaultValue(component.getName());
+                        String nextValue = formData.getNextValue(component.getName());
+
+                        if (defaultValue != null) {
+                            textComponent.setText(defaultValue);
+                            textComponent.setEditable(false);
+                        } else if (nextValue != null) {
+                            textComponent.setText(nextValue);
+                            textComponent.setEditable(false);
+                        } else if (formData.isInGroup(textComponent.getName(), BASE)) {
+                            textComponent.setText("");
+                            textComponent.setEditable(true);
+                        }
+                    }
+                }
+
+                break;
+            case EDIT:
+                btnApplySearch.setVisible(false);
+                btnCommit.setVisible(true);
+                btnRollback.setVisible(true);
+
+                break;
+            case SEARCH:
+                btnApplySearch.setVisible(true);
+                btnCommit.setVisible(false);
+                btnRollback.setVisible(false);
+
+                // TODO move to DataPanel
+                if (formData.isReadOnly()) {
+                    for (Component component : dataPanel.getComponents()) {
+                        if (component instanceof JTextComponent
+                                && !((JTextComponent) component).isEditable()
+                                && formData.isInGroup(component.getName(), BASE)) {
+                            ((JTextComponent) component).setEditable(true);
+                        }
+                    }
+                }
+
+                break;
+        }
+
         this.statusBar.setMode(mode);
     }
 
@@ -326,14 +382,6 @@ public class Form extends JDialog {
 
     public void setDataPanel(DataPanel dataPanel) {
         this.dataPanel = dataPanel;
-    }
-
-    public List<NextMetaData> getNextData() {
-        return nextData;
-    }
-
-    public void setNextData(List<NextMetaData> nextData) {
-        this.nextData = nextData;
     }
 
     public void setParentForm(Form parentForm) {
@@ -354,6 +402,10 @@ public class Form extends JDialog {
 
     public Form getParentForm() {
         return parentForm;
+    }
+
+    public FormData getFormData() {
+        return formData;
     }
 
     public void onZoomDialogClosed(Map<String, String> results) {

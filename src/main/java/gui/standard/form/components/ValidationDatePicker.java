@@ -8,8 +8,8 @@ public class ValidationDatePicker extends JDateChooser {
 
 	public enum E_VALID_DATES {BEFORE_INCLUDING, BEFORE, AFTER_INCLUDING, AFTER, ALL}
 	
-	public ValidationDatePicker(int nullable, String name, E_VALID_DATES validDates){
-		super(new ValidationDateTextField(validDates, nullable == 0, name));
+	public ValidationDatePicker(int nullable, E_VALID_DATES validDates){
+		super(new ValidationDateTextField(validDates, nullable == 0));
 		// TODO
 //		setLocale(Resources.getLocale());
 	}

@@ -71,9 +71,9 @@ public class ValidationTextField extends JTextField implements IValidationTextFi
 	private String patternKey;
 
 	
-	public ValidationTextField(int nullable, int type, int size, int columns){
+	public ValidationTextField(boolean nullable, int type, int size, int columns){
 		super(columns);
-		required = nullable == 0;
+		required = nullable;
 		onlyDigits = isIntNumericType(type);
 		if (size != -1)
 			maxSize = size;
@@ -95,7 +95,7 @@ public class ValidationTextField extends JTextField implements IValidationTextFi
 		
 	}
 	
-	public ValidationTextField(int nullable, int type, int size, boolean onlyDigits, boolean canStartWithZero, int columns){
+	public ValidationTextField(boolean nullable, int type, int size, boolean onlyDigits, boolean canStartWithZero, int columns){
 		this(nullable, type, size, columns);
 		this.onlyDigits = onlyDigits;
 		if (isIntNumericType(type))
@@ -105,7 +105,7 @@ public class ValidationTextField extends JTextField implements IValidationTextFi
 	}
 
 
-	public ValidationTextField(int nullable, int type, int size,int columns, String pattern, boolean key){
+	public ValidationTextField(boolean nullable, int type, int size,int columns, String pattern, boolean key){
 		this(nullable, type, size, columns);
 		if (!key)
 			this.pattern = Pattern.compile(pattern);

@@ -1,5 +1,6 @@
 package gui.standard.form.misc;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,8 @@ import java.util.Map;
  * Created by dejan on 6/8/2015.
  */
 public class QueryBuilder {
+
+    private Query query = new Query();
 
     private StringBuilder queryBuilder;
     private StringBuilder selectBuilder;
@@ -20,7 +23,7 @@ public class QueryBuilder {
     private boolean where = false;
     private boolean orderBy = false;
 
-    private static final String SELECT = "SELECT ";
+    private static final String SELECT = "SELECT DISTINCT ";
     private static final String FROM = " FROM ";
 
     private static final String JOIN = " JOIN ";
@@ -47,13 +50,13 @@ public class QueryBuilder {
         orderByBuilder = new StringBuilder();
     }
 
-    public QueryBuilder select(Collection<ColumnMetaData> columns) {
+    public QueryBuilder select(Collection<ColumnData> columns) {
         if (!select) {
             selectBuilder.append(SELECT);
             select = true;
         }
 
-        for (ColumnMetaData column : columns) {
+        for (ColumnData column : columns) {
             selectBuilder.append(column.getTableName()).append(DOT).append(column.getCode()).append(COMMA);
         }
 
@@ -76,14 +79,15 @@ public class QueryBuilder {
         return this;
     }
 
-    public QueryBuilder leftOuterJoin(String baseTableName, Collection<Map.Entry<String, TableJoin>> tableJoins) {
-        for (Map.Entry<String, TableJoin> entry : tableJoins) {
+    // TODO
+    public QueryBuilder leftOuterJoin(String baseTableName, List<TableJoin> tableJoins) {
+        for (TableJoin tableJoin : tableJoins) {
             relationBuilder.append(LEFT_OUTER_JOIN)
-                    .append(entry.getValue().getTableName())
+                    .append(tableJoin.getTableName())
                     .append(ON)
-                    .append(baseTableName).append(DOT).append(entry.getKey())
+                    .append(baseTableName).append(DOT).append(tableJoin.getFromColumn())
                     .append(EQUAL)
-                    .append(entry.getValue().getTableName()).append(DOT).append(entry.getValue().getJoinColumn());
+                    .append(tableJoin.getTableName()).append(DOT).append(tableJoin.getToColumn());
         }
 
         return this;
@@ -111,42 +115,49 @@ public class QueryBuilder {
         }
 
         whereBuilder.append(tableName).append(DOT).append(columnName).append(EQUAL_QM);
+        query.getWheres().add(Query.WhereTypesEnum.EQUALS);
 
         return this;
     }
 
     public QueryBuilder where(String tableName, Collection<String> columnNames) {
-        if (!where) {
-            whereBuilder.append(WHERE);
-            where = true;
-        } else {
-            and();
-        }
+        if (columnNames.size() > 0) {
+            if (!where) {
+                whereBuilder.append(WHERE);
+                where = true;
+            } else {
+                and();
+            }
 
-        for (String columnName : columnNames) {
-            whereBuilder.append(tableName).append(DOT).append(columnName).append(EQUAL_QM);
-            and();
-        }
+            for (String columnName : columnNames) {
+                whereBuilder.append(tableName).append(DOT).append(columnName).append(EQUAL_QM);
+                query.getWheres().add(Query.WhereTypesEnum.EQUALS);
+                and();
+            }
 
-        removeLastAnd();
+            removeLastAnd();
+        }
 
         return this;
     }
 
-    public QueryBuilder whereLike(String tableName, Collection<String> columnNames) {
-        if (!where) {
-            whereBuilder.append(WHERE);
-            where = true;
-        } else {
-            and();
-        }
+    public QueryBuilder whereLike(Collection<String> tableDotCodes) {
+        if (tableDotCodes.size() > 0) {
+            if (!where) {
+                whereBuilder.append(WHERE);
+                where = true;
+            } else {
+                and();
+            }
 
-        for (String columnName : columnNames) {
-            whereBuilder.append(tableName).append(DOT).append(columnName).append(LIKE);
-            and();
-        }
+            for (String tableDotCode : tableDotCodes) {
+                whereBuilder.append(tableDotCode).append(LIKE);
+                query.getWheres().add(Query.WhereTypesEnum.LIKE);
+                and();
+            }
 
-        removeLastAnd();
+            removeLastAnd();
+        }
 
         return this;
     }
@@ -172,19 +183,33 @@ public class QueryBuilder {
         return this;
     }
 
-    public String build() {
-        return queryBuilder.append(selectBuilder).append(fromBuilder)
-                .append(relationBuilder).append(whereBuilder).append(orderByBuilder).toString();
+    public QueryBuilder orderBy(String customOrderBy) {
+        if (!orderBy) {
+            orderByBuilder.append(ORDER_BY);
+            orderBy = true;
+        }
+
+        orderByBuilder.append(customOrderBy);
+
+        return this;
+    }
+
+    public Query build() {
+        query.setQuery(queryBuilder.append(selectBuilder).append(fromBuilder)
+                .append(relationBuilder).append(whereBuilder).append(orderByBuilder).toString());
+        return query;
     }
 
     private void removeLastAnd() {
         int lastAndIndex = whereBuilder.lastIndexOf(AND);
-        whereBuilder.replace(lastAndIndex, lastAndIndex + 5, "");
+        if (lastAndIndex != -1)
+            whereBuilder.replace(lastAndIndex, lastAndIndex + 5, "");
     }
 
     private void removeLastComma(StringBuilder sb) {
         int lastCommaIndex = sb.lastIndexOf(COMMA);
-        sb.replace(lastCommaIndex, lastCommaIndex + 2, "");
+        if (lastCommaIndex != -1)
+            sb.replace(lastCommaIndex, lastCommaIndex + 2, "");
     }
 
     @Override
@@ -192,5 +217,39 @@ public class QueryBuilder {
         return queryBuilder.toString();
     }
 
+    public static class Query {
+        private String query;
+        private List<WhereTypesEnum> wheres = new ArrayList<>();
+
+        public Query() {
+        }
+
+        public Query(String query, WhereTypesEnum... wheres) {
+            this.query = query;
+            for (WhereTypesEnum where : wheres) {
+                this.wheres.add(where);
+            }
+        }
+
+        public String getQuery() {
+            return query;
+        }
+
+        public void setQuery(String query) {
+            this.query = query;
+        }
+
+        public List<WhereTypesEnum> getWheres() {
+            return wheres;
+        }
+
+        public void setWheres(List<WhereTypesEnum> wheres) {
+            this.wheres = wheres;
+        }
+
+        public enum WhereTypesEnum {
+            EQUALS, LIKE
+        }
+    }
 }
 

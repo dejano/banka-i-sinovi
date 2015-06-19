@@ -13,7 +13,7 @@ import java.util.Vector;
 public class MosquitoSingletone {
 
     private static final String PDM_FILE_LOCATION = "src/main/resources/";
-//        private static final String FILE_NAME = "videoteka.pdm";
+    //        private static final String FILE_NAME = "videoteka.pdm";
     private static final String FILE_NAME = "banka.pdm";
 
     private static MosquitoSingletone instance;

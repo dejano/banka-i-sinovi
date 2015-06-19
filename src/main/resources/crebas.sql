@@ -1,47 +1,47 @@
 /*==============================================================*/
-/* DBMS name:      Microsoft SQL Server 2008                    */
+/* DBMS code:      Microsoft SQL Server 2008                    */
 /* Created on:     6/3/2015 12:23:52                            */
 /*==============================================================*/
 
 
 if exists (select 1
    from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
-   where r.fkeyid = object_id('FILM') and o.name = 'FK_FILM_ASOCIJACI_ZANR')
+   where r.fkeyid = object_id('FILM') and o.code = 'FK_FILM_ASOCIJACI_ZANR')
 alter table FILM
    drop constraint FK_FILM_ASOCIJACI_ZANR
 go
 
 if exists (select 1
    from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
-   where r.fkeyid = object_id('FILM') and o.name = 'FK_FILM_FILMOVI_V_VIDEOTEK')
+   where r.fkeyid = object_id('FILM') and o.code = 'FK_FILM_FILMOVI_V_VIDEOTEK')
 alter table FILM
    drop constraint FK_FILM_FILMOVI_V_VIDEOTEK
 go
 
 if exists (select 1
    from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
-   where r.fkeyid = object_id('FILM') and o.name = 'FK_FILM_ZEMLJA_PO_ZEMLJA_P')
+   where r.fkeyid = object_id('FILM') and o.code = 'FK_FILM_ZEMLJA_PO_ZEMLJA_P')
 alter table FILM
    drop constraint FK_FILM_ZEMLJA_PO_ZEMLJA_P
 go
 
 if exists (select 1
    from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
-   where r.fkeyid = object_id('KOPIJA') and o.name = 'FK_KOPIJA_KOPIJA_FI_FILM')
+   where r.fkeyid = object_id('KOPIJA') and o.code = 'FK_KOPIJA_KOPIJA_FI_FILM')
 alter table KOPIJA
    drop constraint FK_KOPIJA_KOPIJA_FI_FILM
 go
 
 if exists (select 1
    from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
-   where r.fkeyid = object_id('UCESNICI_FILMA') and o.name = 'FK_UCESNICI_UCESNICI__FILM')
+   where r.fkeyid = object_id('UCESNICI_FILMA') and o.code = 'FK_UCESNICI_UCESNICI__FILM')
 alter table UCESNICI_FILMA
    drop constraint FK_UCESNICI_UCESNICI__FILM
 go
 
 if exists (select 1
    from sys.sysreferences r join sys.sysobjects o on (o.id = r.constid and o.type = 'F')
-   where r.fkeyid = object_id('UCESNICI_FILMA') and o.name = 'FK_UCESNICI_UCESNICI__UCESNIK_')
+   where r.fkeyid = object_id('UCESNICI_FILMA') and o.code = 'FK_UCESNICI_UCESNICI__UCESNIK_')
 alter table UCESNICI_FILMA
    drop constraint FK_UCESNICI_UCESNICI__UCESNIK_
 go
@@ -49,7 +49,7 @@ go
 if exists (select 1
             from  sysindexes
            where  id    = object_id('FILM')
-            and   name  = 'FILMOVI_VIDEOTEKE_FK'
+            and   code  = 'FILMOVI_VIDEOTEKE_FK'
             and   indid > 0
             and   indid < 255)
    drop index FILM.FILMOVI_VIDEOTEKE_FK
@@ -58,7 +58,7 @@ go
 if exists (select 1
             from  sysindexes
            where  id    = object_id('FILM')
-            and   name  = 'ASOCIJACIJA_FILM_ZANR_FK'
+            and   code  = 'ASOCIJACIJA_FILM_ZANR_FK'
             and   indid > 0
             and   indid < 255)
    drop index FILM.ASOCIJACIJA_FILM_ZANR_FK
@@ -67,7 +67,7 @@ go
 if exists (select 1
             from  sysindexes
            where  id    = object_id('FILM')
-            and   name  = 'ZEMLJA_POREKLA_FK'
+            and   code  = 'ZEMLJA_POREKLA_FK'
             and   indid > 0
             and   indid < 255)
    drop index FILM.ZEMLJA_POREKLA_FK
@@ -83,7 +83,7 @@ go
 if exists (select 1
             from  sysindexes
            where  id    = object_id('KOPIJA')
-            and   name  = 'KOPIJA_FILMA_FK'
+            and   code  = 'KOPIJA_FILMA_FK'
             and   indid > 0
             and   indid < 255)
    drop index KOPIJA.KOPIJA_FILMA_FK
@@ -99,7 +99,7 @@ go
 if exists (select 1
             from  sysindexes
            where  id    = object_id('UCESNICI_FILMA')
-            and   name  = 'UCESNICI_FILMA_FK2'
+            and   code  = 'UCESNICI_FILMA_FK2'
             and   indid > 0
             and   indid < 255)
    drop index UCESNICI_FILMA.UCESNICI_FILMA_FK2
@@ -108,7 +108,7 @@ go
 if exists (select 1
             from  sysindexes
            where  id    = object_id('UCESNICI_FILMA')
-            and   name  = 'UCESNICI_FILMA_FK'
+            and   code  = 'UCESNICI_FILMA_FK'
             and   indid > 0
             and   indid < 255)
    drop index UCESNICI_FILMA.UCESNICI_FILMA_FK

@@ -1,12 +1,10 @@
 package gui.standard.form;
 
 import database.DBConnection;
-import gui.standard.Column;
-import gui.standard.SortUtils;
+import gui.standard.ColumnValue;
 import gui.standard.form.misc.*;
 import messages.ErrorMessages;
 import messages.WarningMessages;
-
 
 import javax.swing.table.DefaultTableModel;
 import java.sql.Connection;
@@ -16,74 +14,67 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import static gui.standard.form.misc.FormData.ColumnGroupsEnum.*;
 import static gui.standard.form.misc.ProcedureCallFactory.ProcedureCallEnum.*;
-import static gui.standard.form.misc.TableMetaData.ColumnGroupsEnum.ALL_WITHOUT_LOOKUP;
-import static gui.standard.form.misc.TableMetaData.ColumnGroupsEnum.PRIMARY_KEYS;
 
 public class TableModel extends DefaultTableModel {
 
     private static final long serialVersionUID = 1L;
 
-    private TableMetaData tableMetaData;
-    private Map<String, String> nextColumnCodeValues;
-
+    private FormData formData;
     private TableQueriesBuilder tableQueriesBuilder;
 
-    private TableHelper tableHelper;
+    // TODO move
+    public String[] getDbRowByPks(String[] pkValues) throws SQLException {
+        String[] ret = null;
 
-    public TableModel(TableMetaData tableMetaData) {
-        this.tableMetaData = tableMetaData;
-        this.tableQueriesBuilder = new TableQueriesBuilder(tableMetaData);
-        this.tableHelper = new TableHelper(tableQueriesBuilder, tableMetaData);
+        Map<String, String> columnCodeTypes = formData.getColumnCodeTypes(PRIMARY_KEYS);
+        StatementExecutor executor = new StatementExecutor(columnCodeTypes);
+
+        List<String[]> results = executor.execute(
+                tableQueriesBuilder.getBasicQuery().getWhereByPksQuery().build(),
+                formData.mapValues(PRIMARY_KEYS, pkValues),
+                formData.getColumnCodes(ALL));
+
+        if (!results.isEmpty())
+            ret = results.get(0);
+
+        return ret;
+    }
+
+    public TableModel(FormData formData) {
+        this.formData = formData;
+        this.tableQueriesBuilder = new TableQueriesBuilder(formData);
 
         initColumnNames();
     }
 
-    public TableModel(TableMetaData tableMetaData, Map<String, String> nextColumnCodeValues) {
-        this(tableMetaData);
-
-        if (!nextColumnCodeValues.isEmpty()) {
-            this.nextColumnCodeValues = nextColumnCodeValues;
-        }
-
-        this.tableQueriesBuilder = new TableQueriesBuilder(tableMetaData, this.nextColumnCodeValues);
-    }
-
     private void initColumnNames() {
-        List<String> columnNames = tableMetaData.getColumnNames();
+        List<String> columnNames = formData.getColumnNames();
         @SuppressWarnings("rawtypes")
         Vector vector = new Vector(columnNames.size());
         vector.setSize(columnNames.size());
         setDataVector(vector, new Vector(columnNames));
-
-        setColumnIdentifiers(tableMetaData.getColumnCodes().toArray());
+//        setColumnIdentifiers(formData.getColumnCodes(ALL).toArray());
     }
 
     public String getValue(int rowIndex, String columnCode) {
-        return (String) getValueAt(rowIndex, tableMetaData.getColumnIndex(columnCode));
+        return (String) getValueAt(rowIndex, formData.getColumnIndex(columnCode, false));
     }
 
     public void open() throws SQLException {
-        if (nextColumnCodeValues == null) {
-            fillData(tableQueriesBuilder.getBasicQuery().getOrderByQuery().build());
-        } else {
-            fillData(tableQueriesBuilder.getBasicQuery()
-                    .getNextWhereQuery()
-                    .getOrderByQuery()
-                    .build());
-        }
+        fillData(tableQueriesBuilder.getBasicQuery()
+                .getNextWhereQuery()
+                .getOrderByQuery()
+                .build());
     }
 
-    private void fillData(String query) throws SQLException {
+    private void fillData(QueryBuilder.Query query) throws SQLException {
         setRowCount(0);
 
         List<String[]> results;
-        StatementExecutor executor = new StatementExecutor(tableMetaData.getColumnCodeTypes(ALL_WITHOUT_LOOKUP));
-        if (nextColumnCodeValues != null) {
-            results = executor.execute(query, tableMetaData.getColumns().keySet(), nextColumnCodeValues);
-        } else {
-            results = executor.execute(query, tableMetaData.getColumns().keySet());
-        }
+        StatementExecutor executor = new StatementExecutor(formData.getColumnCodeTypes(BASE));
+        results = executor.execute(query, formData.getNextValues(), formData.getColumnCodes(ALL));
 
         for (String[] rowValues : results) {
             addRow(rowValues);
@@ -92,47 +83,52 @@ public class TableModel extends DefaultTableModel {
         fireTableDataChanged();
     }
 
-    public int insertRow(String[] values) throws SQLException {
+    public int insertRow(String[] newValues) throws SQLException {
         int retVal;
 
-        checkRowInsert(values);
+        checkRowInsert(newValues);
 
         StatementExecutor executor = new StatementExecutor(
-                tableMetaData.getColumnCodeTypes(ALL_WITHOUT_LOOKUP));
+                formData.getColumnCodeTypes(BASE));
 
-        executor.executeProcedure(ProcedureCallFactory.getProcedureCall(tableMetaData.getTableName(),
-                CREATE_PROCEDURE_CALL), tableHelper.getColumnList(tableMetaData.getBaseColumns().keySet(), values));
+        executor.executeProcedure(ProcedureCallFactory.getProcedureCall(formData,
+                CREATE_PROCEDURE_CALL), formData.mapValues(BASE, newValues));
 
-        retVal = sortedInsert(values);
+        String[] valuesWithLookup = getDbRowByPks(formData.extractPkValues(newValues, true));
+        retVal = sortedInsert(valuesWithLookup);
+
         fireTableDataChanged();
 
         return retVal;
     }
 
-    public int updateRow(int rowIndex, String[] values) throws SQLException {
+    public int updateRow(int rowIndex, String[] newValues) throws SQLException {
         int retVal;
 
-        checkRowUpdate(rowIndex, values);
+        checkRowUpdate(rowIndex, newValues);
 
-        String[] pkValues = tableHelper.getPkValues(getRowValues(rowIndex));
+        String[] pkValues = formData.extractPkValues(getRowValues(rowIndex), true);
 
-        List<Column> columnValues = new ArrayList<>();
+        List<ColumnValue> columnValueValues = new ArrayList<>();
         int i = 0;
-        for (String pkColumnCode : tableMetaData.getPrimaryKeyColumns()) {
-            columnValues.add(new Column(pkColumnCode, pkValues[i++]));
+        for (String pkColumnCode : formData.getColumnCodes(PRIMARY_KEYS)) {
+            columnValueValues.add(new ColumnValue(pkColumnCode, pkValues[i++]));
         }
 
-        for (String columnCode : tableMetaData.getBaseColumns().keySet()) {
-            int colIndex = tableMetaData.getColumnIndex(columnCode);
-            columnValues.add(new Column(columnCode, values[colIndex]));
+        for (String columnCode : formData.getColumnCodes(BASE)) {
+            int colIndex = formData.getColumnIndex(columnCode, true);
+            columnValueValues.add(new ColumnValue(columnCode, newValues[colIndex]));
         }
 
-        StatementExecutor executor = new StatementExecutor(tableMetaData.getColumnCodeTypes(ALL_WITHOUT_LOOKUP));
-        executor.executeProcedure(ProcedureCallFactory.getProcedureCall(tableMetaData.getTableName(),
-                UPDATE_PROCEDURE_CALL), columnValues);
+        StatementExecutor executor = new StatementExecutor(formData.getColumnCodeTypes(BASE));
+        executor.executeProcedure(ProcedureCallFactory.getProcedureCall(formData,
+                UPDATE_PROCEDURE_CALL), columnValueValues);
 
         removeRow(rowIndex);
-        retVal = sortedInsert(values);
+
+        String[] valuesWithLookup = getDbRowByPks(formData.extractPkValues(newValues, true));
+        retVal = sortedInsert(valuesWithLookup);
+
         fireTableDataChanged();
 
         return retVal;
@@ -164,8 +160,8 @@ public class TableModel extends DefaultTableModel {
     private int comparePkValues(String[] values, int rowIndex) {
         int ret = 0;
 
-        for (String columnCode : tableMetaData.getPrimaryKeyColumns()) {
-            int columnIndex = tableMetaData.getColumnIndex(columnCode);
+        for (String columnCode : formData.getColumnCodes(PRIMARY_KEYS)) {
+            int columnIndex = formData.getColumnIndex(columnCode, false);
 
             String value = values[columnIndex];
             String tableValue = (String) getValueAt(rowIndex, columnIndex);
@@ -192,27 +188,26 @@ public class TableModel extends DefaultTableModel {
     public void deleteRow(int index) throws SQLException {
         checkRowDelete(index);
 
-        String[] pkValues = tableHelper.getPkValues(getRowValues(index));
-        List<Column> columnValues =
-                tableHelper.getColumnList(tableMetaData.getPrimaryKeyColumns(), pkValues);
+        String[] pkValues = formData.extractPkValues(getRowValues(index), false);
+        List<ColumnValue> columnValueValues = formData.mapValues(PRIMARY_KEYS, pkValues);
 
-        StatementExecutor executor = new StatementExecutor(tableMetaData.getColumnCodeTypes(PRIMARY_KEYS));
-        executor.executeProcedure(ProcedureCallFactory.getProcedureCall(tableMetaData.getTableName(),
-                DELETE_PROCEDURE_CALL), columnValues);
+        StatementExecutor executor = new StatementExecutor(formData.getColumnCodeTypes(PRIMARY_KEYS));
+        executor.executeProcedure(ProcedureCallFactory.getProcedureCall(formData,
+                DELETE_PROCEDURE_CALL), columnValueValues);
 
         removeRow(index);
         fireTableDataChanged();
     }
 
-    public int search(String[] values) throws SQLException {
+    public int search(String[] searchValues) throws SQLException {
         int retVal = 0;
 
-        StatementExecutor executor = new StatementExecutor(tableMetaData.getColumnCodeTypes(ALL_WITHOUT_LOOKUP));
-        executor.setFuzzy(true);
-        List<String[]> results = executor.execute(
-                tableQueriesBuilder.getBasicQuery().getWhereLikeQuery().getOrderByQuery().build(),
-                tableMetaData.getColumns().keySet(),
-                tableHelper.createMap(tableMetaData.getColumns().keySet(), values));
+        StatementExecutor executor = new StatementExecutor(formData.getColumnCodeTypes(BASE));
+        List<ColumnValue> values = new ArrayList<>(formData.getNextValues());
+        values.addAll(formData.mapValues(ALL, searchValues));
+        List<String[]> results = executor.execute(tableQueriesBuilder.getBasicQuery().getNextWhereQuery()
+                        .getWhereLikeQuery().getOrderByQuery().build(),
+                values, formData.getColumnCodes(ALL));
 
         if (results.isEmpty())
             throw new SQLException(WarningMessages.SEARCH_NO_RESULTS, "",
@@ -232,7 +227,7 @@ public class TableModel extends DefaultTableModel {
         DBConnection.getConnection()
                 .setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
 
-        String[] result = tableHelper.getDbRowByPks(tableHelper.getPkValues1(values));
+        String[] result = getDbRowByPks(formData.extractPkValues(values, true));
 
         DBConnection.getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 
@@ -247,12 +242,12 @@ public class TableModel extends DefaultTableModel {
         DBConnection.getConnection()
                 .setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
 
-        String[] oldPkValues = tableHelper.getPkValues(getRowValues(index));
-        String[] result = tableHelper.getDbRowByPks(oldPkValues);
+        String[] oldPkValues = formData.extractPkValues(getRowValues(index), true);
+        String[] result = getDbRowByPks(oldPkValues);
 
         String errorMessage = checkUpdatedDeleted(index, result, getRowValues(index));
 
-        String[] newPkValues = tableHelper.getPkValues(newValues);
+        String[] newPkValues = formData.extractPkValues(newValues, true);
 
         boolean newKey = false;
         int i = 0;
@@ -279,7 +274,7 @@ public class TableModel extends DefaultTableModel {
                 .setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
 
         String[] values = getRowValues(index);
-        String[] result = tableHelper.getDbRowByPks(tableHelper.getPkValues(values));
+        String[] result = getDbRowByPks(formData.extractPkValues(values, false));
 
         DBConnection.getConnection().setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 
@@ -332,8 +327,8 @@ public class TableModel extends DefaultTableModel {
         return (String[]) rowValues.toArray(new String[rowValues.size()]);
     }
 
-    public Map<String, String> getNextColumnCodeValues() {
-        return nextColumnCodeValues;
+    public List<ColumnValue> getNextColumnCodeValues() {
+        return formData.getNextValues();
     }
 
     @Override
@@ -341,11 +336,7 @@ public class TableModel extends DefaultTableModel {
         return false;
     }
 
-    public TableMetaData getTableMetaData() {
-        return tableMetaData;
-    }
-
-    public TableHelper getTableHelper() {
-        return tableHelper;
+    public FormData getFormData() {
+        return formData;
     }
 }

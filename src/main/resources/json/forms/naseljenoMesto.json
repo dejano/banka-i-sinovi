@@ -1,0 +1,17 @@
+{
+  "title": "Naseljena mesta",
+  "tableName": "NASELJENO_MESTO",
+  "lookupMap": {
+    "DR_SIFRA": {
+      "table": "DRZAVA",
+      "from": "DR_SIFRA",
+      "to": "DR_SIFRA",
+      "columns": [
+        {
+          "code": "DR_NAZIV",
+          "name": "Naziv države"
+        }
+      ]
+    }
+  }
+}

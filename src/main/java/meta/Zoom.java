@@ -14,9 +14,6 @@ public class Zoom {
         this.columns = columns;
     }
 
-    public Zoom() {
-    }
-
     public String getTableCode() {
         return tableCode;
     }

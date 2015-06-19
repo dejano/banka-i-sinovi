@@ -5,12 +5,45 @@
       "text": "Podaci",
       "menuItems": [
         {
-          "text": "Klijenti",
-          "formName": "klijent"
+          "text": "Fizička lica",
+          "formName": "fizickoLice"
         },
         {
           "text": "Pravna lica",
           "formName": "pravnoLice"
+        },
+        {
+          "text": "Računi",
+          "formName": "racun"
+        },
+        {
+          "text": "Države",
+          "formName": "drzava"
+        },
+        {
+          "text": "Naseljena mesta",
+          "formName": "naseljenoMesto"
+        },
+        {
+          "text": "Kursne liste",
+          "formName": "kursnaLista"
+        }
+      ]
+    },
+    {
+      "text": "Videoteka",
+      "menuItems": [
+        {
+          "text": "Film",
+          "formName": "film"
+        },
+        {
+          "text": "Videoteka",
+          "formName": "videoteka"
+        },
+        {
+          "text": "Kopija",
+          "formName": "kopija"
         }
       ]
     },
@@ -22,6 +55,9 @@
         },
         {
           "actionName": "ImportPaymentOrderAction"
+        },
+        {
+          "actionName": "SwitchBankAction"
         }
       ]
     }

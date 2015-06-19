@@ -4,7 +4,7 @@
     <groupId>rs.ac.uns.ftn</groupId>
     <artifactId>PoslovnaInformatika</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>PoslovnaInformatika</name>
+    <code>PoslovnaInformatika</code>
 
     <dependencies>
         <dependency>
@@ -31,6 +31,11 @@
             <groupId>com.toedter</groupId>
             <artifactId>jcalendar</artifactId>
             <version>1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.collections</groupId>
+            <artifactId>google-collections</artifactId>
+            <version>1.0</version>
         </dependency>
         <dependency>
             <groupId>rs.mgifos</groupId>

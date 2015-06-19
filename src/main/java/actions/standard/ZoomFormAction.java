@@ -1,7 +1,8 @@
 package actions.standard;
 
 import gui.standard.form.Form;
-import gui.standard.form.misc.ColumnMetaData;
+import gui.standard.form.misc.ColumnData;
+import gui.standard.form.misc.FormData;
 import meta.FormCreator;
 
 import javax.swing.*;
@@ -10,6 +11,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static gui.standard.form.misc.FormData.ColumnGroupsEnum.LOOKUP;
 
 public class ZoomFormAction extends AbstractAction {
 
@@ -27,13 +30,13 @@ public class ZoomFormAction extends AbstractAction {
         try {
             Form zoomForm = FormCreator.getStandardForm(event.getActionCommand());
 
-            List<String> zoomColumns = standardForm.getTableModel().getTableMetaData().getZoomColumns(event.getActionCommand());
+            List<String> zoomColumns = standardForm.getTableModel().getFormData().getZoomColumns(event.getActionCommand());
             Map<String, String> zoomData = new HashMap<>();
             for (String zoomColumn : zoomColumns) {
                 zoomData.put(zoomColumn, null);
             }
 
-            Map<String, ColumnMetaData> lookupColumns = standardForm.getTableModel().getTableMetaData().getLookupColumns(event.getActionCommand());
+            Map<String, ColumnData> lookupColumns = standardForm.getFormData().getColumns(LOOKUP);
             for (String s : lookupColumns.keySet()) {
                 zoomData.put(s, null);
             }

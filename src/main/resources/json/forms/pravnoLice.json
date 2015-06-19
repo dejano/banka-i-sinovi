@@ -1,24 +1,56 @@
 {
   "title": "Pravna lica",
-  "tableName": "PRAVNA_LICA",
-  "condition": "PRAVNA_LICA.PR_BANKA=0",
+  "tableName": "KLIJENT",
+  "condition": "KLIJENT.PRAVNO_LICE_=1",
+  "mapToAppData": {
+    "pib_banke": "PRA_PR_PIB"
+  },
+  "customProcedures": {
+    "create": "c_PRAVNO_LICE"
+  },
   "hideColumns": [
-    "PR_BANKA",
-    "SWIFT"
+    "PRA_PR_PIB",
+    "PRAVNO_LICE_"
+  ],
+  "hideInputs": [
+    "PRAVNO_LICE_",
+    "PRA_PR_PIB"
   ],
   "defaultValues": {
-    "PR_BANKA": "0",
-    "SWIFT": ""
+    "PRAVNO_LICE_": "1"
   },
-  "nextData": [
-    {
-      "formName": "klijent",
-      "columnCodeMapping": [
+  "lookupMap": {
+    "PR_PIB": {
+      "table": "PRAVNA_LICA",
+      "from": "PR_PIB",
+      "to": "PR_PIB",
+      "lookupInsert": true,
+      "columns": [
         {
-          "from": "PR_PIB",
-          "to": "PR_PIB"
+          "code": "PR_NAZIV",
+          "name": "Naziv"
+        },
+        {
+          "code": "PR_ADRESA",
+          "name": "Adresa"
+        },
+        {
+          "code": "PR_EMAIL",
+          "name": "Email"
+        },
+        {
+          "code": "PR_WEB",
+          "name": "Web"
+        },
+        {
+          "code": "PR_TELEFON",
+          "name": "Telefon"
+        },
+        {
+          "code": "PR_FAX",
+          "name": "Fax"
         }
       ]
     }
-  ]
+  }
 }
