@@ -1,25 +1,34 @@
 package meta;
 
+import app.AppData;
+import gui.standard.form.Form;
+import gui.standard.form.misc.ProcedureCallFactory;
+import gui.standard.form.misc.ProcedureCallFactory.ProcedureCallEnum;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static gui.standard.form.Form.FormType.DEFAULT;
+import static gui.standard.form.Form.FormType.READ_ONLY;
+
 public class FormMetaData {
 
     private String title;
-    private boolean readOnly;
+    private Form.FormType formType = DEFAULT;
     private String tableName;
     private String condition;
     private String customOrderBy;
+    private List<String> additionalActions = new ArrayList<>();
     private List<String> hideColumns = new ArrayList<>();
     private List<String> hideInputs = new ArrayList<>();
-    private Map<String, String> customProcedures = new HashMap<>();
+    private Map<ProcedureCallEnum, String> customProcedures = new HashMap<>();
     private Map<String, String> defaultValues = new HashMap<>();
     private Map<String, LookupMetaData> lookupMap = new HashMap<>();
     private List<Zoom> zoomData = new ArrayList<>();
     private List<NextMetaData> nextData = new ArrayList<>();
-    private Map<String, String> mapToAppData = new HashMap<>();
+    private Map<AppData.AppDataEnum, String> mapToAppData = new HashMap<>();
 
     public String getTitle() {
         return title;
@@ -29,12 +38,12 @@ public class FormMetaData {
         this.title = title;
     }
 
-    public boolean isReadOnly() {
-        return readOnly;
+    public Form.FormType getFormType() {
+        return formType;
     }
 
-    public void setReadOnly(boolean readOnly) {
-        this.readOnly = readOnly;
+    public void setFormType(Form.FormType formType) {
+        this.formType = formType;
     }
 
     public String getTableName() {
@@ -93,11 +102,11 @@ public class FormMetaData {
         this.nextData = nextData;
     }
 
-    public Map<String, String> getMapToAppData() {
+    public Map<AppData.AppDataEnum, String> getMapToAppData() {
         return mapToAppData;
     }
 
-    public void setMapToAppData(Map<String, String> mapToAppData) {
+    public void setMapToAppData(Map<AppData.AppDataEnum, String> mapToAppData) {
         this.mapToAppData = mapToAppData;
     }
 
@@ -109,11 +118,11 @@ public class FormMetaData {
         this.hideInputs = hideInputs;
     }
 
-    public Map<String, String> getCustomProcedures() {
+    public Map<ProcedureCallEnum, String> getCustomProcedures() {
         return customProcedures;
     }
 
-    public void setCustomProcedures(Map<String, String> customProcedures) {
+    public void setCustomProcedures(Map<ProcedureCallEnum, String> customProcedures) {
         this.customProcedures = customProcedures;
     }
 
@@ -123,5 +132,17 @@ public class FormMetaData {
 
     public void setCustomOrderBy(String customOrderBy) {
         this.customOrderBy = customOrderBy;
+    }
+
+    public boolean isReadOnly() {
+        return formType == READ_ONLY;
+    }
+
+    public List<String> getAdditionalActions() {
+        return additionalActions;
+    }
+
+    public void setAdditionalActions(List<String> additionalActions) {
+        this.additionalActions = additionalActions;
     }
 }

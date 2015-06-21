@@ -1,7 +1,9 @@
 package meta;
 
 import gui.standard.ColumnMapping;
+import gui.standard.form.misc.ColumnCodeName;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Zoom {
@@ -12,6 +14,16 @@ public class Zoom {
     public Zoom(String tableCode, List<ColumnMapping> columns) {
         this.tableCode = tableCode;
         this.columns = columns;
+    }
+
+    public List<String> getToColumnCodes() {
+        List<String> ret = new ArrayList<>();
+
+        for (ColumnMapping column : columns) {
+            ret.add(column.getTo());
+        }
+
+        return ret;
     }
 
     public String getTableCode() {

@@ -2,8 +2,11 @@
   "title": "Fizička lica",
   "tableName": "KLIJENT",
   "condition": "KLIJENT.PRAVNO_LICE_=0",
+  "defaultValues": {
+    "PRAVNO_LICE_": "0"
+  },
   "mapToAppData":{
-    "pib_banke":"PRA_PR_PIB"
+    "pibBanke":"PRA_PR_PIB"
   },
   "hideColumns": [
     "PR_PIB",
@@ -15,9 +18,6 @@
     "PRA_PR_PIB",
     "PRAVNO_LICE_"
   ],
-  "defaultValues": {
-    "PRAVNO_LICE_": "0"
-  },
   "nextData": [
     {
       "formName": "racun",

@@ -2,7 +2,7 @@
   "title": "Kurs u valuti",
   "tableName": "KURS_U_VALUTI",
   "mapToAppData": {
-    "pib_banke": "PR_PIB"
+    "pibBanke": "PR_PIB"
   },
   "hideColumns": [
     "PR_PIB",

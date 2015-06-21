@@ -1,6 +1,7 @@
 package actions;
 
 import app.App;
+import app.AppData;
 import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
 import database.DBConnection;
 import gui.MainFrame;
@@ -28,6 +29,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
+import static app.AppData.AppDataEnum.PIB_BANKE;
 import static gui.standard.form.misc.ProcedureCallFactory.ProcedureCallEnum.CREATE_PROCEDURE_CALL;
 
 /**
@@ -42,9 +44,6 @@ public class ExportClearingAction extends AbstractAction {
     private SuperMetaTable orderMetaTable;
     private SuperMetaTable orderItemMetaTable;
     private SuperMetaTable paymentOrderMetaTable;
-
-    // TODO replace
-    private static final String bankPib = "LGCXHK";
 
     public ExportClearingAction() {
         super(TITLE);
@@ -97,7 +96,7 @@ public class ExportClearingAction extends AbstractAction {
         List<PaymentOrder> ret = null;
         try {
             CallableStatement cs = DBConnection.getConnection().prepareCall("{ call getUnprocessedPayments (?)}");
-            cs.setString(1, bankPib);
+            cs.setString(1, AppData.getInstance().getValue(PIB_BANKE));
             ResultSet resultSet = cs.executeQuery();
 
             if (!resultSet.isBeforeFirst()) {

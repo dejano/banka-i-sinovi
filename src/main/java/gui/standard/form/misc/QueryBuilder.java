@@ -50,6 +50,21 @@ public class QueryBuilder {
         orderByBuilder = new StringBuilder();
     }
 
+    public QueryBuilder select(String tableName, List<String> columns) {
+        if (!select) {
+            selectBuilder.append(SELECT);
+            select = true;
+        }
+
+        for (String columnCode : columns) {
+            selectBuilder.append(tableName).append(DOT).append(columnCode).append(COMMA);
+        }
+
+        removeLastComma(selectBuilder);
+
+        return this;
+    }
+
     public QueryBuilder select(Collection<ColumnData> columns) {
         if (!select) {
             selectBuilder.append(SELECT);

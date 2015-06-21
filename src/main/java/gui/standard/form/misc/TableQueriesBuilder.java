@@ -1,5 +1,8 @@
 package gui.standard.form.misc;
 
+import meta.LookupMetaData;
+import meta.Zoom;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,6 +57,14 @@ public class TableQueriesBuilder {
             queryBuilder.orderBy(formData.getCustomOrderBy());
         else
             queryBuilder.orderBy(formData.getTableName(), formData.getColumnCodes(PRIMARY_KEYS));
+
+        return this;
+    }
+
+    public TableQueriesBuilder getLookupsQuery(Zoom zoom, LookupMetaData lookup) {
+        queryBuilder.select(lookup.getTable(), lookup.getColumnCodes())
+                .from(lookup.getTable())
+                .where(zoom.getTableCode(), zoom.getToColumnCodes());
 
         return this;
     }

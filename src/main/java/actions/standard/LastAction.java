@@ -23,7 +23,6 @@ public class LastAction extends AbstractAction {
 		int rowCount = form.getTableModel().getRowCount();
 
 		if (rowCount > 0)
-			form.getDataTable().setRowSelectionInterval(rowCount - 1,
-					rowCount - 1);
+			form.selectRow(rowCount - 1);
 	}
 }

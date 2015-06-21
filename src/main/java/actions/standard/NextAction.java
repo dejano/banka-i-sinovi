@@ -27,11 +27,9 @@ public class NextAction extends AbstractAction {
 		
 		if (rowCount > 0) {
 			if (br < rowCount - 1) {
-				form.getDataTable()
-						.setRowSelectionInterval(br + 1, br + 1);
+				form.selectRow(br + 1);
 			} else {
-				form.getDataTable()
-						.setRowSelectionInterval(0, 0);
+				form.selectRow(0);
 			}
 		}
 	}

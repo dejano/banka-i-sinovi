@@ -2,6 +2,18 @@
   "title": "Banka i Sinovi",
   "menus": [
     {
+      "text": "Banka",
+      "menuItems": [
+        {
+          "text": "Podaci o banci",
+          "formName": "banka"
+        },
+        {
+          "actionName": "SwitchBankAction"
+        }
+      ]
+    },
+    {
       "text": "Podaci",
       "menuItems": [
         {
@@ -31,23 +43,6 @@
       ]
     },
     {
-      "text": "Videoteka",
-      "menuItems": [
-        {
-          "text": "Film",
-          "formName": "film"
-        },
-        {
-          "text": "Videoteka",
-          "formName": "videoteka"
-        },
-        {
-          "text": "Kopija",
-          "formName": "kopija"
-        }
-      ]
-    },
-    {
       "text": "Medjubankarski promet",
       "menuItems": [
         {
@@ -55,23 +50,8 @@
         },
         {
           "actionName": "ImportPaymentOrderAction"
-        },
-        {
-          "actionName": "SwitchBankAction"
         }
       ]
     }
-//    },
-//    {
-//      "text": "Izveštaji",
-//      "menuItems": [
-//        {
-//          "actionName": "BankStatementAction"
-//        },
-//        {
-//          "actionName": "BankAccountsAction"
-//        }
-//      ]
-//    }
   ]
 }

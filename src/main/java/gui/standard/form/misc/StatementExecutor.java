@@ -21,6 +21,8 @@ import static java.sql.Types.VARCHAR;
  */
 public class StatementExecutor {
 
+    public static final String STRING = "java.lang.String";
+
     private Map<String, String> columnCodeTypes;
 
     public StatementExecutor() {

@@ -2,12 +2,16 @@ package gui.standard.form.misc;
 
 import gui.standard.ColumnMapping;
 import gui.standard.ColumnValue;
+import gui.standard.form.Form;
+import gui.standard.form.misc.ProcedureCallFactory.ProcedureCallEnum;
 import meta.*;
 import rs.mgifos.mosquito.model.MetaColumn;
 import rs.mgifos.mosquito.model.MetaTable;
 
 import java.util.*;
 
+import static gui.standard.form.Form.FormType.PANEL;
+import static gui.standard.form.Form.FormType.READ_ONLY;
 import static gui.standard.form.misc.FormData.ColumnGroupsEnum.BASE;
 import static gui.standard.form.misc.FormData.ColumnGroupsEnum.NEXT;
 import static gui.standard.form.misc.FormData.ColumnGroupsEnum.PRIMARY_KEYS;
@@ -18,17 +22,17 @@ import static gui.standard.form.misc.FormData.ColumnGroupsEnum.PRIMARY_KEYS;
 public class FormData {
 
     private String tableName;
-    private boolean readOnly;
+    private Form.FormType formType;
     private String condition;
     private String customOrderBy;
-    private Map<String, String> customProcedures = new HashMap<>();
+    private Map<ProcedureCallEnum, String> customProcedures = new HashMap<>();
     private List<TableJoin> lookupJoins = new ArrayList<>();
     private List<NextMetaData> nextForms;
     private Map<String, ColumnData> columns = new LinkedHashMap<>();
     private List<Zoom> zoomData;
 
     public FormData(MetaTable metaTable, FormMetaData fmd, Map<String, String> nextColumnCodeValues) {
-        this.readOnly = fmd.isReadOnly();
+        this.formType = fmd.getFormType();
         this.zoomData = fmd.getZoomData();
         this.tableName = metaTable.getCode();
         this.condition = fmd.getCondition();
@@ -299,8 +303,12 @@ public class FormData {
         return null;
     }
 
-    public boolean isReadOnly() {
-        return readOnly;
+    public Form.FormType getFormType() {
+        return formType;
+    }
+
+    public void setFormType(Form.FormType formType) {
+        this.formType = formType;
     }
 
     public List<Zoom> getZoomData() {
@@ -335,11 +343,11 @@ public class FormData {
         this.nextForms = nextForms;
     }
 
-    public Map<String, String> getCustomProcedures() {
+    public Map<ProcedureCallEnum, String> getCustomProcedures() {
         return customProcedures;
     }
 
-    public void setCustomProcedures(Map<String, String> customProcedures) {
+    public void setCustomProcedures(Map<ProcedureCallEnum, String> customProcedures) {
         this.customProcedures = customProcedures;
     }
 
@@ -349,6 +357,14 @@ public class FormData {
 
     public void setCustomOrderBy(String customOrderBy) {
         this.customOrderBy = customOrderBy;
+    }
+
+    public boolean isReadOnly() {
+        return formType == READ_ONLY;
+    }
+
+    public boolean isPanelForm() {
+        return formType == PANEL;
     }
 
     public enum ColumnGroupsEnum {

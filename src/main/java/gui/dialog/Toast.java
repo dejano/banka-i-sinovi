@@ -14,24 +14,25 @@ public class Toast {
         dialog.getContentPane().setLayout(new BorderLayout(0, 0));
 
         JPanel panel = new JPanel();
-        panel.setBackground(Color.GRAY);
-        panel.setBorder(new LineBorder(Color.LIGHT_GRAY, 2));
-//        panel.setBackground(Color.decode("#2572EB"));
-//        panel.setBorder(new LineBorder(Color.decode("#56C5FF"), 2));
+//        panel.setBackground(Color.GRAY);
+//        panel.setBorder(new LineBorder(Color.LIGHT_GRAY, 2));
+        panel.setBackground(Color.decode("#2572EB"));
+        panel.setBorder(new LineBorder(Color.decode("#2572EB"), 2));
         dialog.getContentPane().add(panel, BorderLayout.CENTER);
 
         JLabel toastLabel = new JLabel("");
         toastLabel.setText(message);
-        toastLabel.setFont(new Font("Dialog", Font.BOLD, 12));
+        toastLabel.setFont(new Font("Dialog", Font.BOLD, 15));
         toastLabel.setForeground(Color.WHITE);
 
-        dialog.setBounds(100, 100, toastLabel.getPreferredSize().width + 20, 31);
+        dialog.setBounds(100, 100, toastLabel.getPreferredSize().width + 20,
+                toastLabel.getPreferredSize().height + 16);
 
         dialog.setAlwaysOnTop(true);
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         int y = dim.height / 2 - dialog.getSize().height / 2;
-        int half = y / 2;
-        dialog.setLocation(dim.width / 2 - dialog.getSize().width / 2, y + half);
+        int offset = y * 2 / 3;
+        dialog.setLocation(dim.width / 2 - dialog.getSize().width / 2, y + offset);
         panel.add(toastLabel);
         dialog.setVisible(true);
         parent.requestFocus();

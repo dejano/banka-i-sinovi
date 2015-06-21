@@ -5,6 +5,7 @@ import gui.standard.form.StatusBar.FormModeEnum;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.sql.SQLException;
 
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
@@ -26,7 +27,12 @@ public class AddAction extends AbstractAction {
     }
 
     public void actionPerformed(ActionEvent e) {
-        form.setMode(FormModeEnum.ADD);
-        form.getDataTable().clearSelection();
+        try {
+            form.getTableModel().open();
+            form.setMode(FormModeEnum.ADD);
+            form.getDataTable().clearSelection();
+        } catch (SQLException e1) {
+            e1.printStackTrace(); // TODO handle error
+        }
     }
 }

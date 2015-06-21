@@ -43,38 +43,7 @@ public class ApplySearchAction extends AbstractAction {
     }
 
     private void search() throws SQLException {
-        java.util.List<String> values = getValues();
+        java.util.List<String> values = form.getDataPanel().getValues();
         form.getTableModel().search(values.toArray(new String[values.size()]));
-    }
-
-    // TODO move to DataPanel?
-    private java.util.List<String> getValues() {
-        java.util.List<String> ret = new ArrayList<>();
-
-        for (String columnCode : form.getTableModel().getFormData().getColumnCodes(ALL)) {
-            boolean setValue = false;
-
-            for (Component component : form.getDataPanel().getComponents()) {
-                String componentName = component.getName();
-                if (componentName != null && componentName.equals(columnCode)) {
-                    // TODO handle other inputs
-                    if (component instanceof JTextComponent) {
-                        ret.add(((JTextComponent) component).getText());
-                        setValue = true;
-                        break;
-                    }
-                }
-            }
-
-            if(!setValue) {
-                String defaultValue =form.getFormData().getDefaultValue(columnCode);
-                if(defaultValue != null)
-                    ret.add(defaultValue);
-                else
-                    ret.add(form.getFormData().getNextValue(columnCode));
-            }
-        }
-
-        return ret;
     }
 }

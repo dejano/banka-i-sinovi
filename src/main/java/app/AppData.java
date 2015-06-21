@@ -1,5 +1,6 @@
 package app;
 
+import com.google.gson.annotations.SerializedName;
 import gui.standard.ColumnValue;
 
 import java.util.HashMap;
@@ -11,7 +12,13 @@ import java.util.Map;
  */
 public class AppData {
 
-    private Map<String, String> values = new HashMap<>();
+    public enum AppDataEnum {
+        @SerializedName("pibBanke")
+        PIB_BANKE
+    }
+
+    private Map<AppDataEnum, String> values = new HashMap<>();
+
 
     private static AppData instance;
 
@@ -22,18 +29,18 @@ public class AppData {
         return instance;
     }
 
-    public void put(String key, String value) {
+    public void put(AppDataEnum key, String value) {
         values.put(key, value);
     }
 
-    public String getValue(String key){
+    public String getValue(AppDataEnum key){
         return values.get(key);
     }
 
-    public Map<String, String> getValues(Map<String, String> mapToAppData) {
+    public Map<String, String> getValues(Map<AppDataEnum, String> mapToAppData) {
         Map<String, String> ret = new HashMap<>();
 
-        for (String key : mapToAppData.keySet()) {
+        for (AppDataEnum key : mapToAppData.keySet()) {
             String value = values.get(key);
             System.out.println(mapToAppData.get(key) + "  " + value);
             ret.put(mapToAppData.get(key), value);

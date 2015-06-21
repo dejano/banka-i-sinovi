@@ -2,6 +2,7 @@ package meta;
 
 import gui.standard.form.misc.ColumnCodeName;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class LookupMetaData {
@@ -13,6 +14,16 @@ public class LookupMetaData {
     private List<ColumnCodeName> columns;
 
     public LookupMetaData() {
+    }
+
+    public List<String> getColumnCodes() {
+        List<String> ret = new ArrayList<>();
+
+        for (ColumnCodeName column : columns) {
+            ret.add(column.getCode());
+        }
+
+        return ret;
     }
 
     public List<ColumnCodeName> getColumns() {

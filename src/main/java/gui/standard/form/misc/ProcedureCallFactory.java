@@ -1,5 +1,6 @@
 package gui.standard.form.misc;
 
+import com.google.gson.annotations.SerializedName;
 import meta.MosquitoSingletone;
 import rs.mgifos.mosquito.model.MetaColumn;
 import rs.mgifos.mosquito.model.MetaTable;
@@ -40,7 +41,7 @@ public class ProcedureCallFactory {
 
         switch (type) {
             case CREATE_PROCEDURE_CALL:
-                ret = formData.getCustomProcedures().get("create");
+                ret = formData.getCustomProcedures().get(CREATE_PROCEDURE_CALL);
                 if (ret == null)
                     ret = getCreateProcedureCall(columnCount, pkColumnCount,
                             formData.getTableName(), tableCpc);
@@ -49,21 +50,21 @@ public class ProcedureCallFactory {
 
                 break;
             case UPDATE_PROCEDURE_CALL:
-                ret = formData.getCustomProcedures().get("update");
+                ret = formData.getCustomProcedures().get(UPDATE_PROCEDURE_CALL);
                 if (ret == null)
                     ret = getUpdateProcedureCall(columnCount, pkColumnCount,
                             formData.getTableName(), tableCpc);
                 else
-                    ret += addParams(columnCount);
+                    ret += addParams(pkColumnCount + columnCount);
 
                 break;
             case DELETE_PROCEDURE_CALL:
-                ret = formData.getCustomProcedures().get("delete");
+                ret = formData.getCustomProcedures().get(DELETE_PROCEDURE_CALL);
                 if (ret == null)
                     ret = getDeleteProcedureCall(columnCount, pkColumnCount,
                             formData.getTableName(), tableCpc);
                 else
-                    ret += addParams(columnCount);
+                    ret += addParams(pkColumnCount);
 
                 break;
         }
@@ -144,8 +145,6 @@ public class ProcedureCallFactory {
 
         sb.append(addParams(columnsCount));
 
-        int lastCommaIndex = sb.lastIndexOf(", ");
-        sb.delete(lastCommaIndex, lastCommaIndex + 2);
         sb.append("}");
 
         return sb.toString();
@@ -158,14 +157,26 @@ public class ProcedureCallFactory {
         for (int i = 0; i < columnCount; i++) {
             sb.append("?, ");
         }
+        removeLastComma(sb);
         sb.append(" )");
 
         return sb.toString();
     }
 
+    private static void removeLastComma(StringBuilder sb) {
+        int lastCommaIndex = sb.lastIndexOf(", ");
+        if (lastCommaIndex != -1)
+            sb.replace(lastCommaIndex, lastCommaIndex + 2, "");
+    }
+
     public enum ProcedureCallEnum {
+        @SerializedName("create")
         CREATE_PROCEDURE_CALL,
+
+        @SerializedName("update")
         UPDATE_PROCEDURE_CALL,
+
+        @SerializedName("delete")
         DELETE_PROCEDURE_CALL
     }
 

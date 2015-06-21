@@ -1,0 +1,16 @@
+{
+  "title": "Banka",
+  "tableName": "PRAVNA_LICA",
+  "formType": "panel",
+  "condition": "PRAVNA_LICA.PR_BANKA=1",
+  "defaultValues": {
+    "PR_BANKA": "1"
+  },
+  "mapToAppData": {
+    "pibBanke": "PR_PIB"
+  },
+  "hideInputs": [
+    "PR_PIB",
+    "PR_BANKA"
+  ]
+}

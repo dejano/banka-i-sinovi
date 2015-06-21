@@ -3,10 +3,11 @@
   "tableName": "KLIJENT",
   "condition": "KLIJENT.PRAVNO_LICE_=1",
   "mapToAppData": {
-    "pib_banke": "PRA_PR_PIB"
+    "pibBanke": "PRA_PR_PIB"
   },
   "customProcedures": {
-    "create": "c_PRAVNO_LICE"
+    "create": "c_PRAVNO_LICE",
+    "update": "u_PRAVNO_LICE"
   },
   "hideColumns": [
     "PRA_PR_PIB",

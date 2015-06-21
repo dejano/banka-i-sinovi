@@ -1,14 +1,23 @@
 {
   "title": "Računi",
   "tableName": "RACUNI_PRAVNIH_LICA",
-  "mapToAppData": {
-    "pib_banke": "PR_PIB"
+  "condition": "RACUNI_PRAVNIH_LICA.BAR_VAZI=1",
+  "defaultValues": {
+    "BAR_VAZI": "1"
   },
+  "mapToAppData": {
+    "pibBanke": "PR_PIB"
+  },
+  "additionalActions":[
+    "CancelAccountAction"
+  ],
   "hideColumns": [
-    "PR_PIB"
+    "PR_PIB",
+    "BAR_VAZI"
   ],
   "hideInputs": [
-    "PR_PIB"
+    "PR_PIB",
+    "BAR_VAZI"
   ],
   "nextData": [
     {

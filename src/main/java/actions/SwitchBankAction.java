@@ -22,8 +22,8 @@ public class SwitchBankAction extends AbstractAction {
     @Override
     public void actionPerformed(ActionEvent e) {
         String bankPib = BankSelectionDialog.show();
-        if(bankPib != null && !AppData.getInstance().getValue("pib_banke").equals(bankPib)) {
-            AppData.getInstance().put("pib_banke", bankPib);
+        if(bankPib != null && !AppData.getInstance().getValue(AppData.AppDataEnum.PIB_BANKE).equals(bankPib)) {
+            AppData.getInstance().put(AppData.AppDataEnum.PIB_BANKE, bankPib);
             Toast.show(App.getMainFrame(), "Uspešna selekcija banke.");
         }
     }

@@ -31,13 +31,9 @@ public class RefreshAction extends AbstractAction {
 		try {
 			form.setMode(StatusBar.FormModeEnum.DEFAULT);
 			form.getTableModel().open();
-			for (Component component : form.getDataPanel().getComponents()) {
-				if (component instanceof JTextComponent) {
-					if (form.getFormData().isInGroup(component.getName(), BASE)) {
-						((JTextComponent) component).setEditable(true);
-					}
-					((JTextComponent) component).setText("");
-				}
+			form.getDataPanel().setBlankEditableInputs();
+			for (String columnCode : form.getFormData().getColumnCodes(BASE)) {
+				form.getDataPanel().setBlankEditableInput(columnCode);
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();

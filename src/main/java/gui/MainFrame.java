@@ -17,13 +17,14 @@ import java.util.List;
  */
 public class MainFrame extends JFrame {
 
-    private static final String ACTIONS_PACKAGE = "actions.";
+    public static final String ACTIONS_PACKAGE = "actions.";
 
     public MainFrame(MainFrameMetaData mfmt) {
         this.setTitle(mfmt.getTitle());
         this.setLayout(new BorderLayout());
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+//        this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+        // TODO enable
 //        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 //        this.addWindowListener(new WindowAdapter() {
 //            @Override
@@ -52,7 +53,7 @@ public class MainFrame extends JFrame {
             for (MetaMenuItem metaMenuItem : metaMenu.getMenuItems()) {
                 JMenuItem menuItem = null;
 
-                if(metaMenuItem.getFormName() != null) {
+                if (metaMenuItem.getFormName() != null) {
                     OpenFormAction formAction = new OpenFormAction(metaMenuItem.getText(), metaMenuItem.getFormName());
                     menuItem = new JMenuItem(formAction);
                 } else {
@@ -77,7 +78,7 @@ public class MainFrame extends JFrame {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         Point middle = new Point(screenSize.width / 2, screenSize.height / 2);
 
-        this.setSize(screenSize.width * 2 / 3, screenSize.height * 2 / 3);
+        this.setSize(screenSize.width * 4 / 5, screenSize.height * 4 / 5);
 
         this.setLocation(new Point(middle.x - (getWidth() / 2), middle.y - (getHeight() / 2)));
     }

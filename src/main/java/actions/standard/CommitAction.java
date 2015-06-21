@@ -30,7 +30,7 @@ public class CommitAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(!validate()){
+        if (!validate()) {
             System.out.println("INVALID");
         } else {
             FormModeEnum mode = form.getMode();
@@ -50,8 +50,11 @@ public class CommitAction extends AbstractAction {
                         break;
                 }
 
-                if (newRowIndex != -1)
+                if (newRowIndex != -1) {
                     form.getDataTable().setRowSelectionInterval(newRowIndex, newRowIndex);
+                    form.getDataTable().scrollRectToVisible(new Rectangle(form.getDataTable().getCellRect(newRowIndex,
+                            0, true)));
+                }
 
             } catch (SQLException exception) {
                 if (exception.getErrorCode() == ErrorMessages.CUSTOM_CODE) {
@@ -65,54 +68,24 @@ public class CommitAction extends AbstractAction {
     }
 
     private int add() throws SQLException {
-        java.util.List<String> values = getValues();
+        java.util.List<String> values = form.getDataPanel().getValues();
         return form.getTableModel().insertRow(values.toArray(new String[values.size()]));
     }
 
     private int update() throws SQLException {
-        java.util.List<String> values = getValues();
+        java.util.List<String> values = form.getDataPanel().getValues();
 
         return form.getTableModel().updateRow(form.getDataTable().getSelectedRow(),
                 values.toArray(new String[values.size()]));
     }
 
-    private boolean validate(){
+    private boolean validate() {
         boolean ret = true;
 
         for (Component component : form.getDataPanel().getComponents()) {
             if (component instanceof IValidationTextField) {
                 IValidationTextField validationTextField = (IValidationTextField) component;
                 ret &= validationTextField.isEditValid();
-            }
-        }
-
-        return ret;
-    }
-
-    // TODO move to DataPanel?
-    private java.util.List<String> getValues(){
-        java.util.List<String> ret = new ArrayList<>();
-
-        for (String columnCode : form.getTableModel().getFormData().getColumnCodes(BASE)) {
-            boolean setValue = false;
-
-            for (Component component : form.getDataPanel().getComponents()) {
-                String componentName = component.getName();
-                if (componentName != null && componentName.equals(columnCode)) {
-                    if (component instanceof JTextComponent) {
-                        ret.add(((JTextComponent) component).getText());
-                        // TODO handle other inputs
-                        setValue = true;
-                    }
-                }
-            }
-
-            if(!setValue) {
-                String defaultValue =form.getFormData().getDefaultValue(columnCode);
-                if(defaultValue != null)
-                    ret.add(defaultValue);
-                else
-                    ret.add(form.getFormData().getNextValue(columnCode));
             }
         }
 

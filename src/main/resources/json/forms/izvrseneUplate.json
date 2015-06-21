@@ -1,7 +1,7 @@
 {
   "title": "Izvršene uplate",
   "tableName": "ANALITIKA_IZVODA",
-  "readOnly": true,
+  "formType": "readOnly",
   "condition": "ANALITIKA_IZVODA.ASI_STATUS='P'", // TODO change to I
   "hideColumns": [
     "PR_PIB",

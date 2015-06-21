@@ -3,7 +3,7 @@
   "tableName": "KURSNA_LISTA",
   "customOrderBy": "KURSNA_LISTA.KL_DATUM desc",
   "mapToAppData": {
-    "pib_banke": "PR_PIB"
+    "pibBanke": "PR_PIB"
   },
   "hideColumns": [
     "PR_PIB"

@@ -22,6 +22,6 @@ public class FirstAction extends AbstractAction {
 	public void actionPerformed(ActionEvent arg0) {
 		int rowCount = form.getTableModel().getRowCount();
 		if (rowCount > 0)
-			form.getDataTable().setRowSelectionInterval(0, 0);
+			form.selectRow(0);
 	}
 }

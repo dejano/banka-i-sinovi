@@ -24,17 +24,5 @@ public class SearchAction extends AbstractAction {
 
     public void actionPerformed(ActionEvent e) {
         form.setMode(StatusBar.FormModeEnum.SEARCH);
-
-        // TODO move to DataPanel?
-        for (Component component : form.getDataPanel().getComponents()) {
-            if (component instanceof JTextComponent) {
-                if (form.getFormData().isInGroup(component.getName(), ALL)) {
-                    ((JTextComponent) component).setEditable(true);
-                }
-                ((JTextComponent) component).setText("");
-            }
-        }
-
-        // TODO move to button next to commit and rollback
     }
 }

@@ -2,9 +2,9 @@ package gui.standard.form;
 
 import actions.standard.*;
 import app.AppData;
+import com.google.gson.annotations.SerializedName;
+import gui.MainFrame;
 import gui.standard.form.StatusBar.FormModeEnum;
-import gui.standard.form.components.ComponentCreator;
-import gui.standard.form.misc.ColumnData;
 import gui.standard.form.misc.FormData;
 import meta.FormMetaData;
 import meta.MosquitoSingletone;
@@ -18,6 +18,8 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,12 +34,24 @@ public class Form extends JDialog {
 
     private static final long serialVersionUID = 1L;
 
+    public enum FormType {
+        @SerializedName("default")
+        DEFAULT,
+
+        @SerializedName("panel")
+        PANEL,
+
+        @SerializedName("readOnly")
+        READ_ONLY
+    }
+
     private JButton btnCommit;
     private JButton btnRollback;
     private JButton btnApplySearch;
     private JButton btnDelete;
     private JButton btnNextForm;
     private JButton btnPickup;
+    private List<JButton> additionalButtons = new ArrayList<>();
 
     private Form parentForm;
     private JTable dataTable = new JTable();
@@ -54,12 +68,10 @@ public class Form extends JDialog {
     }
 
     public Form(FormMetaData fmd, Map<String, String> nextColumnCodeValues) throws SQLException {
-        setLayout(new MigLayout("fill"));
-        setModal(true);
-        setTitle(fmd.getTitle());
-        Rectangle bounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
-        this.setBounds(bounds);
-        setResizable(false);
+        this.setLayout(new MigLayout("fill"));
+        this.setModal(true);
+        this.setTitle(fmd.getTitle());
+        this.setResizable(false);
 
         MetaTable metaTable = MosquitoSingletone.getInstance()
                 .getMetaTable(fmd.getTableName());
@@ -70,17 +82,37 @@ public class Form extends JDialog {
         nextColumnCodeValues.putAll(AppData.getInstance().getValues(fmd.getMapToAppData()));
         this.formData = new FormData(metaTable, fmd, nextColumnCodeValues);
 
-        initCenterOnScreen();
-        initTable(fmd, metaTable, nextColumnCodeValues);
-        initGui(fmd);
-        initToolbar(fmd);
-        initStatusBar();
+        this.initTable(fmd, metaTable, nextColumnCodeValues);
+        this.initGui(fmd);
+        this.initStatusBar();
+
+        if (fmd.getFormType() != FormType.PANEL)
+            this.initToolbar(fmd);
+        else
+            this.initPanelForm();
+
+        this.initWindow(fmd);
     }
 
-    private void initCenterOnScreen() {
+    private void initPanelForm() {
+        this.dataTable.setRowSelectionInterval(0, 0);
+        this.setMode(EDIT);
+    }
+
+    private void initWindow(FormMetaData fmd) {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        Point newLocation = new Point(screenSize.width / 2 - (getWidth() / 2), 0);
-        setLocation(newLocation);
+        Point newLocation;
+
+        if (fmd.getFormType() != FormType.PANEL) {
+            this.setSize(screenSize.width * 3 / 4, screenSize.height * 3 / 4);
+        } else {
+            this.pack();
+        }
+
+        newLocation = new Point(screenSize.width / 2 - (getWidth() / 2),
+                screenSize.height / 2 - (getHeight() / 2));
+
+        this.setLocation(newLocation);
     }
 
     private void initToolbar(FormMetaData fmd) {
@@ -155,23 +187,46 @@ public class Form extends JDialog {
         btnApplySearch.setVisible(false);
         buttonsPanel.add(btnApplySearch);
 
+        for (String actionName : fmd.getAdditionalActions()) {
+            try {
+                Class<?> clazz = Class.forName(MainFrame.ACTIONS_PACKAGE + actionName);
+                Constructor<?> ctor = clazz.getConstructor(Form.class);
+
+                JButton button = new JButton((Action) ctor.newInstance(this));
+
+                additionalButtons.add(button);
+                buttonsPanel.add(button);
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        }
+
         if (fmd.isReadOnly()) {
             btnCommit.setVisible(false);
             btnRollback.setVisible(false);
         }
 
         bottomPanel.add(dataPanel);
-
         bottomPanel.add(buttonsPanel, "dock east");
 
-        add(bottomPanel, "grow, wrap");
+        add(bottomPanel, "grow");
     }
 
     // TODO create separate table class
     private void initTable(FormMetaData fmd, MetaTable metaTable, Map<String, String> nextValues)
             throws SQLException {
-        JScrollPane scrollPane = new JScrollPane(dataTable);
-        add(scrollPane, "grow, wrap");
+        if (fmd.getFormType() != FormType.PANEL) {
+            JScrollPane scrollPane = new JScrollPane(dataTable);
+            add(scrollPane, "grow, wrap");
+        }
 
         if (nextValues == null) {
             tableModel = new TableModel(formData);
@@ -206,8 +261,10 @@ public class Form extends JDialog {
                                 btnPickup.setEnabled(true);
                             }
 
-                            btnDelete.setEnabled(!formData.isReadOnly());
-                            btnNextForm.setEnabled(!formData.getNextForms().isEmpty());
+                            if (!formData.isPanelForm()) {
+                                btnDelete.setEnabled(!formData.isReadOnly());
+                                btnNextForm.setEnabled(!formData.getNextForms().isEmpty());
+                            }
 
                             if (!formData.isReadOnly())
                                 setMode(EDIT);
@@ -253,15 +310,17 @@ public class Form extends JDialog {
         }
     }
 
+    public void selectRow(int rowIndex) {
+        dataTable.setRowSelectionInterval(rowIndex, rowIndex);
+        dataTable.scrollRectToVisible(new Rectangle(dataTable.getCellRect(rowIndex, 0, true)));
+    }
+
     private void sync() {
-        for (Component component : dataPanel.getComponents()) {
-            if (component instanceof JTextComponent) {
-                ((JTextComponent) component).setText("");
-                JTextComponent textComponent = (JTextComponent) component;
-                String value = tableModel.getValue(dataTable.getSelectedRow(), textComponent.getName());
-                textComponent.setText(value);
-                ((JTextComponent) component).setEditable(formData.isEditable(component.getName()));
-            }
+        for (String columnCode : dataPanel.getInputs().keySet()) {
+            String value = tableModel.getValue(dataTable.getSelectedRow(), columnCode);
+            boolean editable = !formData.isReadOnly() && formData.isEditable(columnCode);
+
+            dataPanel.setValue(columnCode, value, editable);
         }
     }
 
@@ -304,38 +363,31 @@ public class Form extends JDialog {
                 btnApplySearch.setVisible(false);
                 btnCommit.setVisible(false);
                 btnRollback.setVisible(false);
-
-                // TODO move to DataPanel
-                for (Component component : dataPanel.getComponents()) {
-                    if (component instanceof JTextComponent) {
-                        ((JTextComponent) component).setText("");
-                        ((JTextComponent) component).setEditable(false);
-                    }
+                for (JButton button : additionalButtons) {
+                    button.setVisible(false);
                 }
+
+                dataPanel.clearDisableInputs();
 
                 break;
             case ADD:
                 btnApplySearch.setVisible(false);
                 btnCommit.setVisible(true);
                 btnRollback.setVisible(true);
+                for (JButton button : additionalButtons) {
+                    button.setVisible(false);
+                }
 
-                // TODO move to DataPanel?
-                for (Component component : dataPanel.getComponents()) {
-                    if (component instanceof JTextComponent) {
-                        JTextComponent textComponent = (JTextComponent) component;
-                        String defaultValue = formData.getDefaultValue(component.getName());
-                        String nextValue = formData.getNextValue(component.getName());
+                for (String columnCode : dataPanel.getInputs().keySet()) {
+                    String value = formData.getDefaultValue(columnCode);
 
-                        if (defaultValue != null) {
-                            textComponent.setText(defaultValue);
-                            textComponent.setEditable(false);
-                        } else if (nextValue != null) {
-                            textComponent.setText(nextValue);
-                            textComponent.setEditable(false);
-                        } else if (formData.isInGroup(textComponent.getName(), BASE)) {
-                            textComponent.setText("");
-                            textComponent.setEditable(true);
-                        }
+                    if (value == null)
+                        value = formData.getNextValue(columnCode);
+
+                    if (value != null) {
+                        dataPanel.setValue(columnCode, value, false);
+                    } else if (formData.isInGroup(columnCode, BASE)) {
+                        dataPanel.setBlankEditableInput(columnCode);
                     }
                 }
 
@@ -344,6 +396,9 @@ public class Form extends JDialog {
                 btnApplySearch.setVisible(false);
                 btnCommit.setVisible(true);
                 btnRollback.setVisible(true);
+                for (JButton button : additionalButtons) {
+                    button.setVisible(true);
+                }
 
                 break;
             case SEARCH:
@@ -351,16 +406,7 @@ public class Form extends JDialog {
                 btnCommit.setVisible(false);
                 btnRollback.setVisible(false);
 
-                // TODO move to DataPanel
-                if (formData.isReadOnly()) {
-                    for (Component component : dataPanel.getComponents()) {
-                        if (component instanceof JTextComponent
-                                && !((JTextComponent) component).isEditable()
-                                && formData.isInGroup(component.getName(), BASE)) {
-                            ((JTextComponent) component).setEditable(true);
-                        }
-                    }
-                }
+                dataPanel.setBlankEditableInputs();
 
                 break;
         }
