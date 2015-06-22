@@ -5,6 +5,7 @@ import gui.standard.ColumnValue;
 import gui.standard.form.misc.*;
 import messages.ErrorMessages;
 import messages.WarningMessages;
+import util.ValueMapper;
 
 import javax.swing.table.DefaultTableModel;
 import java.sql.Connection;
@@ -16,6 +17,8 @@ import java.util.Vector;
 
 import static gui.standard.form.misc.FormData.ColumnGroupsEnum.*;
 import static gui.standard.form.misc.ProcedureCallFactory.ProcedureCallEnum.*;
+import static gui.standard.form.misc.StatementExecutor.BOOLEAN;
+import static gui.standard.form.misc.StatementExecutor.DATE;
 
 public class TableModel extends DefaultTableModel {
 
@@ -77,7 +80,7 @@ public class TableModel extends DefaultTableModel {
         results = executor.execute(query, formData.getNextValues(), formData.getColumnCodes(ALL));
 
         for (String[] rowValues : results) {
-            addRow(rowValues);
+            addRow(transformValues(rowValues));
         }
 
         fireTableDataChanged();
@@ -152,9 +155,29 @@ public class TableModel extends DefaultTableModel {
                 break;
         }
 
-        insertRow(left, values);
+        insertRow(left, transformValues(values));
 
         return left;
+    }
+
+    private String[] transformValues(String[] values) {
+        String[] ret = new String[values.length];
+
+        List<ColumnData> columns = formData.getColumns(ALL);
+
+        for (int i = 0; i < values.length; i++) {
+            ColumnData columnData = columns.get(i);
+
+            if (columnData.isType(BOOLEAN)) {
+                ret[i] = ValueMapper.mapBoolean(values[i]);
+            } else if (columnData.isType(DATE)) {
+                ret[i] = ValueMapper.mapDate(values[i]);
+            } else {
+                ret[i] = values[i];
+            }
+        }
+
+        return ret;
     }
 
     private int comparePkValues(String[] values, int rowIndex) {
@@ -215,7 +238,7 @@ public class TableModel extends DefaultTableModel {
 
         this.setRowCount(0);
         for (String[] rowValues : results) {
-            addRow(rowValues);
+            addRow(transformValues(rowValues));
         }
 
         fireTableDataChanged();
@@ -245,7 +268,7 @@ public class TableModel extends DefaultTableModel {
         String[] oldPkValues = formData.extractPkValues(getRowValues(index), true);
         String[] result = getDbRowByPks(oldPkValues);
 
-        String errorMessage = checkUpdatedDeleted(index, result, getRowValues(index));
+        String errorMessage = checkUpdatedDeleted(index, transformValues(result), getRowValues(index));
 
         String[] newPkValues = formData.extractPkValues(newValues, true);
 
@@ -280,7 +303,7 @@ public class TableModel extends DefaultTableModel {
 
         String errorMessage = null;
         if (result != null)
-            errorMessage = checkUpdatedDeleted(index, result, values);
+            errorMessage = checkUpdatedDeleted(index, transformValues(result), values);
 
         if (errorMessage != null) {
             DBConnection.getConnection().commit();

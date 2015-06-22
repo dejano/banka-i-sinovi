@@ -379,7 +379,10 @@ public class Form extends JDialog {
                 }
 
                 for (String columnCode : dataPanel.getInputs().keySet()) {
-                    String value = formData.getDefaultValue(columnCode);
+                    String value = formData.getDefaultNewValue(columnCode);
+
+                    if (value == null)
+                        value = formData.getDefaultValue(columnCode);
 
                     if (value == null)
                         value = formData.getNextValue(columnCode);

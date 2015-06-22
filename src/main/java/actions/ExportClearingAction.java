@@ -164,7 +164,7 @@ public class ExportClearingAction extends AbstractAction {
         }
 
         for (List<PaymentOrder> pos : paymentOrdersByBank.values()) {
-            // TODO get bank details, cache in map
+            // TODO get bank details, cache in mapBoolean
 
             ret.add(createMt102(pos, null, null));
         }

@@ -2,7 +2,6 @@ package actions.standard;
 
 import gui.standard.form.Form;
 import gui.standard.form.misc.ColumnData;
-import gui.standard.form.misc.FormData;
 import meta.FormCreator;
 
 import javax.swing.*;
@@ -36,7 +35,7 @@ public class ZoomFormAction extends AbstractAction {
                 zoomData.put(zoomColumn, null);
             }
 
-            Map<String, ColumnData> lookupColumns = standardForm.getFormData().getColumns(LOOKUP);
+            Map<String, ColumnData> lookupColumns = standardForm.getFormData().getColumnsMap(LOOKUP);
             for (String s : lookupColumns.keySet()) {
                 zoomData.put(s, null);
             }

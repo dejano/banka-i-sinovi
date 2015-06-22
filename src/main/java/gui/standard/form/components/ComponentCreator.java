@@ -5,14 +5,16 @@ import gui.standard.form.misc.ColumnData;
 import javax.swing.*;
 import java.sql.Types;
 
+import static gui.standard.form.components.ValidationDatePicker.E_VALID_DATES.ALL;
+
 /**
  * Created by Nikola on 17.6.2015..
  */
 public class ComponentCreator {
 
     // TODO min size
-    public static JTextField getComponent(ColumnData columnData) {
-        JTextField component = null;
+    public static JComponent getComponent(ColumnData columnData) {
+        JComponent component = null;
         String className = columnData.getClassName();
 
         switch (className) {
@@ -32,16 +34,12 @@ public class ComponentCreator {
 
                 break;
             case "java.lang.Boolean":
-                component = new JTextField();
+                component = new JCheckBox();
                 break;
             case "java.sql.Date":
-                component = new ValidationDateTextField(ValidationDatePicker.E_VALID_DATES.ALL,
-                        columnData.isMandatory());
+                component = new ValidationDatePicker(columnData.isMandatory()?0:1, ALL);
+//                component = new ValidationDateTextField(ALL, columnData.isMandatory());
                 break;
-        }
-
-        if(component == null){
-            System.out.println();
         }
 
         return component;

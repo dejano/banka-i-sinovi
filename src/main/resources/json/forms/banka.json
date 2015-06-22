@@ -2,7 +2,7 @@
   "title": "Banka",
   "tableName": "PRAVNA_LICA",
   "formType": "panel",
-  "condition": "PRAVNA_LICA.PR_BANKA=1",
+  "customWhere": "PRAVNA_LICA.PR_BANKA=1",
   "defaultValues": {
     "PR_BANKA": "1"
   },

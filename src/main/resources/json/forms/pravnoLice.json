@@ -1,7 +1,7 @@
 {
   "title": "Pravna lica",
   "tableName": "KLIJENT",
-  "condition": "KLIJENT.PRAVNO_LICE_=1",
+  "customWhere": "KLIJENT.PRAVNO_LICE_=1",
   "mapToAppData": {
     "pibBanke": "PRA_PR_PIB"
   },

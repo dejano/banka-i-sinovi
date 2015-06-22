@@ -20,13 +20,14 @@ public class ColumnData {
     private boolean mandatory;
     private String nextValue;
     private String defaultValue;
+    private String defaultNewValue;
     private boolean lookup;
     private boolean hiddenColumn;
     private boolean hiddenInput;
+    private boolean nonEditable;
     private boolean lookupInsert;
 
-    public ColumnData(MetaColumn metaColumn, int index, int baseIndex,
-                      boolean lookup, boolean hiddenColumn, boolean hiddenInput, boolean lookupInsert) {
+    public ColumnData(MetaColumn metaColumn, int index, int baseIndex) {
         System.out.println(metaColumn.getCode() + " " + metaColumn.getJClassName()
                 + " " + metaColumn.getLength()+ " " + metaColumn.getPrecision());
 
@@ -39,10 +40,6 @@ public class ColumnData {
         this.length = metaColumn.getLength();
         this.precision = metaColumn.getPrecision();
         this.mandatory = metaColumn.isMandatory();
-        this.lookup = lookup;
-        this.hiddenColumn = hiddenColumn;
-        this.hiddenInput = hiddenInput;
-        this.lookupInsert = lookupInsert;
         if (!lookup) {
             this.primaryKey = metaColumn.isPartOfPK();
             this.foreignKey = metaColumn.isPartOfFK();
@@ -189,5 +186,25 @@ public class ColumnData {
 
     public void setHiddenInput(boolean hiddenInput) {
         this.hiddenInput = hiddenInput;
+    }
+
+    public String getDefaultNewValue() {
+        return defaultNewValue;
+    }
+
+    public void setDefaultNewValue(String defaultNewValue) {
+        this.defaultNewValue = defaultNewValue;
+    }
+
+    public boolean isType(String type) {
+        return className.equals(type);
+    }
+
+    public boolean isNonEditable() {
+        return nonEditable;
+    }
+
+    public void setNonEditable(boolean nonEditable) {
+        this.nonEditable = nonEditable;
     }
 }

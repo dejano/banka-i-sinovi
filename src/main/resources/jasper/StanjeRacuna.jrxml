@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="StanjeRacuna" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="2589ba57-a8ce-4983-b85a-f804b3517f1f">
+	<property name="ireport.zoom" value="1.5"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<parameter name="pib" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[SELECT
+     PRAVNA_LICA."PR_PIB" AS PRAVNA_LICA_PR_PIB,
+     PRAVNA_LICA."PR_NAZIV" AS PRAVNA_LICA_PR_NAZIV,
+     RACUNI_PRAVNIH_LICA."BAR_RACUN" AS RACUNI_PRAVNIH_LICA_BAR_RACUN,
+     DNEVNO_STANJE_RACUNA."DSR_DATUM" AS DNEVNO_STANJE_RACUNA_DSR_DATUM,
+     DNEVNO_STANJE_RACUNA."DSR_PRETHODNO" AS DNEVNO_STANJE_RACUNA_DSR_PRETHODNO,
+     DNEVNO_STANJE_RACUNA."DSR_NOVOSTANJE" AS DNEVNO_STANJE_RACUNA_DSR_NOVOSTANJE,
+     RACUNI_PRAVNIH_LICA."PR_PIB" AS RACUNI_PRAVNIH_LICA_PR_PIB
+FROM
+     "dbo"."PRAVNA_LICA" PRAVNA_LICA INNER JOIN "dbo"."RACUNI_PRAVNIH_LICA" RACUNI_PRAVNIH_LICA ON PRAVNA_LICA."PR_PIB" = RACUNI_PRAVNIH_LICA."PR_PIB"
+     INNER JOIN "dbo"."DNEVNO_STANJE_RACUNA" DNEVNO_STANJE_RACUNA ON RACUNI_PRAVNIH_LICA."BAR_RACUN" = DNEVNO_STANJE_RACUNA."BAR_RACUN"
+WHERE
+     DNEVNO_STANJE_RACUNA.DSR_DATUM = ( SELECT MAX(dbo.DNEVNO_STANJE_RACUNA.DSR_DATUM) FROM "dbo"."DNEVNO_STANJE_RACUNA" WHERE DNEVNO_STANJE_RACUNA.BAR_RACUN = RACUNI_PRAVNIH_LICA.BAR_RACUN )
+ AND RACUNI_PRAVNIH_LICA.PR_PIB = $P{pib}]]>
+	</queryString>
+	<field name="PRAVNA_LICA_PR_PIB" class="java.lang.String"/>
+	<field name="PRAVNA_LICA_PR_NAZIV" class="java.lang.String"/>
+	<field name="RACUNI_PRAVNIH_LICA_BAR_RACUN" class="java.lang.String"/>
+	<field name="DNEVNO_STANJE_RACUNA_DSR_DATUM" class="java.sql.Timestamp"/>
+	<field name="DNEVNO_STANJE_RACUNA_DSR_PRETHODNO" class="java.math.BigDecimal"/>
+	<field name="DNEVNO_STANJE_RACUNA_DSR_NOVOSTANJE" class="java.math.BigDecimal"/>
+	<field name="RACUNI_PRAVNIH_LICA_PR_PIB" class="java.lang.String"/>
+	<pageHeader>
+		<band height="140" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="45" height="20" uuid="0f75b1e1-e59b-40dc-9352-b3fb124249b1"/>
+				<text><![CDATA[Datum:]]></text>
+			</staticText>
+			<textField pattern="dd/MM/yyyy">
+				<reportElement x="45" y="0" width="90" height="20" uuid="45822633-d5d9-42e1-8b0b-19a70f811967"/>
+				<textFieldExpression><![CDATA[new java.util.Date()]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="479" y="0" width="45" height="20" uuid="c034456b-a5ba-4866-87c0-1e6ce476fc50"/>
+				<text><![CDATA[Strana:]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="524" y="0" width="31" height="20" uuid="4fb4c46f-002c-47f7-b1d7-48ea47c9661f"/>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement x="119" y="25" width="360" height="73" uuid="759c131f-8a44-4223-99c1-4a999cccddd7"/>
+				<textElement textAlignment="Center">
+					<font size="26"/>
+				</textElement>
+				<text><![CDATA[Spisak racuna sa stanjem zadate banke]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="0" y="119" width="94" height="20" uuid="cc739113-f8f4-4df6-a772-37fed69a7715"/>
+				<text><![CDATA[Broj racuna]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="119" y="119" width="80" height="20" uuid="5b45b069-e569-4879-a84e-0c2ddddc52f3"/>
+				<text><![CDATA[Datum]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="236" y="119" width="67" height="20" uuid="cea488fa-cef6-4918-8796-969315c2ad7e"/>
+				<text><![CDATA[Stanje]]></text>
+			</staticText>
+		</band>
+	</pageHeader>
+	<detail>
+		<band height="53" splitType="Stretch">
+			<line>
+				<reportElement x="0" y="44" width="555" height="1" uuid="8f664ea2-1d37-4901-8648-c134cba50dd3"/>
+			</line>
+			<textField>
+				<reportElement x="0" y="12" width="94" height="20" uuid="b40ea389-2f2e-4673-bd59-21dc405b07af"/>
+				<textFieldExpression><![CDATA[$F{RACUNI_PRAVNIH_LICA_BAR_RACUN}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="236" y="12" width="67" height="20" uuid="60a96c5b-d7d1-46f7-bfda-49ee3df04fef"/>
+				<textFieldExpression><![CDATA[$F{DNEVNO_STANJE_RACUNA_DSR_NOVOSTANJE}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="119" y="13" width="80" height="20" uuid="238deb1f-271a-4016-b6ee-d2c5c3774b3e"/>
+				<textFieldExpression><![CDATA[$F{DNEVNO_STANJE_RACUNA_DSR_DATUM}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+</jasperReport>

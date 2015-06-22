@@ -45,18 +45,15 @@ public class BankAccountsReportAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Map<String, String> params = new HashMap(1);
-        params.put("STATUS", AppData.getInstance().getValue(AppData.AppDataEnum.PIB_BANKE));
+        Map<String, Object> params = new HashMap(1);
+        params.put("pib", AppData.getInstance().getValue(AppData.AppDataEnum.PIB_BANKE));
 
         try {
-            JasperPrint jp = JasperFillManager.fillReport(
-                    getClass().getResource("/jasper/Zaposleni.jasper").openStream(),
+            JasperPrint jp = JasperFillManager.fillReport("src/main/resources/jasper/StanjeRacuna.jasper",
                     params, DBConnection.getConnection());
 
             JasperViewer.viewReport(jp, false);
         } catch (JRException e1) {
-            e1.printStackTrace();
-        } catch (IOException e1) {
             e1.printStackTrace();
         }
     }

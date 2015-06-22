@@ -2,7 +2,6 @@ package meta;
 
 import app.AppData;
 import gui.standard.form.Form;
-import gui.standard.form.misc.ProcedureCallFactory;
 import gui.standard.form.misc.ProcedureCallFactory.ProcedureCallEnum;
 
 import java.util.ArrayList;
@@ -18,13 +17,15 @@ public class FormMetaData {
     private String title;
     private Form.FormType formType = DEFAULT;
     private String tableName;
-    private String condition;
+    private String customWhere;
     private String customOrderBy;
     private List<String> additionalActions = new ArrayList<>();
     private List<String> hideColumns = new ArrayList<>();
     private List<String> hideInputs = new ArrayList<>();
+    private List<String> nonEditableColumns = new ArrayList<>();
     private Map<ProcedureCallEnum, String> customProcedures = new HashMap<>();
     private Map<String, String> defaultValues = new HashMap<>();
+    private Map<String, String> defaultNewValues = new HashMap<>();
     private Map<String, LookupMetaData> lookupMap = new HashMap<>();
     private List<Zoom> zoomData = new ArrayList<>();
     private List<NextMetaData> nextData = new ArrayList<>();
@@ -54,12 +55,12 @@ public class FormMetaData {
         this.tableName = tableName;
     }
 
-    public String getCondition() {
-        return condition;
+    public String getCustomWhere() {
+        return customWhere;
     }
 
-    public void setCondition(String condition) {
-        this.condition = condition;
+    public void setCustomWhere(String customWhere) {
+        this.customWhere = customWhere;
     }
 
     public List<String> getHideColumns() {
@@ -144,5 +145,21 @@ public class FormMetaData {
 
     public void setAdditionalActions(List<String> additionalActions) {
         this.additionalActions = additionalActions;
+    }
+
+    public Map<String, String> getDefaultNewValues() {
+        return defaultNewValues;
+    }
+
+    public List<String> getNonEditableColumns() {
+        return nonEditableColumns;
+    }
+
+    public void setNonEditableColumns(List<String> nonEditableColumns) {
+        this.nonEditableColumns = nonEditableColumns;
+    }
+
+    public void setDefaultNewValues(Map<String, String> defaultNewValues) {
+        this.defaultNewValues = defaultNewValues;
     }
 }

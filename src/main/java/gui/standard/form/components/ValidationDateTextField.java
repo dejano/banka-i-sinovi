@@ -19,13 +19,12 @@ IValidationTextField {
 	private boolean required;
 
 	public ValidationDateTextField(E_VALID_DATES validDates, boolean required) {
-		super();
+		super(true, "dd.MM.yyyy.", "##.##.####.", '_');
 		setSize(20, 40);
-		// super("dd.MM.yyyy", "##.##.####",'_');
 		this.validDates = validDates;
 		this.required = required;
-		AbstractDocument doc = (AbstractDocument)getDocument();
-		doc.setDocumentFilter(new DateDocumentFilter());
+//		AbstractDocument doc = (AbstractDocument)getDocument();
+//		doc.setDocumentFilter(new DateDocumentFilter());
 	}
 
 	@Override

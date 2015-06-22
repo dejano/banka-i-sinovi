@@ -12,9 +12,7 @@ import java.util.*;
 
 import static gui.standard.form.Form.FormType.PANEL;
 import static gui.standard.form.Form.FormType.READ_ONLY;
-import static gui.standard.form.misc.FormData.ColumnGroupsEnum.BASE;
-import static gui.standard.form.misc.FormData.ColumnGroupsEnum.NEXT;
-import static gui.standard.form.misc.FormData.ColumnGroupsEnum.PRIMARY_KEYS;
+import static gui.standard.form.misc.FormData.ColumnGroupsEnum.*;
 
 /**
  * Created by Nikola on 8.6.2015..
@@ -35,8 +33,8 @@ public class FormData {
         this.formType = fmd.getFormType();
         this.zoomData = fmd.getZoomData();
         this.tableName = metaTable.getCode();
-        this.condition = fmd.getCondition();
-        this.condition = fmd.getCondition();
+        this.condition = fmd.getCustomWhere();
+        this.condition = fmd.getCustomWhere();
         this.customOrderBy = fmd.getCustomOrderBy();
         this.customProcedures = fmd.getCustomProcedures();
 
@@ -51,15 +49,19 @@ public class FormData {
             LookupMetaData lookupMetaData = fmd.getLookupMap().get(column.getCode());
             boolean hiddenColumn = fmd.getHideColumns().contains(column.getCode());
             boolean hiddenInput = fmd.getHideInputs().contains(column.getCode());
+            boolean nonEditable = fmd.getNonEditableColumns().contains(column.getCode());
+            String defaultNewValue = fmd.getDefaultNewValues().get(column.getCode());
             String nextValue = null;
             if (nextColumnCodeValues != null)
                 nextValue = nextColumnCodeValues.get(column.getCode());
 
-            ColumnData newColumnData = new ColumnData(column, columnIndex++, baseIndex++, false,
-                    hiddenColumn, hiddenInput, false);
-
+            ColumnData newColumnData = new ColumnData(column, columnIndex++, baseIndex++);
             newColumnData.setDefaultValue(defaultValue);
+            newColumnData.setDefaultNewValue(defaultNewValue);
             newColumnData.setNextValue(nextValue);
+            newColumnData.setHiddenColumn(hiddenColumn);
+            newColumnData.setHiddenInput(hiddenInput);
+            newColumnData.setNonEditable(nonEditable);
 
             if (lookupMetaData != null)
                 lookupJoins.add(new TableJoin(lookupMetaData.getTable(), lookupMetaData.getFrom(),
@@ -72,12 +74,14 @@ public class FormData {
 
                 for (ColumnCodeName columnCodeValueCode : lookupMetaData.getColumns()) {
                     MetaColumn lookupMetaColumn = (MetaColumn) lookupTable
-                            .getColByTableDotColumnCode(lookupTable.getCode() + "." + columnCodeValueCode.getCode());
+                            .getColByTableDotColumnCode(lookupTable.getCode() + "."
+                                    + columnCodeValueCode.getCode());
 
                     ColumnData newLookupColumnData = new ColumnData(lookupMetaColumn, columnIndex++,
-                            lookupMetaData.isLookupInsert()? baseIndex++:-1, true,
-                            false, false, lookupMetaData.isLookupInsert());
+                            lookupMetaData.isLookupInsert() ? baseIndex++ : -1);
                     newLookupColumnData.setName(columnCodeValueCode.getName());
+                    newLookupColumnData.setLookup(true);
+                    newLookupColumnData.setLookupInsert(lookupMetaData.isLookupInsert());
 
                     columns.put(lookupMetaColumn.getCode(), newLookupColumnData);
                 }
@@ -131,7 +135,7 @@ public class FormData {
     }
 
     public boolean isEditable(String columnCode) {
-        return isInGroup(columnCode, BASE) && !isInGroup(columnCode, NEXT, PRIMARY_KEYS);
+        return isInGroup(columnCode, BASE) && !isInGroup(columnCode, NEXT, PRIMARY_KEYS, NON_EDITABLE);
     }
 
     public int getColumnIndex(String columnCode, boolean useBase) {
@@ -139,7 +143,7 @@ public class FormData {
         return columnData == null ? null : (useBase ? columnData.getBaseIndex() : columnData.getIndex());
     }
 
-    public Map<String, ColumnData> getColumns(ColumnGroupsEnum columnGroup) {
+    public Map<String, ColumnData> getColumnsMap(ColumnGroupsEnum columnGroup) {
         Map<String, ColumnData> ret = new LinkedHashMap<>();
 
         for (ColumnData columnData : columns.values()) {
@@ -147,7 +151,18 @@ public class FormData {
                 ret.put(columnData.getCode(), columnData);
         }
 
-        return columns;
+        return ret;
+    }
+
+    public List<ColumnData> getColumns(ColumnGroupsEnum columnGroup) {
+        List<ColumnData> ret = new ArrayList<>();
+
+        for (ColumnData columnData : columns.values()) {
+            if (isInGroup(columnData, columnGroup))
+                ret.add(columnData);
+        }
+
+        return ret;
     }
 
     public List<String> getColumnCodes(ColumnGroupsEnum columnGroup) {
@@ -228,6 +243,9 @@ public class FormData {
                 break;
             case LOOKUP_INSERT:
                 ret = columnData.isLookupInsert();
+                break;
+            case NON_EDITABLE:
+                ret = columnData.isNonEditable();
                 break;
         }
 
@@ -323,6 +341,10 @@ public class FormData {
         return columns.get(columnCode).getDefaultValue();
     }
 
+    public String getDefaultNewValue(String columnCode) {
+        return columns.get(columnCode).getDefaultNewValue();
+    }
+
     public String getNextValue(String columnCode) {
         return columns.get(columnCode).getNextValue();
     }
@@ -367,8 +389,12 @@ public class FormData {
         return formType == PANEL;
     }
 
+    public ColumnData getColumn(String columnCode) {
+        return columns.get(columnCode);
+    }
+
     public enum ColumnGroupsEnum {
-        ALL, BASE, PRIMARY_KEYS, LOOKUP, NEXT, LOOKUP_INSERT
+        ALL, BASE, PRIMARY_KEYS, LOOKUP, NEXT, LOOKUP_INSERT, NON_EDITABLE
     }
 }
 

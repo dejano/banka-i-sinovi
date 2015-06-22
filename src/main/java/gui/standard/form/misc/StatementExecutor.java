@@ -22,6 +22,8 @@ import static java.sql.Types.VARCHAR;
 public class StatementExecutor {
 
     public static final String STRING = "java.lang.String";
+    public static final String BOOLEAN = "java.lang.Boolean";
+    public static final String DATE = "java.sql.Date";
 
     private Map<String, String> columnCodeTypes;
 
@@ -115,7 +117,7 @@ public class StatementExecutor {
                 statement.setNull(i, VARCHAR);
             } else {
                 switch (columnTypeClass) {
-                    case "java.lang.String":
+                    case STRING:
                         statement.setString(i, (String) value);
                         break;
                     case "java.math.BigInteger":
@@ -140,7 +142,7 @@ public class StatementExecutor {
                         }
 
                         break;
-                    case "java.lang.Boolean":
+                    case BOOLEAN:
                         if (value instanceof String) {
                             boolean boolValue = false;
 
@@ -163,16 +165,16 @@ public class StatementExecutor {
                         }
 
                         break;
-                    case "java.sql.Date":
+                    case DATE:
                         if (value instanceof String) {
-                            SimpleDateFormat dateFormat = new SimpleDateFormat("dd.mm.yyyy.");
-                            try {
+                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+                            try{
                                 java.util.Date date = dateFormat.parse((String) value);
                                 Date sqlDate = new Date(date.getTime());
                                 statement.setDate(i, sqlDate);
-                            } catch (Exception e) {
+                            } catch (ParseException e) {
+                                dateFormat = new SimpleDateFormat("dd.MM.yyyy.");
                                 try {
-                                    dateFormat = new SimpleDateFormat("yyyy-");
                                     java.util.Date date = dateFormat.parse((String) value);
                                     Date sqlDate = new Date(date.getTime());
                                     statement.setDate(i, sqlDate);

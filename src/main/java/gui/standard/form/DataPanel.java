@@ -1,14 +1,14 @@
 package gui.standard.form;
 
 import actions.standard.ZoomFormAction;
+import com.toedter.calendar.JDateChooser;
 import gui.standard.form.components.ComponentCreator;
 import gui.standard.form.misc.ColumnData;
 import gui.standard.form.misc.FormData;
-import meta.FormMetaData;
 import net.miginfocom.swing.MigLayout;
 
-import java.awt.*;
-import java.awt.List;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import javax.swing.*;
@@ -17,6 +17,8 @@ import javax.swing.text.JTextComponent;
 import static gui.standard.form.misc.FormData.ColumnGroupsEnum.*;
 import static gui.standard.form.misc.FormData.ColumnGroupsEnum.LOOKUP;
 import static gui.standard.form.misc.FormData.ColumnGroupsEnum.LOOKUP_INSERT;
+import static util.ValueMapper.NO;
+import static util.ValueMapper.YES;
 
 public class DataPanel extends JPanel {
 
@@ -35,27 +37,29 @@ public class DataPanel extends JPanel {
     }
 
     private void initInputs(FormData formData, boolean readOnlyForm) {
-        Map<String, ColumnData> columns = formData.getColumns(ALL);
+        Map<String, ColumnData> columns = formData.getColumnsMap(ALL);
 
         for (ColumnData columnData : columns.values()) {
             if (!columnData.isHiddenInput()) {
                 JLabel label = new JLabel(columnData.getName());
 
-                JTextField textField = ComponentCreator.getComponent(columnData);
-                textField.setEditable(!readOnlyForm);
-                textField.setName(columnData.getCode());
+                JComponent component = ComponentCreator.getComponent(columnData);
+                component.setName(columnData.getCode());
 
-                this.inputs.put(columnData.getCode(), textField);
+                this.inputs.put(columnData.getCode(), component);
 
                 if (formData.isReadOnly()
                         || (formData.isInGroup(columnData.getCode(), LOOKUP, PRIMARY_KEYS, NEXT)
                         && !formData.isInGroup(columnData.getCode(), LOOKUP_INSERT))
                         || formData.getZoomBaseColumns().contains(columnData.getCode())) {
-                    textField.setEditable(false);
+                    if (component instanceof JTextComponent)
+                        ((JTextComponent) component).setEditable(!readOnlyForm);
+                    else
+                        component.setEnabled(false);
                 }
 
                 this.add(label);
-                this.add(textField, "wrap");
+                this.add(component, "wrap");
 
                 if (formData.getZoomBaseColumns().contains(columnData.getCode())) {
                     if (!readOnlyForm) {
@@ -74,8 +78,17 @@ public class DataPanel extends JPanel {
         for (String columnCode : parent.getFormData().getColumnCodes(ALL)) {
             JComponent component = inputs.get(columnCode);
 
-            if (component != null && component instanceof JTextComponent) {
-                ret.add(((JTextComponent) component).getText()); // TODO handle other component types
+            if (component != null) {
+                if (component instanceof JTextComponent) {
+                    ret.add(((JTextComponent) component).getText()); // TODO handle other component types
+                } else if (component instanceof JCheckBox) {
+                    boolean checked = ((JCheckBox) component).isSelected();
+                    ret.add(checked ? "1" : "0");
+                } else if (component instanceof JDateChooser) {
+                    JDateChooser dateChooser = (JDateChooser) component;
+                    SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
+                    ret.add(df.format(dateChooser.getDate()));
+                }
             } else {
                 String defaultValue = parent.getFormData().getDefaultValue(columnCode);
 
@@ -90,37 +103,96 @@ public class DataPanel extends JPanel {
     }
 
     public void setValue(String columnCode, String value, boolean editable) {
-        JTextComponent component = (JTextComponent) inputs.get(columnCode);
+        JComponent component = inputs.get(columnCode);
         if (component != null) {
-            component.setText("");
-            component.setText(value);
-            component.setEditable(editable);
+            if (component instanceof JTextComponent) {
+                JTextComponent textComponent = (JTextComponent) component;
+                textComponent.setText("");
+                textComponent.setText(value);
+                textComponent.setEditable(editable);
+            } else if (component instanceof JCheckBox) {
+                JCheckBox checkBox = (JCheckBox) component;
+                checkBox.setEnabled(editable);
+                switch (value) {
+                    case "1":
+                    case YES:
+                        checkBox.setSelected(true);
+                        break;
+                    case "0":
+                    case NO:
+                    default:
+                        checkBox.setSelected(false);
+                        break;
+                }
+            } else if (component instanceof JDateChooser) {
+                JDateChooser dateChooser = (JDateChooser) component;
+
+                try {
+                    SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy.");
+                    dateChooser.setDate(df.parse(value));
+                    dateChooser.setEnabled(editable);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
     public void setBlankEditableInputs() {
-        for (String columnCode : inputs.keySet()) {
-            JTextComponent component = (JTextComponent) inputs.get(columnCode);
+        for (JComponent component : inputs.values()) {
             if (component != null) {
-                component.setText("");
-                component.setEditable(true);
+                if (component instanceof JTextComponent) {
+                    JTextComponent textComponent = (JTextComponent) component;
+                    textComponent.setText("");
+                    textComponent.setEditable(true);
+                } else if (component instanceof JCheckBox) {
+                    ((JCheckBox) component).setSelected(false);
+                } else if (component instanceof JDateChooser) {
+                    JDateChooser dateChooser = (JDateChooser) component;
+                    dateChooser.setDate(null);
+                    dateChooser.setEnabled(true);
+                }
             }
         }
     }
 
     public void setBlankEditableInput(String columnCode) {
-        JTextComponent component = (JTextComponent) inputs.get(columnCode);
+        JComponent component = inputs.get(columnCode);
         if (component != null) {
-            component.setText("");
-            component.setEditable(true);
+            if (component instanceof JTextComponent) {
+                JTextComponent textComponent = (JTextComponent) component;
+                textComponent.setText("");
+                textComponent.setEditable(true);
+            } else if (component instanceof JCheckBox) {
+                JCheckBox checkBox = (JCheckBox) component;
+                checkBox.setSelected(false);
+                checkBox.setEnabled(true);
+            } else if (component instanceof JDateChooser) {
+                JDateChooser dateChooser = (JDateChooser) component;
+                dateChooser.setDate(null);
+                dateChooser.setEnabled(true);
+            }
         }
+
     }
 
     public void clearDisableInputs() {
         for (JComponent component : inputs.values()) {
-            JTextComponent textComponent = (JTextComponent) component;
-            textComponent.setText("");
-            textComponent.setEditable(false);
+            if (component != null) {
+                if (component instanceof JTextComponent) {
+                    JTextComponent textComponent = (JTextComponent) component;
+                    textComponent.setText("");
+                    textComponent.setEditable(false);
+                } else if (component instanceof JCheckBox) {
+                    JCheckBox checkBox = (JCheckBox) component;
+                    checkBox.setSelected(false);
+                    checkBox.setEnabled(false);
+                } else if (component instanceof JDateChooser) {
+                    JDateChooser dateChooser = (JDateChooser) component;
+                    dateChooser.setDate(null);
+                    dateChooser.setEnabled(false);
+                }
+            }
         }
     }
 

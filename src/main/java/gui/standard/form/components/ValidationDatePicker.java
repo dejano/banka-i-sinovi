@@ -10,9 +10,5 @@ public class ValidationDatePicker extends JDateChooser {
 	
 	public ValidationDatePicker(int nullable, E_VALID_DATES validDates){
 		super(new ValidationDateTextField(validDates, nullable == 0));
-		// TODO
-//		setLocale(Resources.getLocale());
 	}
-
-
 }

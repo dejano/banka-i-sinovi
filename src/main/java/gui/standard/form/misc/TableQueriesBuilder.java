@@ -3,7 +3,6 @@ package gui.standard.form.misc;
 import meta.LookupMetaData;
 import meta.Zoom;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static gui.standard.form.misc.FormData.ColumnGroupsEnum.*;
@@ -22,7 +21,7 @@ public class TableQueriesBuilder {
     }
 
     public TableQueriesBuilder getBasicQuery() {
-        queryBuilder.select(formData.getColumns(ALL).values())
+        queryBuilder.select(formData.getColumnsMap(ALL).values())
                 .from(formData.getTableName())
                 .leftOuterJoin(formData.getTableName(), formData.getLookupJoins());
 
@@ -72,7 +71,7 @@ public class TableQueriesBuilder {
     public QueryBuilder.Query build() {
         QueryBuilder.Query ret = queryBuilder.build();
 
-        // TODO replace with map for caching where key is hash
+        // TODO replace with mapBoolean for caching where key is hash
         queryBuilder = new QueryBuilder();
 
         return ret;
