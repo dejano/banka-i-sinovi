@@ -85,6 +85,7 @@ public class CommitAction extends AbstractAction {
         for (Component component : form.getDataPanel().getComponents()) {
             if (component instanceof IValidationTextField) {
                 IValidationTextField validationTextField = (IValidationTextField) component;
+                System.out.println(component.getName() + " is valid:" + validationTextField.isEditValid());
                 ret &= validationTextField.isEditValid();
             }
         }

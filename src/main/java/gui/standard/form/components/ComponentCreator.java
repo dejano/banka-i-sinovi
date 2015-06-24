@@ -12,6 +12,9 @@ import static gui.standard.form.components.ValidationDatePicker.E_VALID_DATES.AL
  */
 public class ComponentCreator {
 
+    private ComponentCreator() {
+    }
+
     // TODO min size
     public static JComponent getComponent(ColumnData columnData) {
         JComponent component = null;
@@ -23,13 +26,21 @@ public class ComponentCreator {
                         className.substring(className.lastIndexOf('.')), columnData.getLength() + 5);
                 break;
             case "java.math.BigInteger":
+                component = new ValidationTextField(columnData.isMandatory(),
+                        Types.BIGINT, columnData.getLength(), columnData.getLength());
+                ((ValidationTextField)component).setMaxSize(columnData.getLength());
+                break;
             case "java.math.BigDecimal":
-                if(columnData.getPrecision() == 0){
+                System.out.println(columnData.getCode() + " LENGTH: " + columnData.getLength() + "," + columnData.getPrecision());
+                if (columnData.getPrecision() == 0) {
+                    System.out.println("ComponentCreator.getComponent");
                     component = new ValidationTextField(!columnData.isMandatory(),
-                            Types.BIGINT, columnData.getLength(), columnData.getLength());
+                            Types.BIGINT, columnData.getLength(), true, true, columnData.getLength());
+                    ((ValidationTextField)component).setMaxSize(columnData.getLength());
                 } else {
                     component = new DecimalTextField(columnData.getLength(),
-                            columnData.getLength() + 5, columnData.getPrecision(), false);
+                            columnData.getLength() , columnData.getPrecision(), false);
+
                 }
 
                 break;
@@ -37,14 +48,11 @@ public class ComponentCreator {
                 component = new JCheckBox();
                 break;
             case "java.sql.Date":
-                component = new ValidationDatePicker(columnData.isMandatory()?0:1, ALL);
+                component = new ValidationDatePicker(columnData.isMandatory() ? 0 : 1, ALL);
 //                component = new ValidationDateTextField(ALL, columnData.isMandatory());
                 break;
         }
 
         return component;
-    }
-
-    private ComponentCreator() {
     }
 }
