@@ -33,5 +33,29 @@
         }
       ]
     }
+  ],
+  "lookupMap": {
+    "VA_IFRA": {
+      "table": "VALUTE",
+      "from": "VA_IFRA",
+      "to": "VA_IFRA",
+      "columns": [
+        {
+          "code": "VA_NAZIV",
+          "name": "Naziv Valute"
+        }
+      ]
+    }
+  },
+  "zoomData": [
+    {
+      "tableCode": "valuta",
+      "columns": [
+        {
+          "from": "VA_IFRA",
+          "to": "VA_IFRA"
+        }
+      ]
+    }
   ]
 }

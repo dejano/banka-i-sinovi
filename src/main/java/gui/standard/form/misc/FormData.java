@@ -309,6 +309,18 @@ public class FormData {
         return result;
     }
 
+    public String getZoomJsonFile(String columnName) {
+        for (Zoom zoom : zoomData) {
+            for (ColumnMapping columnMapping : zoom.getColumns()) {
+                if (columnMapping.getFrom().equals(columnName)) {
+                    return zoom.getJsonFileName();
+                }
+            }
+        }
+
+        return null;
+    }
+
     public String getZoomTableCode(String columnName) {
         for (Zoom zoom : zoomData) {
             for (ColumnMapping columnMapping : zoom.getColumns()) {
@@ -319,6 +331,17 @@ public class FormData {
         }
 
         return null;
+    }
+
+    public List<TableJoin> getLookupJoins(String table) {
+        List<TableJoin> result = new ArrayList<>();
+        for (TableJoin lookupJoin : lookupJoins) {
+            if (lookupJoin.getTableName().equals(table)) {
+                result.add(lookupJoin);
+            }
+        }
+
+        return result;
     }
 
     public Form.FormType getFormType() {

@@ -1,4 +1,28 @@
 {
   "title": "Valute",
-  "tableName": "VALUTE"
+  "tableName": "VALUTE",
+  "lookupMap": {
+    "DR_SIFRA": {
+      "table": "DRZAVA",
+      "from": "DR_SIFRA",
+      "to": "DR_SIFRA",
+      "columns": [
+        {
+          "code": "DR_NAZIV",
+          "name": "Naziv Drzave"
+        }
+      ]
+    }
+  },
+  "zoomData": [
+    {
+      "tableCode": "DRZAVA",
+      "columns": [
+        {
+          "from": "DR_SIFRA",
+          "to": "DR_SIFRA"
+        }
+      ]
+    }
+  ]
 }
