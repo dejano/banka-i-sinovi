@@ -1,9 +1,13 @@
 package gui.dialog;
 
 import gui.standard.form.misc.StatementExecutor;
-import meta.NextMetaData;
+import net.miginfocom.swing.MigLayout;
+import org.jdesktop.swingx.autocomplete.AutoCompleteDecorator;
 
 import javax.swing.*;
+import javax.swing.event.AncestorListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,13 +17,14 @@ import java.util.List;
  */
 public class BankSelectionDialog {
 
-    private static final String BANK_SELECTION_TITLE = "Selekcija banke";
-    private static final String BANK_SELECTION_MESSAGE = "Selektujte banku :";
+    private static final String TITLE = "Selekcija banke";
+    private static final String LABEL = "Unesite naziv banke: ";
 
-    private static final String GET_BANKS_QUERY = "SELECT TOP 10 PR_NAZIV, PR_PIB FROM PRAVNA_LICA " +
+    private static final String GET_BANKS_QUERY = "SELECT PR_NAZIV, PR_PIB FROM PRAVNA_LICA " +
             "WHERE PR_BANKA=1 ORDER BY PR_NAZIV";
 
-    public static String show(){
+
+    public static String show() {
         String ret = null;
 
         StatementExecutor executor = new StatementExecutor();
@@ -28,31 +33,35 @@ public class BankSelectionDialog {
         columnCodes.add("PR_NAZIV");
         columnCodes.add("PR_PIB");
 
-        List<String[]> results = new ArrayList<>();
+        List<String[]> bankResults = new ArrayList<>();
         try {
-            results = executor.execute(GET_BANKS_QUERY, columnCodes);
+            bankResults = executor.execute(GET_BANKS_QUERY, columnCodes);
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        String[] bankNames = new String[results.size()];
+        String[] bankNames = new String[bankResults.size()];
         int i = 0;
-        for (String[] result : results) {
+        for (String[] result : bankResults) {
             bankNames[i++] = result[0];
         }
 
-        String selectedBankName = (String) JOptionPane.showInputDialog(null,
-                BANK_SELECTION_MESSAGE,
-                BANK_SELECTION_TITLE,
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                bankNames,
-                bankNames[0]);
+        JPanel myPanel = new JPanel(new MigLayout());
+        myPanel.add(new JLabel(LABEL));
+        JComboBox comboBox = new JComboBox(bankNames);
+        myPanel.add(comboBox);
 
-        if (selectedBankName != null) {
-            for (String[] result : results) {
-                if(result[0].equals(selectedBankName)) {
-                    ret = result[1];
+        AutoCompleteDecorator.decorate(comboBox);
+
+        int result = JOptionPane.showConfirmDialog(null, myPanel,
+                TITLE, JOptionPane.OK_CANCEL_OPTION);
+
+        if (result == JOptionPane.OK_OPTION) {
+            String selectedBankName = (String) comboBox.getSelectedItem();
+
+            for (String[] bankResult : bankResults) {
+                if (bankResult[0].equals(selectedBankName)) {
+                    ret = bankResult[1];
                     break;
                 }
             }
@@ -61,5 +70,6 @@ public class BankSelectionDialog {
         return ret;
     }
 
-    private BankSelectionDialog(){}
+    private BankSelectionDialog() {
+    }
 }

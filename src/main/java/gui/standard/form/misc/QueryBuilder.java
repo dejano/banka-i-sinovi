@@ -94,7 +94,6 @@ public class QueryBuilder {
         return this;
     }
 
-    // TODO
     public QueryBuilder leftOuterJoin(String baseTableName, List<TableJoin> tableJoins) {
         for (TableJoin tableJoin : tableJoins) {
             relationBuilder.append(LEFT_OUTER_JOIN)

@@ -1,9 +1,12 @@
 package actions;
 
+import app.App;
 import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
+import gui.dialog.ErrorMessageDialog;
 import gui.standard.ColumnValue;
 import gui.standard.form.misc.QueryBuilder;
 import gui.standard.form.misc.StatementExecutor;
+import messages.ErrorMessages;
 import meta.MosquitoSingletone;
 import meta.SuperMetaTable;
 import xml.XmlHelper;
@@ -45,25 +48,30 @@ public class ImportPaymentOrderAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        PaymentOrder paymentOrder = getPaymentOrder();
+        try {
+            PaymentOrder paymentOrder = getPaymentOrder();
 
-        String debtorBankCode =
-                paymentOrder.getDebtorAccountDetails().getAccountNumber().substring(0, 3);
-        String creditorBankCode =
-                paymentOrder.getCreditorAccountDetails().getAccountNumber().substring(0, 3);
+            String debtorBankCode =
+                    paymentOrder.getDebtorAccountDetails().getAccountNumber().substring(0, 3);
+            String creditorBankCode =
+                    paymentOrder.getCreditorAccountDetails().getAccountNumber().substring(0, 3);
 
-        if (debtorBankCode.equals(creditorBankCode)) {
-            transferFunds(paymentOrder);
-        } else if (paymentOrder.isUrgent()
-            //|| paymentOrder.getAmount().compareTo(new BigDecimal(250000)) > 0
-                ) {
-            rtgs(paymentOrder);
-        } else {
-            // TODO MAJOR store payment with insert and trigger
+            if (debtorBankCode.equals(creditorBankCode)) {
+                transferFunds(paymentOrder);
+            } else if (paymentOrder.isUrgent()
+                //|| paymentOrder.getAmount().compareTo(new BigDecimal(250000)) > 0 // TODO enable
+                    ) {
+                rtgs(paymentOrder);
+
+            } else {
+                // TODO MAJOR store payment with insert and trigger
+            }
+        } catch (Exception e1) {
+            ErrorMessageDialog.show(App.getMainFrame(), e1);
         }
     }
 
-    private PaymentOrder getPaymentOrder() {
+    private PaymentOrder getPaymentOrder() throws Exception {
         PaymentOrder ret = null;
 
         JFileChooser openDialog = new JFileChooser();
@@ -76,13 +84,9 @@ public class ImportPaymentOrderAction extends AbstractAction {
             File file = openDialog.getSelectedFile();
             String path = file.getPath();
 
-            try {
                 InputStream is = new FileInputStream(new File(path));
 
                 ret = XmlHelper.unmarshall(is, PaymentOrder.class);
-            } catch (Exception e1) {
-                e1.printStackTrace();
-            }
         }
 
         return ret;
@@ -97,7 +101,7 @@ public class ImportPaymentOrderAction extends AbstractAction {
         // TODO MAJOR update database with insert and trigger
     }
 
-    private void rtgs(PaymentOrder paymentOrder) {
+    private void rtgs(PaymentOrder paymentOrder) throws SQLException {
         BankDetails debtorBankDetails = getBankDetails(
                 paymentOrder.getDebtorAccountDetails().getAccountNumber().substring(0, 3));
         BankDetails creditorBankDetails = getBankDetails(
@@ -111,7 +115,7 @@ public class ImportPaymentOrderAction extends AbstractAction {
         // TODO MAJOR update database
     }
 
-    private BankDetails getBankDetails(String bankCode) {
+    private BankDetails getBankDetails(String bankCode) throws SQLException {
         BankDetails ret = null;
 
         StatementExecutor executor = new StatementExecutor(bankDetailsMetaTable.getPkColumnTypes());
@@ -120,15 +124,11 @@ public class ImportPaymentOrderAction extends AbstractAction {
 
         values.add(new ColumnValue("SIFRA_BANKE", bankCode));
 
-        try {
-            results = executor.execute(new QueryBuilder.Query("SELECT * FROM BANKA_POSLOVNOG_PARTNERA " +
-                            "WHERE SIFRA_BANKE=?", EQUALS), values, bankDetailsMetaTable.getBaseColumnCodes());
-        } catch (SQLException e1) {
-            e1.printStackTrace(); // error, show message
-        }
+        results = executor.execute(new QueryBuilder.Query("SELECT * FROM BANKA_POSLOVNOG_PARTNERA " +
+                "WHERE SIFRA_BANKE=?", EQUALS), values, bankDetailsMetaTable.getBaseColumnCodes());
 
         if (results.isEmpty()) {
-            // throw exception
+            throw new SQLException("Nema banke u šifarniku banaka.", null, ErrorMessages.CUSTOM_CODE);
         } else {
             ret = new BankDetails();
             ret.setSwiftCode(results.get(0)[0]);

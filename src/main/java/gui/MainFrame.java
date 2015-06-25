@@ -23,8 +23,6 @@ public class MainFrame extends JFrame {
         this.setTitle(mfmt.getTitle());
         this.setLayout(new BorderLayout());
         this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-//        this.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        // TODO enable
         this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         this.addWindowListener(new WindowAdapter() {
             @Override

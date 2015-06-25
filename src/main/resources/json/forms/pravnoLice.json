@@ -20,6 +20,17 @@
   "defaultValues": {
     "PRAVNO_LICE_": "1"
   },
+  "nextData": [
+    {
+      "formName": "racun",
+      "columnCodeMapping": [
+        {
+          "from": "JMBG",
+          "to": "JMBG"
+        }
+      ]
+    }
+  ],
   "lookupMap": {
     "PR_PIB": {
       "table": "PRAVNA_LICA",

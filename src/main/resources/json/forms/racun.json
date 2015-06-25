@@ -11,7 +11,8 @@
     "pibBanke": "PR_PIB"
   },
   "additionalActions": [
-    "CancelAccountAction"
+    "CancelAccountAction",
+    "BankStatementReportAction"
   ],
   "hideColumns": [
     "PR_PIB"

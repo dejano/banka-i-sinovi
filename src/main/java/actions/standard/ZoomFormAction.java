@@ -1,6 +1,7 @@
 package actions.standard;
 
 import gui.standard.ColumnMapping;
+import gui.dialog.ErrorMessageDialog;
 import gui.standard.form.Form;
 import gui.standard.form.misc.ColumnData;
 import gui.standard.form.misc.TableJoin;
@@ -115,7 +116,7 @@ public class ZoomFormAction extends AbstractAction {
                 }
             }
 
-            for (TableJoin lookup: standardForm.getTableModel().getFormData().getLookupJoins(removeFromTable)) {
+            for (TableJoin lookup : standardForm.getTableModel().getFormData().getLookupJoins(removeFromTable)) {
                 for (Component component : standardForm.getDataPanel().getComponents()) {
                     if (component instanceof JTextComponent && component.getName().equals(lookup.getFromColumn())) {
                         JTextComponent textComponent = (JTextComponent) component;
@@ -159,9 +160,8 @@ public class ZoomFormAction extends AbstractAction {
             }
 
 //            standardForm.onZoomDialogClosed(results);
-
         } catch (SQLException e) {
-            e.printStackTrace();
+            ErrorMessageDialog.show(standardForm, e);
         }
     }
 }

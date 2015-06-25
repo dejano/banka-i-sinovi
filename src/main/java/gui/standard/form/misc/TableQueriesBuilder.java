@@ -71,7 +71,6 @@ public class TableQueriesBuilder {
     public QueryBuilder.Query build() {
         QueryBuilder.Query ret = queryBuilder.build();
 
-        // TODO replace with mapBoolean for caching where key is hash
         queryBuilder = new QueryBuilder();
 
         return ret;

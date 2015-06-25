@@ -184,7 +184,7 @@ public class Form extends JDialog {
         btnRollback = new JButton(new RollbackAction(this));
         buttonsPanel.add(btnRollback);
         btnApplySearch = new JButton(new ApplySearchAction(this));
-        btnApplySearch.setVisible(false);
+        btnApplySearch.setEnabled(false);
         buttonsPanel.add(btnApplySearch);
 
         for (String actionName : fmd.getAdditionalActions()) {
@@ -220,7 +220,6 @@ public class Form extends JDialog {
         add(bottomPanel, "grow");
     }
 
-    // TODO create separate table class
     private void initTable(FormMetaData fmd, MetaTable metaTable, Map<String, String> nextValues)
             throws SQLException {
         if (fmd.getFormType() != FormType.PANEL) {
@@ -315,7 +314,7 @@ public class Form extends JDialog {
         dataTable.scrollRectToVisible(new Rectangle(dataTable.getCellRect(rowIndex, 0, true)));
     }
 
-    private void sync() {
+    public void sync() {
         for (String columnCode : dataPanel.getInputs().keySet()) {
             String value = tableModel.getValue(dataTable.getSelectedRow(), columnCode);
             boolean editable = !formData.isReadOnly() && formData.isEditable(columnCode);
@@ -360,22 +359,22 @@ public class Form extends JDialog {
     public void setMode(FormModeEnum mode) {
         switch (mode) {
             case DEFAULT:
-                btnApplySearch.setVisible(false);
-                btnCommit.setVisible(false);
-                btnRollback.setVisible(false);
+                btnApplySearch.setEnabled(false);
+                btnCommit.setEnabled(false);
+                btnRollback.setEnabled(false);
                 for (JButton button : additionalButtons) {
-                    button.setVisible(false);
+                    button.setEnabled(false);
                 }
 
                 dataPanel.clearDisableInputs();
 
                 break;
             case ADD:
-                btnApplySearch.setVisible(false);
-                btnCommit.setVisible(true);
-                btnRollback.setVisible(true);
+                btnApplySearch.setEnabled(false);
+                btnCommit.setEnabled(true);
+                btnRollback.setEnabled(true);
                 for (JButton button : additionalButtons) {
-                    button.setVisible(false);
+                    button.setEnabled(false);
                 }
 
                 for (String columnCode : dataPanel.getInputs().keySet()) {
@@ -396,18 +395,21 @@ public class Form extends JDialog {
 
                 break;
             case EDIT:
-                btnApplySearch.setVisible(false);
-                btnCommit.setVisible(true);
-                btnRollback.setVisible(true);
+                btnApplySearch.setEnabled(false);
+                btnCommit.setEnabled(true);
+                btnRollback.setEnabled(true);
                 for (JButton button : additionalButtons) {
-                    button.setVisible(true);
+                    button.setEnabled(true);
                 }
 
                 break;
             case SEARCH:
-                btnApplySearch.setVisible(true);
-                btnCommit.setVisible(false);
-                btnRollback.setVisible(false);
+                btnApplySearch.setEnabled(true);
+                btnCommit.setEnabled(false);
+                btnRollback.setEnabled(false);
+                for (JButton button : additionalButtons) {
+                    button.setEnabled(false);
+                }
 
                 dataPanel.setBlankEditableInputs();
 

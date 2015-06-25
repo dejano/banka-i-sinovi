@@ -1,5 +1,7 @@
 package actions;
 
+import app.App;
+import gui.dialog.ErrorMessageDialog;
 import gui.standard.form.Form;
 import messages.WarningMessages;
 import meta.FormCreator;
@@ -28,13 +30,7 @@ public class OpenFormAction extends AbstractAction {
         try {
             form = FormCreator.getStandardForm(formName);
         } catch (SQLException exception) {
-            // TODO extract exception handle form messages
-            if (exception.getErrorCode() == WarningMessages.CUSTOM_CODE) {
-                JOptionPane.showMessageDialog(form, exception.getMessage(), WarningMessages.TITLE,
-                        JOptionPane.WARNING_MESSAGE);
-            } else {
-                exception.printStackTrace();
-            }
+            ErrorMessageDialog.show(App.getMainFrame(), exception);
         }
 
         form.setVisible(true);

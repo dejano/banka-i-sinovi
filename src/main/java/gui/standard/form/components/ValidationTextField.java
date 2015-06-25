@@ -271,7 +271,6 @@ public class ValidationTextField extends JTextField implements IValidationTextFi
         this.minValue = minValue;
     }
 
-
     public Integer getMaxSize() {
         return maxSize;
     }

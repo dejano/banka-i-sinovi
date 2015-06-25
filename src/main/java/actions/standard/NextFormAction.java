@@ -1,5 +1,6 @@
 package actions.standard;
 
+import gui.dialog.ErrorMessageDialog;
 import gui.standard.ColumnMapping;
 import gui.standard.form.Form;
 import messages.WarningMessages;
@@ -48,12 +49,7 @@ public class NextFormAction extends AbstractAction {
             try {
                 createNextForm(nextData);
             } catch (SQLException exception) {
-                if (exception.getErrorCode() == WarningMessages.CUSTOM_CODE) {
-                    JOptionPane.showMessageDialog(form, exception.getMessage(), WarningMessages.TITLE,
-                            JOptionPane.WARNING_MESSAGE);
-                } else {
-                    exception.printStackTrace();
-                }
+                ErrorMessageDialog.show(form, exception);
             }
         }
     }

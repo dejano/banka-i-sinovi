@@ -15,7 +15,6 @@ import static gui.standard.form.misc.ProcedureCallFactory.ProcedureCallEnum.*;
 /**
  * Created by Nikola on 8.6.2015..
  */
-// TODO refactor
 public class ProcedureCallFactory {
 
     private static Map<String, Map<ProcedureCallEnum, String>> cachedParameterCalls = new HashMap<>();

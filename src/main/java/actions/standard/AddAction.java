@@ -1,5 +1,6 @@
 package actions.standard;
 
+import gui.dialog.ErrorMessageDialog;
 import gui.standard.form.Form;
 import gui.standard.form.StatusBar.FormModeEnum;
 
@@ -32,7 +33,7 @@ public class AddAction extends AbstractAction {
             form.setMode(FormModeEnum.ADD);
             form.getDataTable().clearSelection();
         } catch (SQLException e1) {
-            e1.printStackTrace(); // TODO handle error
+            ErrorMessageDialog.show(form, e1);
         }
     }
 }

@@ -53,6 +53,29 @@ public class StatementExecutor {
         DBConnection.getConnection().commit();
     }
 
+    public void executeProcedures(List<String> procedureCalls, List<List<ColumnValue>> columnValueValues) throws SQLException {
+        int procedureCount = 0;
+
+        for (String procedureCall : procedureCalls) {
+            System.out.println("Executing : \n" + procedureCall);
+
+            CallableStatement statement = DBConnection.getConnection().prepareCall(procedureCall);
+
+            int i = 1;
+            for (ColumnValue columnValue : columnValueValues.get(procedureCount++)) {
+                String columnTypeClass = columnCodeTypes.get(columnValue.getCode());
+                Object value = columnValue.getValue();
+
+                setValue(statement, columnTypeClass, i++, value, false);
+            }
+
+            statement.execute();
+            statement.close();
+        }
+
+        DBConnection.getConnection().commit();
+    }
+
     public List<String[]> execute(String query, Collection<String> resultColumnCodes) throws SQLException {
         System.out.println("Executing : \n" + query);
 

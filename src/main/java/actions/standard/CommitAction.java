@@ -1,5 +1,6 @@
 package actions.standard;
 
+import gui.dialog.ErrorMessageDialog;
 import gui.dialog.Toast;
 import gui.standard.form.Form;
 import gui.standard.form.StatusBar.FormModeEnum;
@@ -57,12 +58,7 @@ public class CommitAction extends AbstractAction {
                 }
 
             } catch (SQLException exception) {
-                if (exception.getErrorCode() == ErrorMessages.CUSTOM_CODE) {
-                    JOptionPane.showMessageDialog(form, exception.getMessage(), ErrorMessages.TITLE,
-                            JOptionPane.ERROR_MESSAGE);
-                } else {
-                    exception.printStackTrace();
-                }
+                ErrorMessageDialog.show(form, exception);
             }
         }
     }

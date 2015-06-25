@@ -1,5 +1,6 @@
 package actions.standard;
 
+import gui.dialog.ErrorMessageDialog;
 import gui.dialog.Toast;
 import gui.standard.form.Form;
 import messages.QuestionMessages;
@@ -30,11 +31,9 @@ public class DeleteAction extends AbstractAction {
 
 			try {
 				form.removeRow();
-
 				Toast.show(form, "Slog uspešno obrisan.");
 			} catch (SQLException ex) {
-				JOptionPane.showMessageDialog(form, ex.getMessage(), "Greska",
-						JOptionPane.ERROR_MESSAGE);
+				ErrorMessageDialog.show(form, ex);
 			}
 		}
 	}

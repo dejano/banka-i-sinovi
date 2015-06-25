@@ -80,7 +80,7 @@ public class DataPanel extends JPanel {
 
             if (component != null) {
                 if (component instanceof JTextComponent) {
-                    ret.add(((JTextComponent) component).getText()); // TODO handle other component types
+                    ret.add(((JTextComponent) component).getText());
                 } else if (component instanceof JCheckBox) {
                     boolean checked = ((JCheckBox) component).isSelected();
                     ret.add(checked ? "1" : "0");

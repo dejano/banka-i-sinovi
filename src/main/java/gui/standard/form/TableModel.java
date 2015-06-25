@@ -27,7 +27,6 @@ public class TableModel extends DefaultTableModel {
     private FormData formData;
     private TableQueriesBuilder tableQueriesBuilder;
 
-    // TODO move
     public String[] getDbRowByPks(String[] pkValues) throws SQLException {
         String[] ret = null;
 

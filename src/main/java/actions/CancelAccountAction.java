@@ -1,8 +1,10 @@
 package actions;
 
+import gui.dialog.ErrorMessageDialog;
 import gui.standard.ColumnValue;
 import gui.standard.form.Form;
 import gui.standard.form.misc.ColumnData;
+import gui.standard.form.misc.FormData;
 import gui.standard.form.misc.StatementExecutor;
 
 import javax.swing.*;
@@ -13,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static gui.standard.form.misc.FormData.ColumnGroupsEnum.PRIMARY_KEYS;
 import static gui.standard.form.misc.StatementExecutor.STRING;
 
 
@@ -40,15 +43,14 @@ public class CancelAccountAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        // TODO form.getSelectAccountNumber
-        ColumnData columnData = null;
-        String value1 = null;
+        Map<String, ColumnData> pks = form.getFormData().getColumnsMap(PRIMARY_KEYS);
+        ColumnData columnData = pks.get("BAR_RACUN");
+        String value1 = form.getSelectedRowValue("BAR_RACUN");
 
         String value2 = JOptionPane.showInputDialog(form, QUESTION, TITLE, JOptionPane.QUESTION_MESSAGE);
 
         if (value2 != null) {
             //TODO validate value2
-
             StatementExecutor executor;
 
             List<ColumnValue> values = new ArrayList<>();
@@ -64,13 +66,9 @@ public class CancelAccountAction extends AbstractAction {
             try {
                 executor.executeProcedure(CANCEL_ACCOUNT_PROCEDURE_CALL, values);
             } catch (SQLException e1) {
-                e1.printStackTrace(); // TODO handle error
+                ErrorMessageDialog.show(form, e1);
             }
         }
     }
 
-    private void search() throws SQLException {
-        List<String> values = form.getDataPanel().getValues();
-        form.getTableModel().search(values.toArray(new String[values.size()]));
-    }
 }

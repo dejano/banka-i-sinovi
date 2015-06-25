@@ -5,10 +5,12 @@ import app.AppData;
 import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
 import database.DBConnection;
 import gui.MainFrame;
+import gui.dialog.ErrorMessageDialog;
 import gui.dialog.Toast;
 import gui.standard.ColumnValue;
 import gui.standard.form.misc.ProcedureCallFactory;
 import gui.standard.form.misc.StatementExecutor;
+import messages.ErrorMessages;
 import messages.QuestionMessages;
 import meta.MosquitoSingletone;
 import meta.SuperMetaTable;
@@ -100,7 +102,7 @@ public class ExportClearingAction extends AbstractAction {
             ResultSet resultSet = cs.executeQuery();
 
             if (!resultSet.isBeforeFirst()) {
-                // TODO no results message - throw exception
+                throw new SQLException("Nema podataka za export.", null, ErrorMessages.CUSTOM_CODE);
             } else {
                 ret = new ArrayList<>();
 
@@ -141,7 +143,7 @@ public class ExportClearingAction extends AbstractAction {
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            ErrorMessageDialog.show(App.getMainFrame(), e);
         }
 
         return ret;
@@ -184,9 +186,9 @@ public class ExportClearingAction extends AbstractAction {
             mt102 = objectFactory.createMt102();
             mt102.setPayments(objectFactory.createMt102Payments());
 
+            mt102.setMessageId(Integer.toString(i++)); // TODO set message id
             mt102.setCreditorBankDetails(creditorBankDetails);
             mt102.setDebtorBankDetails(debtorBankDetails);
-            mt102.setMessageId(Integer.toString(i++)); // TODO set message id
             mt102.setCurrencyCode(paymentOrders.get(0).getCurrencyCode());
             mt102.setCurrencyDate(paymentOrders.get(0).getCurrencyDate());
             mt102.setDate(new XMLGregorianCalendarImpl(new GregorianCalendar()));

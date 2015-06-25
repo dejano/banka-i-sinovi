@@ -59,7 +59,7 @@
       ]
     },
     {
-      "text": "Medjubankarski promet",
+      "text": "Import/Export",
       "menuItems": [
         {
           "actionName": "ExportClearingAction"
@@ -74,9 +74,6 @@
       "menuItems": [
         {
           "actionName": "BankAccountsReportAction"
-        },
-        {
-          "actionName": "BankStatementReportAction"
         }
       ]
     }
