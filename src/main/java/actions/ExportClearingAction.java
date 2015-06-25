@@ -9,6 +9,7 @@ import gui.dialog.ErrorMessageDialog;
 import gui.dialog.Toast;
 import gui.standard.ColumnValue;
 import gui.standard.form.misc.ProcedureCallFactory;
+import gui.standard.form.misc.QueryBuilder;
 import gui.standard.form.misc.StatementExecutor;
 import messages.ErrorMessages;
 import messages.QuestionMessages;
@@ -33,6 +34,7 @@ import java.util.*;
 
 import static app.AppData.AppDataEnum.PIB_BANKE;
 import static gui.standard.form.misc.ProcedureCallFactory.ProcedureCallEnum.CREATE_PROCEDURE_CALL;
+import static gui.standard.form.misc.QueryBuilder.Query.WhereTypesEnum.EQUALS;
 
 /**
  * Created by Nikola on 14.6.2015..
@@ -41,11 +43,12 @@ public class ExportClearingAction extends AbstractAction {
 
     private static final String TITLE = "Salji poruke matora";
 
-    private int i = 0;
+    private int i = 1;
 
     private SuperMetaTable orderMetaTable;
     private SuperMetaTable orderItemMetaTable;
     private SuperMetaTable paymentOrderMetaTable;
+    private SuperMetaTable bankDetailsMetaTable;
 
     public ExportClearingAction() {
         super(TITLE);
@@ -56,6 +59,8 @@ public class ExportClearingAction extends AbstractAction {
                 new SuperMetaTable(MosquitoSingletone.getInstance().getMetaTable("ANALITIKA_STAVKE"));
         this.paymentOrderMetaTable =
                 new SuperMetaTable(MosquitoSingletone.getInstance().getMetaTable("ANALITIKA_IZVODA"));
+        this.bankDetailsMetaTable =
+                new SuperMetaTable(MosquitoSingletone.getInstance().getMetaTable("BANKA_POSLOVNOG_PARTNERA"));
     }
 
     @Override
@@ -68,7 +73,8 @@ public class ExportClearingAction extends AbstractAction {
 
             new Thread(new Runnable() {
                 public void run() {
-                    List<PaymentOrder> paymentOrders = createPaymentOrders();
+                    Map<String, Map<String, String>> foo = new HashMap<>();
+                    List<PaymentOrder> paymentOrders = createPaymentOrders(foo);
                     List<Mt102> mt102s = createMt102s(paymentOrders);
 
                     try {
@@ -76,12 +82,12 @@ public class ExportClearingAction extends AbstractAction {
                             XmlHelper.writeToFile(mt102, "mt102_" + mt102.getMessageId());
 
                             saveClearingOrder(mt102);
-                            for (Mt102Payment mt102Payment : mt102.getPayments().getPayment()) {
-                                saveClearingOrderItem(mt102, mt102Payment);
+                            for (String key : foo.keySet()) {
+                                saveClearingOrderItem(i++, mt102, key, foo.get(key));
                             }
 
                             for (PaymentOrder paymentOrder : paymentOrders)
-                                updatePaymentOrderStatus(paymentOrder);
+                                updatePaymentOrderStatus(foo.get(mt102.getMessageId()), paymentOrder);
                         }
                     } catch (SQLException e1) {
                         e1.printStackTrace();
@@ -94,22 +100,31 @@ public class ExportClearingAction extends AbstractAction {
     }
 
 
-    private List<PaymentOrder> createPaymentOrders() {
+    private List<PaymentOrder> createPaymentOrders(Map<String, Map<String, String>> foo) {
         List<PaymentOrder> ret = null;
         try {
-            CallableStatement cs = DBConnection.getConnection().prepareCall("{ call getUnprocessedPayments (?)}");
-            cs.setString(1, AppData.getInstance().getValue(PIB_BANKE));
-            ResultSet resultSet = cs.executeQuery();
+            CallableStatement statement =
+                    DBConnection.getConnection().prepareCall("{ call getUnprocessedPayments (?)}");
+            statement.setString(1, AppData.getInstance().getValue(PIB_BANKE));
+            ResultSet resultSet = statement.executeQuery();
 
             if (!resultSet.isBeforeFirst()) {
                 throw new SQLException("Nema podataka za export.", null, ErrorMessages.CUSTOM_CODE);
             } else {
+                Map<String, String> bar = new HashMap<>();
                 ret = new ArrayList<>();
 
                 while (resultSet.next()) {
                     PaymentOrder paymentOrder = new PaymentOrder();
 
                     GregorianCalendar cal;
+                    AccountDetails debtorAccountDetails;
+                    AccountDetails creditorAccountDetails;
+
+                    bar.put("PR_PIB", resultSet.getString("PR_PIB"));
+                    bar.put("BAR_RACUN", resultSet.getString("BAR_RACUN"));
+                    bar.put("DSR_IZVOD", resultSet.getString("DSR_IZVOD"));
+                    foo.put(resultSet.getString("ASI_BROJSTAVKE"), bar);
 
                     paymentOrder.setMessageId(resultSet.getString("ASI_BROJSTAVKE"));
                     paymentOrder.setDebtor(resultSet.getString("ASI_DUZNIK"));
@@ -124,13 +139,13 @@ public class ExportClearingAction extends AbstractAction {
                     cal.setTime(resultSet.getDate("ASI_DATVAL"));
                     paymentOrder.setCurrencyDate(new XMLGregorianCalendarImpl(cal));
 
-                    AccountDetails debtorAccountDetails = new AccountDetails();
+                    debtorAccountDetails = new AccountDetails();
                     debtorAccountDetails.setAccountNumber(resultSet.getString("ASI_RACDUZ"));
                     debtorAccountDetails.setModel(resultSet.getInt("ASI_MODZAD"));
                     debtorAccountDetails.setReferenceNumber(resultSet.getString("ASI_PBZAD"));
                     paymentOrder.setDebtorAccountDetails(debtorAccountDetails);
 
-                    AccountDetails creditorAccountDetails = new AccountDetails();
+                    creditorAccountDetails = new AccountDetails();
                     creditorAccountDetails.setAccountNumber(resultSet.getString("ASI_RACPOV"));
                     creditorAccountDetails.setModel(resultSet.getInt("ASI_MODODOB"));
                     creditorAccountDetails.setReferenceNumber(resultSet.getString("ASI_PBODO"));
@@ -155,7 +170,7 @@ public class ExportClearingAction extends AbstractAction {
         Map<String, List<PaymentOrder>> paymentOrdersByBank = new HashMap<>();
 
         for (PaymentOrder paymentOrder : paymentOrders) {
-            String creditorBankCode = paymentOrder.getCreditorAccountDetails().getAccountNumber();//.substring(0, 3); TODO
+            String creditorBankCode = paymentOrder.getCreditorAccountDetails().getAccountNumber().substring(0, 3);
 
             if (!paymentOrdersByBank.containsKey(creditorBankCode)) {
                 paymentOrdersByBank.put(creditorBankCode, new ArrayList<PaymentOrder>());
@@ -166,9 +181,41 @@ public class ExportClearingAction extends AbstractAction {
         }
 
         for (List<PaymentOrder> pos : paymentOrdersByBank.values()) {
-            // TODO get bank details, cache in mapBoolean
+            String debtorBankCode = pos.get(0).getDebtorAccountDetails().getAccountNumber().substring(0, 3);
+            String creditorBankCode = pos.get(0).getDebtorAccountDetails().getAccountNumber().substring(0, 3);
 
-            ret.add(createMt102(pos, null, null));
+            try {
+                BankDetails debtorBankDetails = getBankDetails(debtorBankCode);
+                BankDetails creditorBankDetails = getBankDetails(creditorBankCode);
+
+                ret.add(createMt102(pos, debtorBankDetails, creditorBankDetails));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        return ret;
+    }
+
+    private BankDetails getBankDetails(String bankCode) throws SQLException {
+        BankDetails ret = null;
+
+        StatementExecutor executor = new StatementExecutor(bankDetailsMetaTable.getPkColumnTypes());
+        List<ColumnValue> values = new ArrayList<>();
+        List<String[]> results = null;
+
+        values.add(new ColumnValue("SIFRA_BANKE", bankCode));
+
+        results = executor.execute(new QueryBuilder.Query("SELECT * FROM BANKA_POSLOVNOG_PARTNERA " +
+                "WHERE SIFRA_BANKE=?", EQUALS), values, bankDetailsMetaTable.getBaseColumnCodes());
+
+        if (results.isEmpty()) {
+            throw new SQLException("Nema banke u šifarniku banaka.", null, ErrorMessages.CUSTOM_CODE);
+        } else {
+            ret = new BankDetails();
+            ret.setSwiftCode(results.get(0)[0]);
+            ret.setBankClearingAccountNumber(results.get(0)[1]);
         }
 
         return ret;
@@ -223,45 +270,57 @@ public class ExportClearingAction extends AbstractAction {
     }
 
 
-
     private void saveClearingOrder(Mt102 mt102) throws SQLException {
         StatementExecutor orderExecutor = new StatementExecutor(orderMetaTable.getBaseColumnTypes());
 
         List<ColumnValue> values = new ArrayList<>();
 
+        String debtorBankCode = mt102.getPayments().getPayment().get(0).getDebtorAccountDetails()
+                .getAccountNumber().substring(0, 3);
+        String creditorBankCode = mt102.getPayments().getPayment().get(0).getCreditorAccountDetails()
+                .getAccountNumber().substring(0, 3);
+
         Iterator<String> it = orderMetaTable.getBaseColumnCodes().iterator();
 
         values.add(new ColumnValue(it.next(), mt102.getMessageId()));
-        values.add(new ColumnValue(it.next(), 838)); // TODO real value
-        values.add(new ColumnValue(it.next(), 410));
+        values.add(new ColumnValue(it.next(), debtorBankCode));
+        values.add(new ColumnValue(it.next(), creditorBankCode));
         // TODO update table to support larger amount
         values.add(new ColumnValue(it.next(), mt102.getPayments().getPayment().get(0).getAmount()));
         values.add(new ColumnValue(it.next(), mt102.getDate()));
-        values.add(new ColumnValue(it.next(), false)); // TODO real value
+        values.add(new ColumnValue(it.next(), false));
         values.add(new ColumnValue(it.next(), 1));
 
         orderExecutor.executeProcedure(ProcedureCallFactory.getCreateProcedureCall("MEDJUBANKARSKI_NALOG",
                 values.size()), values);
     }
 
-    private void saveClearingOrderItem(Mt102 mt102, Mt102Payment mt102Payment) throws SQLException {
+    private void saveClearingOrderItem(int j, Mt102 mt102, String baz, Map<String, String> foo)
+            throws SQLException {
         StatementExecutor orderItemExecutor = new StatementExecutor(orderItemMetaTable.getBaseColumnTypes());
 
         List<ColumnValue> values = new ArrayList<>();
         Iterator<String> it = orderItemMetaTable.getBaseColumnCodes().iterator();
 
-        values.add(new ColumnValue(it.next(), i++));
-        values.add(new ColumnValue(it.next(), mt102Payment.getDebtorAccountDetails().getAccountNumber()));
-        values.add(new ColumnValue(it.next(), mt102Payment.getPaymentOrderId()));
-        values.add(new ColumnValue(it.next(), mt102.getDate()));
-        values.add(new ColumnValue(it.next(), 0));
-        values.add(new ColumnValue(it.next(), 1)); // TODO real value
+        values.add(new ColumnValue(it.next(), j)); // TODO autoincrement?
+        values.add(new ColumnValue(it.next(), mt102.getMessageId()));
+        values.add(new ColumnValue(it.next(), foo.get("PR_PIB")));
+        values.add(new ColumnValue(it.next(), foo.get("BAR_RACUN")));
+        values.add(new ColumnValue(it.next(), foo.get("DSR_IZVOD")));
+        values.add(new ColumnValue(it.next(), baz));
+
+        System.out.println();
+        System.out.println(foo.get("PR_PIB"));
+        System.out.println(foo.get("BAR_RACUN"));
+        System.out.println(foo.get("DSR_IZVOD"));
+        System.out.println(baz);
+        System.out.println();
 
         orderItemExecutor.executeProcedure(ProcedureCallFactory.getCreateProcedureCall("ANALITIKA_STAVKE",
                 values.size()), values);
     }
 
-    private void updatePaymentOrderStatus(PaymentOrder paymentOrder) throws SQLException {
+    private void updatePaymentOrderStatus(Map<String, String> foo, PaymentOrder paymentOrder) throws SQLException {
         Map<String, String> columnTypes = paymentOrderMetaTable.getPkColumnTypes();
         columnTypes.put("ASI_STATUS", "java.lang.String");
 
@@ -272,9 +331,10 @@ public class ExportClearingAction extends AbstractAction {
         columnCodes.add("ASI_STATUS");
         Iterator<String> it = columnCodes.iterator();
 
-        values.add(new ColumnValue(it.next(), paymentOrder.getDebtorAccountDetails().getAccountNumber()));
-        values.add(new ColumnValue(it.next(), 340)); // TODO use valid value
-        values.add(new ColumnValue(it.next(), paymentOrder.getMessageId()));
+        values.add(new ColumnValue(it.next(), foo.get("PR_PIB")));
+        values.add(new ColumnValue(it.next(), foo.get("BAR_RACUN")));
+        values.add(new ColumnValue(it.next(), foo.get("DSR_IZVOD")));
+        values.add(new ColumnValue(it.next(), foo.get("ASI_BROJSTAVKE")));
         values.add(new ColumnValue(it.next(), "P"));
 
         orderItemExecutor.executeProcedure("{ call updateAnalitikaIzvodaStatus(?,?,?,?)}", values);

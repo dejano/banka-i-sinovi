@@ -23,7 +23,6 @@ public class BankSelectionDialog {
     private static final String GET_BANKS_QUERY = "SELECT PR_NAZIV, PR_PIB FROM PRAVNA_LICA " +
             "WHERE PR_BANKA=1 ORDER BY PR_NAZIV";
 
-
     public static String show() {
         String ret = null;
 

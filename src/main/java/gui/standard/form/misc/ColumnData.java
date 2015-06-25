@@ -22,20 +22,25 @@ public class ColumnData {
     private String defaultValue;
     private String defaultNewValue;
     private boolean lookup;
+    private boolean zoom;
     private boolean hiddenColumn;
     private boolean hiddenInput;
     private boolean nonEditable;
     private boolean lookupInsert;
 
     public ColumnData(MetaColumn metaColumn, int index, int baseIndex) {
+        this(metaColumn, metaColumn.getParentTable(), index, baseIndex);
+    }
+
+    public ColumnData(MetaColumn metaColumn, String tableName, int index, int baseIndex) {
         System.out.println(metaColumn.getCode() + " " + metaColumn.getJClassName()
-                + " " + metaColumn.getLength()+ " " + metaColumn.getPrecision());
+                + " " + metaColumn.getLength() + " " + metaColumn.getPrecision());
 
         this.index = index;
         this.baseIndex = baseIndex;
         this.name = metaColumn.getName();
         this.code = metaColumn.getCode();
-        this.tableName = metaColumn.getParentTable();
+        this.tableName = tableName;
         this.className = metaColumn.getJClassName();
         this.length = metaColumn.getLength();
         this.precision = metaColumn.getPrecision();
@@ -206,5 +211,13 @@ public class ColumnData {
 
     public void setNonEditable(boolean nonEditable) {
         this.nonEditable = nonEditable;
+    }
+
+    public boolean isZoom() {
+        return zoom;
+    }
+
+    public void setZoom(boolean zoom) {
+        this.zoom = zoom;
     }
 }

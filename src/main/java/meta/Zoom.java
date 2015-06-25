@@ -27,6 +27,19 @@ public class Zoom {
         return ret;
     }
 
+    public boolean isZoomColumn(String columnCode){
+        boolean ret = false;
+
+        for (ColumnMapping columnMapping : columns) {
+            if(columnMapping.getFrom().equals(columnCode)){
+                ret = true;
+                break;
+            }
+        }
+
+        return ret;
+    }
+
     public String getTableCode() {
         return tableCode;
     }

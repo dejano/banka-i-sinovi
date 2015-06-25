@@ -49,10 +49,6 @@
           "formName": "vrstaPlacanja"
         },
         {
-          "text": "Kurs u valuti",
-          "formName": "kursUValuti"
-        },
-        {
           "text": "Banke poslovnih partnera",
           "formName": "bankaPoslovnogPartnera"
         }

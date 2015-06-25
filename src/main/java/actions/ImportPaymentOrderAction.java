@@ -62,7 +62,6 @@ public class ImportPaymentOrderAction extends AbstractAction {
                 //|| paymentOrder.getAmount().compareTo(new BigDecimal(250000)) > 0 // TODO enable
                     ) {
                 rtgs(paymentOrder);
-
             } else {
                 // TODO MAJOR store payment with insert and trigger
             }

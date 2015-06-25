@@ -38,6 +38,7 @@ public class QueryBuilder {
 
     private static final String ORDER_BY = " ORDER BY ";
 
+    private static final char SPACE = ' ';
     private static final char DOT = '.';
     private static final String COMMA = ", ";
 
@@ -97,11 +98,11 @@ public class QueryBuilder {
     public QueryBuilder leftOuterJoin(String baseTableName, List<TableJoin> tableJoins) {
         for (TableJoin tableJoin : tableJoins) {
             relationBuilder.append(LEFT_OUTER_JOIN)
-                    .append(tableJoin.getTableName())
+                    .append(tableJoin.getTableName()).append(SPACE).append(tableJoin.getAlias())
                     .append(ON)
                     .append(baseTableName).append(DOT).append(tableJoin.getFromColumn())
                     .append(EQUAL)
-                    .append(tableJoin.getTableName()).append(DOT).append(tableJoin.getToColumn());
+                    .append(tableJoin.getAlias()).append(DOT).append(tableJoin.getToColumn());
         }
 
         return this;

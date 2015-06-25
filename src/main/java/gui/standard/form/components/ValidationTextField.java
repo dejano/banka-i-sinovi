@@ -70,10 +70,11 @@ public class ValidationTextField extends JTextField implements IValidationTextFi
 
     private String patternKey;
 
+    private static final int MAX_COLUMNS = 60;
 
     public ValidationTextField(boolean nullable, int type, int size, int columns) {
-        super(columns);
-        required = nullable;
+        super(columns > MAX_COLUMNS ? MAX_COLUMNS : columns);
+        required = !nullable;
         onlyDigits = isIntNumericType(type);
         if (size != -1)
             maxSize = size;
@@ -85,7 +86,7 @@ public class ValidationTextField extends JTextField implements IValidationTextFi
     }
 
     public ValidationTextField(boolean required, String javaType, int columns) {
-        super(columns);
+        super(columns > MAX_COLUMNS ? MAX_COLUMNS : columns);
         this.required = required;
         onlyDigits = isJavaNumericType(javaType);
         maxSize = 1000;

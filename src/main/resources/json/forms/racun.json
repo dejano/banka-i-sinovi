@@ -43,12 +43,36 @@
       "columns": [
         {
           "code": "VA_NAZIV",
-          "name": "Naziv Valute"
+          "name": "Naziv valute"
+        }
+      ]
+    },
+    "JMBG": {
+      "table": "KLIJENT",
+      "from": "JMBG",
+      "to": "JMBG",
+      "columns": [
+        {
+          "code": "IME",
+          "name": "Ime"
+        },
+        {
+          "code": "PREZIME",
+          "name": "Prezime"
         }
       ]
     }
   },
   "zoomData": [
+    {
+      "tableCode": "klijent",
+      "columns": [
+        {
+          "from": "JMBG",
+          "to": "JMBG"
+        }
+      ]
+    },
     {
       "tableCode": "valuta",
       "columns": [

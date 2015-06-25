@@ -24,7 +24,6 @@ public class DataPanel extends JPanel {
 
     private static final long serialVersionUID = 1L;
 
-    //    private FormData formData;
     private Form parent;
     private Map<String, JComponent> inputs = new LinkedHashMap<>();
 
@@ -48,34 +47,33 @@ public class DataPanel extends JPanel {
 
                 this.inputs.put(columnData.getCode(), component);
 
-                if (formData.isReadOnly()
-                        || (formData.isInGroup(columnData.getCode(), LOOKUP, PRIMARY_KEYS, NEXT)
-                        && !formData.isInGroup(columnData.getCode(), LOOKUP_INSERT))
-                        || formData.getZoomBaseColumns().contains(columnData.getCode())) {
+                if ((formData.isInGroup(columnData.getCode(), LOOKUP, PRIMARY_KEYS, NEXT, ZOOM)
+                        && !formData.isInGroup(columnData.getCode(), LOOKUP_INSERT)) || formData.isReadOnly()) {
                     if (component instanceof JTextComponent)
-                        ((JTextComponent) component).setEditable(!readOnlyForm);
+                        ((JTextComponent) component).setEditable(false);
                     else
                         component.setEnabled(false);
                 }
 
                 this.add(label);
-                this.add(component, "wrap");
 
-                if (formData.getZoomBaseColumns().contains(columnData.getCode())) {
-                    if (!readOnlyForm) {
-                        JButton zoomBtn = new JButton(new ZoomFormAction(parent,
-                                formData.getZoomTableCode(columnData.getCode())));
-                        this.add(zoomBtn);
-                    }
+                if (!formData.isInGroup(columnData.getCode(), ZOOM) || readOnlyForm) {
+                    this.add(component, "wrap");
+                } else {
+                    JButton zoomBtn = new JButton(new ZoomFormAction(parent,
+                            formData.getZoomTableCode(columnData.getCode())));
+
+                    this.add(component);
+                    this.add(zoomBtn, "wrap");
                 }
             }
         }
     }
 
-    public java.util.List<String> getValues() {
+    public java.util.List<String> getValues() throws Exception {
         java.util.List<String> ret = new ArrayList<>();
 
-        for (String columnCode : parent.getFormData().getColumnCodes(ALL)) {
+        for (String columnCode : parent.getFormData().getColumnCodes(BASE)) {
             JComponent component = inputs.get(columnCode);
 
             if (component != null) {
@@ -87,7 +85,11 @@ public class DataPanel extends JPanel {
                 } else if (component instanceof JDateChooser) {
                     JDateChooser dateChooser = (JDateChooser) component;
                     SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
-                    ret.add(df.format(dateChooser.getDate()));
+                    try {
+                        ret.add(df.format(dateChooser.getDate()));
+                    } catch (Exception e) {
+                        throw new Exception("Uneti datum nije validan.");
+                    }
                 }
             } else {
                 String defaultValue = parent.getFormData().getDefaultValue(columnCode);
@@ -198,9 +200,5 @@ public class DataPanel extends JPanel {
 
     public Map<String, JComponent> getInputs() {
         return inputs;
-    }
-
-    public void setInputs(Map<String, JComponent> inputs) {
-        this.inputs = inputs;
     }
 }

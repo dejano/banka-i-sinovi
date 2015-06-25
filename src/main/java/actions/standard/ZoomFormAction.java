@@ -32,12 +32,10 @@ public class ZoomFormAction extends AbstractAction {
 
     public void actionPerformed(ActionEvent event) {
         try {
-//            Form zoomForm = FormCreator.getStandardForm(event.getActionCommand());
-
             List<Zoom> zoomConfig = standardForm.getTableModel().getFormData().getZoomData();
 
-            List<String> zoomColumns = standardForm.getTableModel().getFormData().getZoomColumns(event.getActionCommand());
-
+            List<String> zoomColumns =
+                    standardForm.getTableModel().getFormData().getZoomColumns(event.getActionCommand());
 
             String mutualCol = null;
             if (zoomColumns.size() > 1) {

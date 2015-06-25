@@ -23,7 +23,13 @@ public class ProcedureCallFactory {
     }
 
     public static String getCreateProcedureCall(String tableName, int columnCount) {
-        return getCreateProcedureCall(columnCount, 0, tableName, cachedParameterCalls.get(tableName));
+        Map<ProcedureCallEnum, String> tableCpc = cachedParameterCalls.get(tableName);
+        if (tableCpc == null) {
+            tableCpc = new HashMap<>();
+            cachedParameterCalls.put(tableName, tableCpc);
+        }
+
+        return getCreateProcedureCall(columnCount, 0, tableName, tableCpc);
     }
 
     public static String getProcedureCall(FormData formData, ProcedureCallEnum type) {
@@ -73,8 +79,7 @@ public class ProcedureCallFactory {
 
     private static String getCreateProcedureCall(int columnCount, int pkColumnCount,
                                                  String tableName, Map<ProcedureCallEnum, String> tableCpc) {
-        String createProcedureCall = cachedParameterCalls.get(tableName)
-                .get(CREATE_PROCEDURE_CALL);
+        String createProcedureCall = tableCpc.get(CREATE_PROCEDURE_CALL);
 
         // { call c_tableName(?,...,?)}
 

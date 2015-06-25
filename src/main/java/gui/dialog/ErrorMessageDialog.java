@@ -12,9 +12,9 @@ import java.sql.SQLException;
 public class ErrorMessageDialog {
 
     public static void show(Window window, Exception exception) {
-        if (exception instanceof SQLException) {
-            String errorMessage;
+        String errorMessage;
 
+        if (exception instanceof SQLException) {
             int errorCode = ((SQLException) exception).getErrorCode();
 
             if (errorCode == ErrorMessages.CUSTOM_CODE) {
@@ -24,10 +24,13 @@ public class ErrorMessageDialog {
             } else {
                 errorMessage = exception.getMessage();
             }
-
-            JOptionPane.showMessageDialog(window, errorMessage, ErrorMessages.TITLE,
-                    JOptionPane.ERROR_MESSAGE);
+        } else {
+            errorMessage = exception.getMessage();
         }
+
+        JOptionPane.showMessageDialog(window, errorMessage, ErrorMessages.TITLE,
+                JOptionPane.ERROR_MESSAGE);
+
     }
 
     private ErrorMessageDialog() {

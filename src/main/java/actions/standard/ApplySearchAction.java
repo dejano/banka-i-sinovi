@@ -32,17 +32,19 @@ public class ApplySearchAction extends AbstractAction {
         FormModeEnum mode = form.getMode();
         try {
             search();
-        } catch (SQLException exception) {
-            if (exception.getErrorCode() == ErrorMessages.CUSTOM_CODE) {
-                JOptionPane.showMessageDialog(form, exception.getMessage(), ErrorMessages.TITLE,
-                        JOptionPane.ERROR_MESSAGE);
-            } else {
+        } catch (Exception exception) {
+            if(exception instanceof SQLException) {
+                if (((SQLException)exception).getErrorCode() == ErrorMessages.CUSTOM_CODE) {
+                    JOptionPane.showMessageDialog(form, exception.getMessage(), ErrorMessages.TITLE,
+                            JOptionPane.ERROR_MESSAGE);
+                }
+            }else {
                 exception.printStackTrace();
             }
         }
     }
 
-    private void search() throws SQLException {
+    private void search() throws Exception {
         java.util.List<String> values = form.getDataPanel().getValues();
         form.getTableModel().search(values.toArray(new String[values.size()]));
     }

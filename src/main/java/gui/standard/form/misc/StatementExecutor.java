@@ -2,6 +2,7 @@ package gui.standard.form.misc;
 
 import database.DBConnection;
 import gui.standard.ColumnValue;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.math.BigDecimal;
@@ -53,7 +54,8 @@ public class StatementExecutor {
         DBConnection.getConnection().commit();
     }
 
-    public void executeProcedures(List<String> procedureCalls, List<List<ColumnValue>> columnValueValues) throws SQLException {
+    public void executeProcedures(List<String> procedureCalls, List<List<ColumnValue>> columnValueValues)
+            throws SQLException {
         int procedureCount = 0;
 
         for (String procedureCall : procedureCalls) {
@@ -129,6 +131,9 @@ public class StatementExecutor {
 
     private void setValue(PreparedStatement statement, String columnTypeClass, int i, Object value, boolean like)
             throws SQLException {
+        if(value instanceof  String)
+            value = ((String) value).trim();
+
         if (like) {
             if (value == null || value.equals("")) {
                 statement.setString(i, "%");
@@ -146,7 +151,6 @@ public class StatementExecutor {
                     case "java.math.BigInteger":
                     case "java.math.BigDecimal":
                         if (value instanceof String) {
-                            ((String)value).trim();
                             try {
                                 statement.setInt(i, Integer.parseInt((String) value));
                             } catch (Exception e) {

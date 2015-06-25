@@ -31,6 +31,19 @@ public class FormMetaData {
     private List<NextMetaData> nextData = new ArrayList<>();
     private Map<AppData.AppDataEnum, String> mapToAppData = new HashMap<>();
 
+    public boolean isZoomColumn(String columnCode){
+        boolean ret = false;
+
+        for (Zoom zoom : zoomData) {
+            if(zoom.isZoomColumn(columnCode)) {
+                ret = true;
+                break;
+            }
+        }
+
+        return ret;
+    }
+
     public String getTitle() {
         return title;
     }

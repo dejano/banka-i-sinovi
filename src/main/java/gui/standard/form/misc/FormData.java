@@ -19,6 +19,8 @@ import static gui.standard.form.misc.FormData.ColumnGroupsEnum.*;
  */
 public class FormData {
 
+    private static final String ALIAS_BASE = "lookupTable";
+
     private String tableName;
     private Form.FormType formType;
     private String condition;
@@ -43,6 +45,7 @@ public class FormData {
         Vector<MetaColumn> metaColumns = (Vector<MetaColumn>) metaTable.cColumns();
         int columnIndex = 0;
         int baseIndex = 0;
+        int aliasCount = 0;
         for (int i = 0; i < metaTable.getTotalColumns(); i++) {
             MetaColumn column = metaColumns.get(i);
             String defaultValue = fmd.getDefaultValues().get(column.getCode());
@@ -62,10 +65,11 @@ public class FormData {
             newColumnData.setHiddenColumn(hiddenColumn);
             newColumnData.setHiddenInput(hiddenInput);
             newColumnData.setNonEditable(nonEditable);
+            newColumnData.setZoom(fmd.isZoomColumn(column.getCode()));
 
             if (lookupMetaData != null)
-                lookupJoins.add(new TableJoin(lookupMetaData.getTable(), lookupMetaData.getFrom(),
-                        lookupMetaData.getTo()));
+                lookupJoins.add(new TableJoin(lookupMetaData.getTable(), ALIAS_BASE + aliasCount,
+                        lookupMetaData.getFrom(), lookupMetaData.getTo()));
 
             columns.put(column.getCode(), newColumnData);
 
@@ -77,14 +81,16 @@ public class FormData {
                             .getColByTableDotColumnCode(lookupTable.getCode() + "."
                                     + columnCodeValueCode.getCode());
 
-                    ColumnData newLookupColumnData = new ColumnData(lookupMetaColumn, columnIndex++,
-                            lookupMetaData.isLookupInsert() ? baseIndex++ : -1);
+                    ColumnData newLookupColumnData = new ColumnData(lookupMetaColumn, ALIAS_BASE + aliasCount,
+                            columnIndex++, lookupMetaData.isLookupInsert() ? baseIndex++ : -1);
                     newLookupColumnData.setName(columnCodeValueCode.getName());
                     newLookupColumnData.setLookup(true);
                     newLookupColumnData.setLookupInsert(lookupMetaData.isLookupInsert());
 
                     columns.put(lookupMetaColumn.getCode(), newLookupColumnData);
                 }
+
+                aliasCount++;
             }
         }
     }
@@ -135,7 +141,7 @@ public class FormData {
     }
 
     public boolean isEditable(String columnCode) {
-        return isInGroup(columnCode, BASE) && !isInGroup(columnCode, NEXT, PRIMARY_KEYS, NON_EDITABLE);
+        return isInGroup(columnCode, BASE) && !isInGroup(columnCode, NEXT, PRIMARY_KEYS, NON_EDITABLE, ZOOM);
     }
 
     public int getColumnIndex(String columnCode, boolean useBase) {
@@ -246,6 +252,9 @@ public class FormData {
                 break;
             case NON_EDITABLE:
                 ret = columnData.isNonEditable();
+                break;
+            case ZOOM:
+                ret = columnData.isZoom();
                 break;
         }
 
@@ -417,7 +426,7 @@ public class FormData {
     }
 
     public enum ColumnGroupsEnum {
-        ALL, BASE, PRIMARY_KEYS, LOOKUP, NEXT, LOOKUP_INSERT, NON_EDITABLE
+        ALL, BASE, PRIMARY_KEYS, LOOKUP, NEXT, LOOKUP_INSERT, NON_EDITABLE, ZOOM
     }
 }
 

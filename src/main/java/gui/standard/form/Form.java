@@ -388,7 +388,9 @@ public class Form extends JDialog {
 
                     if (value != null) {
                         dataPanel.setValue(columnCode, value, false);
-                    } else if (formData.isInGroup(columnCode, BASE)) {
+                    } else if (formData.isInGroup(columnCode, BASE)
+                            && (!formData.isInGroup(columnCode, ZOOM, NEXT)
+                            || formData.isInGroup(columnCode, LOOKUP_INSERT))) {
                         dataPanel.setBlankEditableInput(columnCode);
                     }
                 }

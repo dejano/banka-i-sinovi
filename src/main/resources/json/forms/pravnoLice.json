@@ -2,6 +2,9 @@
   "title": "Pravna lica",
   "tableName": "KLIJENT",
   "customWhere": "KLIJENT.PRAVNO_LICE_=1",
+  "nonEditableColumns": [
+    "PR_PIB"
+  ],
   "mapToAppData": {
     "pibBanke": "PRA_PR_PIB"
   },

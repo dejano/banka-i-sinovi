@@ -5,11 +5,13 @@ package gui.standard.form.misc;
  */
 public class TableJoin {
     private String tableName;
+    private String alias;
     private String fromColumn;
     private String toColumn;
 
-    public TableJoin(String tableName, String fromColumn, String toColumn) {
+    public TableJoin(String tableName, String alias, String fromColumn, String toColumn) {
         this.tableName = tableName;
+        this.alias = alias;
         this.fromColumn = fromColumn;
         this.toColumn = toColumn;
     }
@@ -20,6 +22,14 @@ public class TableJoin {
 
     public void setTableName(String tableName) {
         this.tableName = tableName;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
 
     public String getFromColumn() {

@@ -26,9 +26,9 @@ public class ComponentCreator {
                         className.substring(className.lastIndexOf('.')), columnData.getLength() + 5);
                 break;
             case "java.math.BigInteger":
-                component = new ValidationTextField(columnData.isMandatory(),
+                component = new ValidationTextField(!columnData.isMandatory(),
                         Types.BIGINT, columnData.getLength(), columnData.getLength());
-                ((ValidationTextField)component).setMaxSize(columnData.getLength());
+                ((ValidationTextField) component).setMaxSize(columnData.getLength());
                 break;
             case "java.math.BigDecimal":
                 System.out.println(columnData.getCode() + " LENGTH: " + columnData.getLength() + "," + columnData.getPrecision());
@@ -36,10 +36,10 @@ public class ComponentCreator {
                     System.out.println("ComponentCreator.getComponent");
                     component = new ValidationTextField(!columnData.isMandatory(),
                             Types.BIGINT, columnData.getLength(), true, true, columnData.getLength());
-                    ((ValidationTextField)component).setMaxSize(columnData.getLength());
+                    ((ValidationTextField) component).setMaxSize(columnData.getLength());
                 } else {
                     component = new DecimalTextField(columnData.getLength(),
-                            columnData.getLength() , columnData.getPrecision(), false);
+                            columnData.getLength(), columnData.getPrecision(), false);
 
                 }
 

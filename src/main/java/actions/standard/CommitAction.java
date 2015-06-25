@@ -56,19 +56,18 @@ public class CommitAction extends AbstractAction {
                     form.getDataTable().scrollRectToVisible(new Rectangle(form.getDataTable().getCellRect(newRowIndex,
                             0, true)));
                 }
-
-            } catch (SQLException exception) {
+            } catch (Exception exception) {
                 ErrorMessageDialog.show(form, exception);
             }
         }
     }
 
-    private int add() throws SQLException {
+    private int add() throws Exception {
         java.util.List<String> values = form.getDataPanel().getValues();
         return form.getTableModel().insertRow(values.toArray(new String[values.size()]));
     }
 
-    private int update() throws SQLException {
+    private int update() throws Exception {
         java.util.List<String> values = form.getDataPanel().getValues();
 
         return form.getTableModel().updateRow(form.getDataTable().getSelectedRow(),
