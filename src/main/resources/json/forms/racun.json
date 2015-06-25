@@ -65,7 +65,7 @@
   },
   "zoomData": [
     {
-      "tableCode": "klijent",
+      "tableCode": "fizickoLice",
       "columns": [
         {
           "from": "JMBG",

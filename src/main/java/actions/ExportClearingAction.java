@@ -73,21 +73,23 @@ public class ExportClearingAction extends AbstractAction {
 
             new Thread(new Runnable() {
                 public void run() {
-                    Map<String, Map<String, String>> foo = new HashMap<>();
-                    List<PaymentOrder> paymentOrders = createPaymentOrders(foo);
-                    List<Mt102> mt102s = createMt102s(paymentOrders);
+                    Map<Integer, Mt102> poHashMt102Map = new HashMap<>();
+                    Map<Integer, Map<String, String>> poHashPoPkValues = new HashMap<>();
+                    List<PaymentOrder> paymentOrders = createPaymentOrders(poHashPoPkValues);
+                    List<Mt102> mt102s = createMt102s(paymentOrders, poHashMt102Map);
 
                     try {
                         for (Mt102 mt102 : mt102s) {
                             XmlHelper.writeToFile(mt102, "mt102_" + mt102.getMessageId());
 
                             saveClearingOrder(mt102);
-                            for (String key : foo.keySet()) {
-                                saveClearingOrderItem(i++, mt102, key, foo.get(key));
-                            }
 
-                            for (PaymentOrder paymentOrder : paymentOrders)
-                                updatePaymentOrderStatus(foo.get(mt102.getMessageId()), paymentOrder);
+//                            for (PaymentOrder po : paymentOrders)
+//                                updatePaymentOrderStatus(poHashPoPkValues.get(po.hashCode()), po);
+                        }
+
+                        for (Integer poHash : poHashPoPkValues.keySet()) {
+                            saveClearingOrderItem(i++, poHashMt102Map.get(poHash), poHashPoPkValues.get(poHash));
                         }
                     } catch (SQLException e1) {
                         e1.printStackTrace();
@@ -100,7 +102,7 @@ public class ExportClearingAction extends AbstractAction {
     }
 
 
-    private List<PaymentOrder> createPaymentOrders(Map<String, Map<String, String>> foo) {
+    private List<PaymentOrder> createPaymentOrders(Map<Integer, Map<String, String>> poHashPoPkValues) {
         List<PaymentOrder> ret = null;
         try {
             CallableStatement statement =
@@ -111,7 +113,7 @@ public class ExportClearingAction extends AbstractAction {
             if (!resultSet.isBeforeFirst()) {
                 throw new SQLException("Nema podataka za export.", null, ErrorMessages.CUSTOM_CODE);
             } else {
-                Map<String, String> bar = new HashMap<>();
+                Map<String, String> pkValues = new HashMap<>();
                 ret = new ArrayList<>();
 
                 while (resultSet.next()) {
@@ -121,10 +123,11 @@ public class ExportClearingAction extends AbstractAction {
                     AccountDetails debtorAccountDetails;
                     AccountDetails creditorAccountDetails;
 
-                    bar.put("PR_PIB", resultSet.getString("PR_PIB"));
-                    bar.put("BAR_RACUN", resultSet.getString("BAR_RACUN"));
-                    bar.put("DSR_IZVOD", resultSet.getString("DSR_IZVOD"));
-                    foo.put(resultSet.getString("ASI_BROJSTAVKE"), bar);
+                    pkValues.put("PR_PIB", resultSet.getString("PR_PIB"));
+                    pkValues.put("BAR_RACUN", resultSet.getString("BAR_RACUN"));
+                    pkValues.put("DSR_IZVOD", resultSet.getString("DSR_IZVOD"));
+                    pkValues.put("ASI_BROJSTAVKE", resultSet.getString("ASI_BROJSTAVKE"));
+                    poHashPoPkValues.put(paymentOrder.hashCode(), pkValues);
 
                     paymentOrder.setMessageId(resultSet.getString("ASI_BROJSTAVKE"));
                     paymentOrder.setDebtor(resultSet.getString("ASI_DUZNIK"));
@@ -164,7 +167,7 @@ public class ExportClearingAction extends AbstractAction {
         return ret;
     }
 
-    private List<Mt102> createMt102s(List<PaymentOrder> paymentOrders) {
+    private List<Mt102> createMt102s(List<PaymentOrder> paymentOrders, Map<Integer, Mt102> poHashCodeMt102Map) {
         List<Mt102> ret = new ArrayList<>();
 
         Map<String, List<PaymentOrder>> paymentOrdersByBank = new HashMap<>();
@@ -193,6 +196,9 @@ public class ExportClearingAction extends AbstractAction {
                 e.printStackTrace();
             }
 
+            for (PaymentOrder po : pos) {
+                poHashCodeMt102Map.put(po.hashCode(), ret.get(ret.size() - 1));
+            }
         }
 
         return ret;
@@ -269,7 +275,6 @@ public class ExportClearingAction extends AbstractAction {
         return mt102Payment;
     }
 
-
     private void saveClearingOrder(Mt102 mt102) throws SQLException {
         StatementExecutor orderExecutor = new StatementExecutor(orderMetaTable.getBaseColumnTypes());
 
@@ -295,7 +300,7 @@ public class ExportClearingAction extends AbstractAction {
                 values.size()), values);
     }
 
-    private void saveClearingOrderItem(int j, Mt102 mt102, String baz, Map<String, String> foo)
+    private void saveClearingOrderItem(int j, Mt102 mt102, Map<String, String> foo)
             throws SQLException {
         StatementExecutor orderItemExecutor = new StatementExecutor(orderItemMetaTable.getBaseColumnTypes());
 
@@ -307,14 +312,7 @@ public class ExportClearingAction extends AbstractAction {
         values.add(new ColumnValue(it.next(), foo.get("PR_PIB")));
         values.add(new ColumnValue(it.next(), foo.get("BAR_RACUN")));
         values.add(new ColumnValue(it.next(), foo.get("DSR_IZVOD")));
-        values.add(new ColumnValue(it.next(), baz));
-
-        System.out.println();
-        System.out.println(foo.get("PR_PIB"));
-        System.out.println(foo.get("BAR_RACUN"));
-        System.out.println(foo.get("DSR_IZVOD"));
-        System.out.println(baz);
-        System.out.println();
+        values.add(new ColumnValue(it.next(), foo.get("ASI_BROJSTAVKE")));
 
         orderItemExecutor.executeProcedure(ProcedureCallFactory.getCreateProcedureCall("ANALITIKA_STAVKE",
                 values.size()), values);
@@ -337,6 +335,6 @@ public class ExportClearingAction extends AbstractAction {
         values.add(new ColumnValue(it.next(), foo.get("ASI_BROJSTAVKE")));
         values.add(new ColumnValue(it.next(), "P"));
 
-        orderItemExecutor.executeProcedure("{ call updateAnalitikaIzvodaStatus(?,?,?,?)}", values);
+        orderItemExecutor.executeProcedure("{ call updateAnalitikaIzvodaStatus(?,?,?,?,?)}", values);
     }
 }

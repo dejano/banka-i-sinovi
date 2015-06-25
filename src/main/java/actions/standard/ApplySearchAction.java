@@ -1,5 +1,6 @@
 package actions.standard;
 
+import gui.dialog.ErrorMessageDialog;
 import gui.standard.form.Form;
 import gui.standard.form.StatusBar.FormModeEnum;
 import messages.ErrorMessages;
@@ -18,6 +19,7 @@ import static gui.standard.form.misc.FormData.ColumnGroupsEnum.BASE;
 public class ApplySearchAction extends AbstractAction {
 
     private static final long serialVersionUID = 1L;
+
     private Form form;
 
     public ApplySearchAction(Form form) {
@@ -29,18 +31,10 @@ public class ApplySearchAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        FormModeEnum mode = form.getMode();
         try {
             search();
         } catch (Exception exception) {
-            if(exception instanceof SQLException) {
-                if (((SQLException)exception).getErrorCode() == ErrorMessages.CUSTOM_CODE) {
-                    JOptionPane.showMessageDialog(form, exception.getMessage(), ErrorMessages.TITLE,
-                            JOptionPane.ERROR_MESSAGE);
-                }
-            }else {
-                exception.printStackTrace();
-            }
+            ErrorMessageDialog.show(form, exception);
         }
     }
 

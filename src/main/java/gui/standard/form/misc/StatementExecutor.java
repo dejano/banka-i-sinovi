@@ -131,7 +131,9 @@ public class StatementExecutor {
 
     private void setValue(PreparedStatement statement, String columnTypeClass, int i, Object value, boolean like)
             throws SQLException {
-        if(value instanceof  String)
+        System.out.println(value);
+
+        if (value instanceof String)
             value = ((String) value).trim();
 
         if (like) {
@@ -157,7 +159,7 @@ public class StatementExecutor {
                                 try {
                                     statement.setDouble(i, Double.parseDouble((String) value));
                                 } catch (Exception e1) {
-                                        statement.setBigDecimal(i, new BigDecimal((String) value));
+                                    statement.setBigDecimal(i, new BigDecimal((String) value));
                                 }
                             }
                         } else if (value instanceof Integer) {
@@ -195,7 +197,7 @@ public class StatementExecutor {
                     case DATE:
                         if (value instanceof String) {
                             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-                            try{
+                            try {
                                 java.util.Date date = dateFormat.parse((String) value);
                                 Date sqlDate = new Date(date.getTime());
                                 statement.setDate(i, sqlDate);
