@@ -43,6 +43,7 @@ public class StatementExecutor {
         for (ColumnValue columnValue : columnValueValues) {
             String columnTypeClass = columnCodeTypes.get(columnValue.getCode());
             Object value = columnValue.getValue();
+            System.out.println(columnValue.getCode() + " " + value);
 
             setValue(statement, columnTypeClass, i++, value, false);
         }
@@ -130,8 +131,6 @@ public class StatementExecutor {
 
     private void setValue(PreparedStatement statement, String columnTypeClass, int i, Object value, boolean like)
             throws SQLException {
-        System.out.println(value);
-
         if (value instanceof String)
             value = ((String) value).trim();
 

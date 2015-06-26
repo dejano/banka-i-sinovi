@@ -39,7 +39,7 @@ public class ApplySearchAction extends AbstractAction {
     }
 
     private void search() throws Exception {
-        java.util.List<String> values = form.getDataPanel().getValues();
+        java.util.List<String> values = form.getDataPanel().getValues(ALL);
         form.getTableModel().search(values.toArray(new String[values.size()]));
     }
 }

@@ -73,29 +73,36 @@ public class ExportClearingAction extends AbstractAction {
 
             new Thread(new Runnable() {
                 public void run() {
-                    Map<Integer, Mt102> poHashMt102Map = new HashMap<>();
                     Map<Integer, Map<String, String>> poHashPoPkValues = new HashMap<>();
+
                     List<PaymentOrder> paymentOrders = createPaymentOrders(poHashPoPkValues);
-                    List<Mt102> mt102s = createMt102s(paymentOrders, poHashMt102Map);
 
-                    try {
-                        for (Mt102 mt102 : mt102s) {
-                            XmlHelper.writeToFile(mt102, "mt102_" + mt102.getMessageId());
+                    if (paymentOrders == null || paymentOrders.size() == 0)
+                        Toast.show(App.getMainFrame(), "Nema poruka za slanje.");
+                    else {
+                        Map<Integer, Mt102> poHashMt102Map = new HashMap<>();
 
-                            saveClearingOrder(mt102);
+                        List<Mt102> mt102s = createMt102s(paymentOrders, poHashMt102Map);
 
-//                            for (PaymentOrder po : paymentOrders)
-//                                updatePaymentOrderStatus(poHashPoPkValues.get(po.hashCode()), po);
+                        try {
+                            for (Mt102 mt102 : mt102s) {
+                                XmlHelper.writeToFile(mt102, "mt102_" + mt102.getMessageId());
+
+                                saveClearingOrder(mt102);
+                            }
+
+                            for (Integer poHash : poHashPoPkValues.keySet())
+                                saveClearingOrderItem(i++, poHashMt102Map.get(poHash), poHashPoPkValues.get(poHash));
+
+
+                            for (PaymentOrder po : paymentOrders)
+                                updatePaymentOrderStatus(poHashPoPkValues.get(po.hashCode()));
+                        } catch (SQLException e1) {
+                            e1.printStackTrace();
                         }
 
-                        for (Integer poHash : poHashPoPkValues.keySet()) {
-                            saveClearingOrderItem(i++, poHashMt102Map.get(poHash), poHashPoPkValues.get(poHash));
-                        }
-                    } catch (SQLException e1) {
-                        e1.printStackTrace();
+                        Toast.show(App.getMainFrame(), "Poruke poslate.");
                     }
-
-                    Toast.show(App.getMainFrame(), "Poruke poslate.");
                 }
             }).start();
         }
@@ -113,21 +120,15 @@ public class ExportClearingAction extends AbstractAction {
             if (!resultSet.isBeforeFirst()) {
                 throw new SQLException("Nema podataka za export.", null, ErrorMessages.CUSTOM_CODE);
             } else {
-                Map<String, String> pkValues = new HashMap<>();
                 ret = new ArrayList<>();
 
                 while (resultSet.next()) {
+                    Map<String, String> pkValues = new HashMap<>();
                     PaymentOrder paymentOrder = new PaymentOrder();
 
                     GregorianCalendar cal;
                     AccountDetails debtorAccountDetails;
                     AccountDetails creditorAccountDetails;
-
-                    pkValues.put("PR_PIB", resultSet.getString("PR_PIB"));
-                    pkValues.put("BAR_RACUN", resultSet.getString("BAR_RACUN"));
-                    pkValues.put("DSR_IZVOD", resultSet.getString("DSR_IZVOD"));
-                    pkValues.put("ASI_BROJSTAVKE", resultSet.getString("ASI_BROJSTAVKE"));
-                    poHashPoPkValues.put(paymentOrder.hashCode(), pkValues);
 
                     paymentOrder.setMessageId(resultSet.getString("ASI_BROJSTAVKE"));
                     paymentOrder.setDebtor(resultSet.getString("ASI_DUZNIK"));
@@ -158,6 +159,12 @@ public class ExportClearingAction extends AbstractAction {
                     paymentOrder.setCurrencyCode(resultSet.getString("VA_IFRA"));
 
                     ret.add(paymentOrder);
+
+                    pkValues.put("PR_PIB", resultSet.getString("PR_PIB"));
+                    pkValues.put("BAR_RACUN", resultSet.getString("BAR_RACUN"));
+                    pkValues.put("DSR_IZVOD", resultSet.getString("DSR_IZVOD"));
+                    pkValues.put("ASI_BROJSTAVKE", resultSet.getString("ASI_BROJSTAVKE"));
+                    poHashPoPkValues.put(paymentOrder.hashCode(), pkValues);
                 }
             }
         } catch (SQLException e) {
@@ -318,7 +325,7 @@ public class ExportClearingAction extends AbstractAction {
                 values.size()), values);
     }
 
-    private void updatePaymentOrderStatus(Map<String, String> foo, PaymentOrder paymentOrder) throws SQLException {
+    private void updatePaymentOrderStatus(Map<String, String> pkValues) throws SQLException {
         Map<String, String> columnTypes = paymentOrderMetaTable.getPkColumnTypes();
         columnTypes.put("ASI_STATUS", "java.lang.String");
 
@@ -327,14 +334,15 @@ public class ExportClearingAction extends AbstractAction {
         List<ColumnValue> values = new ArrayList<>();
         List<String> columnCodes = paymentOrderMetaTable.getPkColumnCodes();
         columnCodes.add("ASI_STATUS");
+
         Iterator<String> it = columnCodes.iterator();
 
-        values.add(new ColumnValue(it.next(), foo.get("PR_PIB")));
-        values.add(new ColumnValue(it.next(), foo.get("BAR_RACUN")));
-        values.add(new ColumnValue(it.next(), foo.get("DSR_IZVOD")));
-        values.add(new ColumnValue(it.next(), foo.get("ASI_BROJSTAVKE")));
+        values.add(new ColumnValue(it.next(), pkValues.get("PR_PIB")));
+        values.add(new ColumnValue(it.next(), pkValues.get("BAR_RACUN")));
+        values.add(new ColumnValue(it.next(), pkValues.get("DSR_IZVOD")));
+        values.add(new ColumnValue(it.next(), pkValues.get("ASI_BROJSTAVKE")));
         values.add(new ColumnValue(it.next(), "P"));
 
-        orderItemExecutor.executeProcedure("{ call updateAnalitikaIzvodaStatus(?,?,?,?,?)}", values);
+        orderItemExecutor.executeProcedure("{ call updatePaymentStatus(?,?,?,?,?)}", values);
     }
 }

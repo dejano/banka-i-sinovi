@@ -25,6 +25,7 @@
   },
   "nextData": [
     {
+      "alias": "Računi",
       "formName": "racun",
       "columnCodeMapping": [
         {

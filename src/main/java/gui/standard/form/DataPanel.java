@@ -70,10 +70,10 @@ public class DataPanel extends JPanel {
         }
     }
 
-    public java.util.List<String> getValues() throws Exception {
+    public java.util.List<String> getValues(FormData.ColumnGroupsEnum group) throws Exception {
         java.util.List<String> ret = new ArrayList<>();
 
-        for (String columnCode : parent.getFormData().getColumnCodes(BASE)) {
+        for (String columnCode : parent.getFormData().getColumnCodes(group)) {
             JComponent component = inputs.get(columnCode);
 
             if (component != null) {
@@ -86,9 +86,10 @@ public class DataPanel extends JPanel {
                     JDateChooser dateChooser = (JDateChooser) component;
                     SimpleDateFormat df = new SimpleDateFormat("yyyyMMdd");
                     try {
-                        ret.add(df.format(dateChooser.getDate()));
+                        String dateValue = df.format(dateChooser.getDate());
+                        ret.add(dateValue);
                     } catch (Exception e) {
-                        throw new Exception("Uneti datum nije validan.");
+                        ret.add(null);
                     }
                 }
             } else {
@@ -149,6 +150,7 @@ public class DataPanel extends JPanel {
                     textComponent.setEditable(true);
                 } else if (component instanceof JCheckBox) {
                     ((JCheckBox) component).setSelected(false);
+                    component.setEnabled(true);
                 } else if (component instanceof JDateChooser) {
                     JDateChooser dateChooser = (JDateChooser) component;
                     dateChooser.setDate(null);

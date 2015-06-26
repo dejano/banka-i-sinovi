@@ -5,7 +5,6 @@
 	<property name="ireport.y" value="0"/>
 	<parameter name="accountNumber" class="java.lang.String"/>
 	<parameter name="date" class="java.lang.String"/>
-	<parameter name="statementNumber" class="java.lang.Integer"/>
 	<queryString>
 		<![CDATA[SELECT
      ANALITIKA_IZVODA."BAR_RACUN" AS ANALITIKA_IZVODA_BAR_RACUN,
@@ -38,9 +37,9 @@ FROM
      AND PRENOS_IZVODA___PRESEK."BNP_PRESEK" = ANALITIKA_PRESEKA."BNP_PRESEK"
      AND PRENOS_IZVODA___PRESEK."BAR_RACUN" = ANALITIKA_PRESEKA."PRE_BAR_RACUN"
      AND PRENOS_IZVODA___PRESEK."BNP_DATUM" = ANALITIKA_PRESEKA."BNP_DATUM"
-WHERE PRENOS_IZVODA___PRESEK."BNP_PRESEK" = $P{statementNumber}
-	AND PRENOS_IZVODA___PRESEK."BAR_RACUN" = $P{accountNumber}
-	AND PRENOS_IZVODA___PRESEK."BNP_DATUM" = $P{date}]]>
+WHERE
+	datediff(day,PRENOS_IZVODA___PRESEK."BNP_DATUM",$P{date})=0
+	AND PRENOS_IZVODA___PRESEK."BAR_RACUN" = $P{accountNumber}]]>
 	</queryString>
 	<field name="ANALITIKA_IZVODA_BAR_RACUN" class="java.lang.String"/>
 	<field name="ANALITIKA_IZVODA_ASI_DUZNIK" class="java.lang.String"/>

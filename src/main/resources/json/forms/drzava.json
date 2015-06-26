@@ -3,6 +3,7 @@
   "tableName": "DRZAVA",
   "nextData": [
     {
+      "alias":"Naseljeno mesto",
       "formName": "naseljenoMesto",
       "columnCodeMapping": [
         {

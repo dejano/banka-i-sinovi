@@ -10,8 +10,17 @@ import java.util.List;
  */
 public class NextMetaData {
 
+    private String alias;
     private String formName;
     private List<ColumnMapping> columnCodeMapping = new ArrayList<>();
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
 
     public String getFormName() {
         return formName;

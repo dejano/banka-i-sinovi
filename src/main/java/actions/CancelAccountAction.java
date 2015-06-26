@@ -1,5 +1,6 @@
 package actions;
 
+import app.AppData;
 import gui.dialog.ErrorMessageDialog;
 import gui.standard.ColumnValue;
 import gui.standard.form.Form;
@@ -26,15 +27,14 @@ public class CancelAccountAction extends AbstractAction {
     private static final String TITLE = "Ukidanje računa";
     private static final String QUESTION = "Unesite broj računa na koji će sredstva biti preneta :";
 
-    private static final String CANCEL_ACCOUNT_PROCEDURE_CALL = "{ ur(?, ?)}";
+    private static final String CANCEL_ACCOUNT_PROCEDURE_CALL = "{ call cancelBankAccount(?,?,?)}";
+    private static final String PIB = "PIB";
     private static final String ACCOUNT2 = "BAR_RACUN2";
 
     private Form form;
 
     public CancelAccountAction(Form form) {
         // TODO set icon
-//        putValue(SMALL_ICON,
-//                new ImageIcon(getClass().getResource("/img/search.gif")));
         putValue(SHORT_DESCRIPTION, TITLE);
         putValue(NAME, TITLE);
 
@@ -50,14 +50,15 @@ public class CancelAccountAction extends AbstractAction {
         String value2 = JOptionPane.showInputDialog(form, QUESTION, TITLE, JOptionPane.QUESTION_MESSAGE);
 
         if (value2 != null) {
-            //TODO validate value2
             StatementExecutor executor;
 
             List<ColumnValue> values = new ArrayList<>();
+            values.add(new ColumnValue(PIB, AppData.getInstance().getValue(AppData.AppDataEnum.PIB_BANKE)));
             values.add(new ColumnValue(columnData.getCode(), value1));
             values.add(new ColumnValue(ACCOUNT2, value2));
 
             Map<String, String> columnCodeTypes = new HashMap<>();
+            columnCodeTypes.put(PIB, StatementExecutor.STRING);
             columnCodeTypes.put(columnData.getCode(), columnData.getClassName());
             columnCodeTypes.put(ACCOUNT2, STRING);
 

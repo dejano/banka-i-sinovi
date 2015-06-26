@@ -10,7 +10,10 @@ import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.view.JasperViewer;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,7 +24,7 @@ import static gui.standard.form.components.ValidationDatePicker.E_VALID_DATES.BE
  */
 public class BankStatementReportAction extends AbstractAction {
 
-    private static final String TITLE = "Izvod matorah";
+    private static final String TITLE = "Kreiranje izvoda";
 
     private Form form;
 
@@ -41,37 +44,46 @@ public class BankStatementReportAction extends AbstractAction {
 
         if (resultOk) {
             try {
-                JasperPrint jp = JasperFillManager.fillReport("src/main/resources/jasper/izvod.jasper",
+                JasperPrint jasperPrint = JasperFillManager.fillReport("src/main/resources/jasper/izvod.jasper",
                         params, DBConnection.getConnection());
 
-                JasperViewer.viewReport(jp, false);
+                JasperViewer jasperViewer = new JasperViewer(jasperPrint, false);
+
+                if (!jasperPrint.getPages().isEmpty()) {
+                    JDialog dialog = new JDialog(form, "Izvod računa br. " + params.get("accountNumber"));
+                    dialog.setModal(true);
+                    dialog.setContentPane(jasperViewer.getContentPane());
+                    dialog.setSize(jasperViewer.getSize());
+                    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+                    Point newLocation = new Point(screenSize.width / 2 - (dialog.getWidth() / 2),
+                            screenSize.height / 2 - (dialog.getHeight() / 2));
+                    dialog.setLocation(newLocation);
+                    dialog.setVisible(true);
+                }
             } catch (JRException e1) {
                 e1.printStackTrace();
             }
         }
     }
 
-    private static final String[] INPUT_LABELS = new String[]{"Unesite datum: ", "Unesite broj preseka: "};
+    private static final String INPUT_LABEL = "Unesite datum: ";
 
     public boolean getDateStatementNumber(Map<String, Object> params) {
         boolean ret = false;
 
         ValidationDatePicker datePicker = new ValidationDatePicker(0, BEFORE_INCLUDING);
-        JTextField statementNumberInput = new JTextField(5);
 
         JPanel myPanel = new JPanel(new MigLayout());
-        myPanel.add(new JLabel(INPUT_LABELS[0]));
+        myPanel.add(new JLabel(INPUT_LABEL));
         myPanel.add(datePicker, "wrap");
-        myPanel.add(new JLabel(INPUT_LABELS[1]));
-        myPanel.add(statementNumberInput);
 
         int result = JOptionPane.showConfirmDialog(null, myPanel,
                 TITLE, JOptionPane.OK_CANCEL_OPTION);
 
         if (result == JOptionPane.OK_OPTION) {
             ret = true;
-            params.put("date", datePicker.getDate());
-            params.put("statementNumber", statementNumberInput.getText());
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+            params.put("date", dateFormat.format(datePicker.getDate()));
         }
 
         return ret;

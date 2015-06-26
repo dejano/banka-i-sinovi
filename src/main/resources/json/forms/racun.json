@@ -22,7 +22,22 @@
   ],
   "nextData": [
     {
-      "formName": "izvrseneUplate",
+      "alias": "Nalozi",
+      "formName": "nalog",
+      "columnCodeMapping": [
+        {
+          "from": "PR_PIB",
+          "to": "PR_PIB"
+        },
+        {
+          "from": "BAR_RACUN",
+          "to": "BAR_RACUN"
+        }
+      ]
+    },
+    {
+      "alias": "Dnevna stanja",
+      "formName": "dnevnoStanje",
       "columnCodeMapping": [
         {
           "from": "PR_PIB",

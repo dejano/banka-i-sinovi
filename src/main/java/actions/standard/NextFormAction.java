@@ -34,7 +34,7 @@ public class NextFormAction extends AbstractAction {
 
         int nextFormsCount = nextForms.size();
 
-        NextMetaData nextData = null;
+        NextMetaData nextData;
         switch (nextFormsCount) {
             case 1:
                 nextData = nextForms.get(0);
@@ -78,7 +78,7 @@ public class NextFormAction extends AbstractAction {
         String[] nextFormNames = new String[nextForms.size()];
         int i = 0;
         for (NextMetaData nd : nextForms) {
-            nextFormNames[i++] = nd.getFormName();
+            nextFormNames[i++] = nd.getAlias();
         }
 
         String selectedNextFormName = (String) JOptionPane.showInputDialog(form,
@@ -91,7 +91,7 @@ public class NextFormAction extends AbstractAction {
 
         if (selectedNextFormName != null) {
             for (NextMetaData nd : nextForms) {
-                if (selectedNextFormName.equals(nd.getFormName())) {
+                if (selectedNextFormName.equals(nd.getAlias())) {
                     ret = nd;
                     break;
                 }
