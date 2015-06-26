@@ -27,6 +27,7 @@ public class ColumnData {
     private boolean hiddenInput;
     private boolean nonEditable;
     private boolean lookupInsert;
+    private String realTableName;
 
     public ColumnData(MetaColumn metaColumn, int index, int baseIndex) {
         this(metaColumn, metaColumn.getParentTable(), index, baseIndex);
@@ -55,6 +56,14 @@ public class ColumnData {
         this.tableName = tableName;
         this.code = code;
         this.className = className;
+    }
+
+    public String getRealTableName() {
+        return realTableName;
+    }
+
+    public void setRealTableName(String realTableName) {
+        this.realTableName = realTableName;
     }
 
     public int getIndex() {

@@ -86,6 +86,7 @@ public class FormData {
                     newLookupColumnData.setName(columnCodeValueCode.getName());
                     newLookupColumnData.setLookup(true);
                     newLookupColumnData.setLookupInsert(lookupMetaData.isLookupInsert());
+                    newLookupColumnData.setRealTableName(lookupMetaData.getTable());
 
                     columns.put(lookupMetaColumn.getCode(), newLookupColumnData);
                 }

@@ -2,7 +2,6 @@ package gui.standard.form.misc;
 
 import database.DBConnection;
 import gui.standard.ColumnValue;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.math.BigDecimal;

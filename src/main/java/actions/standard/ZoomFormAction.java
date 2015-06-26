@@ -1,7 +1,7 @@
 package actions.standard;
 
-import gui.standard.ColumnMapping;
 import gui.dialog.ErrorMessageDialog;
+import gui.standard.ColumnMapping;
 import gui.standard.form.Form;
 import gui.standard.form.misc.ColumnData;
 import gui.standard.form.misc.TableJoin;
@@ -77,8 +77,10 @@ public class ZoomFormAction extends AbstractAction {
             }
 
             Map<String, ColumnData> lookupColumns = standardForm.getFormData().getColumnsMap(LOOKUP);
-            for (String s : lookupColumns.keySet()) {
-                zoomData.put(s, null);
+            for (Map.Entry<String, ColumnData> entry : lookupColumns.entrySet()) {
+                if (entry.getValue().getRealTableName().equals(zoomForm.getFormData().getTableName())) {
+                    zoomData.put(entry.getKey(), null);
+                }
             }
 
             zoomForm.setParentForm(standardForm);

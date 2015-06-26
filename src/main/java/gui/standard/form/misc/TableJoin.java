@@ -1,5 +1,7 @@
 package gui.standard.form.misc;
 
+import java.util.List;
+
 /**
  * Created by Nikola on 8.6.2015..
  */
@@ -8,12 +10,21 @@ public class TableJoin {
     private String alias;
     private String fromColumn;
     private String toColumn;
+    private List<String> columns;
 
     public TableJoin(String tableName, String alias, String fromColumn, String toColumn) {
         this.tableName = tableName;
         this.alias = alias;
         this.fromColumn = fromColumn;
         this.toColumn = toColumn;
+    }
+
+    public List<String> getColumns() {
+        return columns;
+    }
+
+    public void setColumns(List<String> columns) {
+        this.columns = columns;
     }
 
     public String getTableName() {

@@ -62,6 +62,9 @@
         },
         {
           "actionName": "ImportPaymentOrderAction"
+        },
+        {
+          "actionName": "ExportStatementAction"
         }
       ]
     },
