@@ -32,9 +32,11 @@ public class QueryBuilder {
 
     private static final String WHERE = " WHERE ";
     private static final String AND = " AND ";
+    private static final String OR = " OR ";
     private static final String EQUAL = " = ";
     private static final String EQUAL_QM = "=?";
     private static final String LIKE = " LIKE ?";
+    private static final String IS_NULL = " IS NULL";
 
     private static final String ORDER_BY = " ORDER BY ";
 
@@ -166,9 +168,14 @@ public class QueryBuilder {
             }
 
             for (String tableDotCode : tableDotCodes) {
+                whereBuilder.append("(");
+                whereBuilder.append(tableDotCode).append(IS_NULL);
+                or();
                 whereBuilder.append(tableDotCode).append(LIKE);
-                query.getWheres().add(Query.WhereTypesEnum.LIKE);
+                whereBuilder.append(")");
                 and();
+
+                query.getWheres().add(Query.WhereTypesEnum.LIKE);
             }
 
             removeLastAnd();
@@ -179,6 +186,12 @@ public class QueryBuilder {
 
     public QueryBuilder and() {
         whereBuilder.append(AND);
+
+        return this;
+    }
+
+    public QueryBuilder or() {
+        whereBuilder.append(OR);
 
         return this;
     }

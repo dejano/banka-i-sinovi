@@ -33,8 +33,6 @@ public class CancelAccountAction extends AbstractAction {
 
     public CancelAccountAction(Form form) {
         // TODO set icon
-//        putValue(SMALL_ICON,
-//                new ImageIcon(getClass().getResource("/img/search.gif")));
         putValue(SHORT_DESCRIPTION, TITLE);
         putValue(NAME, TITLE);
 

@@ -63,12 +63,12 @@ public class CommitAction extends AbstractAction {
     }
 
     private int add() throws Exception {
-        java.util.List<String> values = form.getDataPanel().getValues();
+        java.util.List<String> values = form.getDataPanel().getValues(BASE);
         return form.getTableModel().insertRow(values.toArray(new String[values.size()]));
     }
 
     private int update() throws Exception {
-        java.util.List<String> values = form.getDataPanel().getValues();
+        java.util.List<String> values = form.getDataPanel().getValues(BASE);
 
         return form.getTableModel().updateRow(form.getDataTable().getSelectedRow(),
                 values.toArray(new String[values.size()]));

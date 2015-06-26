@@ -90,8 +90,7 @@ public class TableModel extends DefaultTableModel {
 
         checkRowInsert(newValues);
 
-        StatementExecutor executor = new StatementExecutor(
-                formData.getColumnCodeTypes(BASE));
+        StatementExecutor executor = new StatementExecutor( formData.getColumnCodeTypes(BASE));
 
         executor.executeProcedure(ProcedureCallFactory.getProcedureCall(formData,
                 CREATE_PROCEDURE_CALL), formData.mapValues(BASE, newValues));
@@ -224,10 +223,9 @@ public class TableModel extends DefaultTableModel {
     public int search(String[] searchValues) throws SQLException {
         int retVal = 0;
 
-        StatementExecutor executor = new StatementExecutor(formData.getColumnCodeTypes(BASE));
-        List<ColumnValue> values = new ArrayList<>(formData.getNextValues());
-        values.addAll(formData.mapValues(ALL, searchValues));
-        List<String[]> results = executor.execute(tableQueriesBuilder.getBasicQuery().getNextWhereQuery()
+        StatementExecutor executor = new StatementExecutor(formData.getColumnCodeTypes(ALL));
+        List<ColumnValue> values = formData.mapValues(ALL, searchValues);
+        List<String[]> results = executor.execute(tableQueriesBuilder.getBasicQuery()
                         .getWhereLikeQuery().getOrderByQuery().build(),
                 values, formData.getColumnCodes(ALL));
 

@@ -24,7 +24,7 @@ import static gui.standard.form.components.ValidationDatePicker.E_VALID_DATES.BE
  */
 public class BankStatementReportAction extends AbstractAction {
 
-    private static final String TITLE = "Izvod matorah";
+    private static final String TITLE = "Kreiranje izvoda";
 
     private Form form;
 
@@ -49,15 +49,17 @@ public class BankStatementReportAction extends AbstractAction {
 
                 JasperViewer jasperViewer = new JasperViewer(jasperPrint, false);
 
-                JDialog dialog = new JDialog(form, "Izvod računa br. " + params.get("accountNumber"));
-                dialog.setModal(true);
-                dialog.setContentPane(jasperViewer.getContentPane());
-                dialog.setSize(jasperViewer.getSize());
-                Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-                Point newLocation = new Point(screenSize.width / 2 - (dialog.getWidth() / 2),
-                        screenSize.height / 2 - (dialog.getHeight() / 2));
-                dialog.setLocation(newLocation);
-                dialog.setVisible(true);
+                if (!jasperPrint.getPages().isEmpty()) {
+                    JDialog dialog = new JDialog(form, "Izvod računa br. " + params.get("accountNumber"));
+                    dialog.setModal(true);
+                    dialog.setContentPane(jasperViewer.getContentPane());
+                    dialog.setSize(jasperViewer.getSize());
+                    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+                    Point newLocation = new Point(screenSize.width / 2 - (dialog.getWidth() / 2),
+                            screenSize.height / 2 - (dialog.getHeight() / 2));
+                    dialog.setLocation(newLocation);
+                    dialog.setVisible(true);
+                }
             } catch (JRException e1) {
                 e1.printStackTrace();
             }
