@@ -44,6 +44,7 @@ public class StatementExecutor {
         for (ColumnValue columnValue : columnValueValues) {
             String columnTypeClass = columnCodeTypes.get(columnValue.getCode());
             Object value = columnValue.getValue();
+            System.out.println(columnValue.getCode() + " " + value);
 
             setValue(statement, columnTypeClass, i++, value, false);
         }
