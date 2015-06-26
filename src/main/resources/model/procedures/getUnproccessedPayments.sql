@@ -33,6 +33,6 @@ BEGIN
       ,[ASI_TIPGRESKE]
       ,[ASI_STATUS]
 	  from dbo.ANALITIKA_IZVODA
-	  where PR_PIB = @pib
+	  where PR_PIB = @pib and ASI_STATUS='E'
 END
 GO

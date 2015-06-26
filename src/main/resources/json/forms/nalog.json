@@ -1,8 +1,8 @@
 {
-  "title": "Izvršene uplate",
+  "title": "Nalozi za plaćanje",
   "tableName": "ANALITIKA_IZVODA",
   "formType": "readOnly",
-  "customWhere": "ANALITIKA_IZVODA.ASI_STATUS='P'", // TODO change to I
+  "customOrderBy": "ASI_DATPRI desc",
   "hideColumns": [
     "PR_PIB",
     "BAR_RACUN",
@@ -14,8 +14,7 @@
     "ASI_DATPRI",
     "ASI_DATVAL",
     "ASI_HITNO",
-    "ASI_TIPGRESKE",
-    "ASI_STATUS"
+    "ASI_TIPGRESKE"
   ],
   "hideInputs": [
     "PR_PIB",
@@ -23,7 +22,6 @@
     "DSR_IZVOD",
     "ASI_BROJSTAVKE",
     "ASI_HITNO",
-    "ASI_TIPGRESKE",
-    "ASI_STATUS"
+    "ASI_TIPGRESKE"
   ]
 }

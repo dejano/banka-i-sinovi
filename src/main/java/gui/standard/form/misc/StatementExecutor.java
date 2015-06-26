@@ -131,8 +131,6 @@ public class StatementExecutor {
 
     private void setValue(PreparedStatement statement, String columnTypeClass, int i, Object value, boolean like)
             throws SQLException {
-        System.out.println(value);
-
         if (value instanceof String)
             value = ((String) value).trim();
 

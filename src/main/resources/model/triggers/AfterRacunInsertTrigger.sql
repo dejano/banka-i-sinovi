@@ -10,7 +10,7 @@ GO
 -- Create date: <Create Date,,>
 -- Description:	<Description,,>
 -- =============================================
-create TRIGGER [dbo].[AfterInsertRacunTrigger]
+alter TRIGGER [dbo].[AfterInsertRacunTrigger]
    ON	[dbo].[RACUNI_PRAVNIH_LICA]
    AFTER INSERT
 AS 

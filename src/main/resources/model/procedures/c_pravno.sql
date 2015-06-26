@@ -1,4 +1,4 @@
-USE [PI]
+USE [PoslovnaInformatika]
 GO
 SET ANSI_NULLS ON
 GO

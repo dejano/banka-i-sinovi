@@ -272,6 +272,7 @@ public class ImportPaymentOrderAction extends AbstractAction {
         String q = "SELECT PR_PIB, BAR_RACUN, DSR_IZVOD, ASI_BROJSTAVKE " +
                 "FROM ANALITIKA_IZVODA " +
                 "WHERE ID_NALOGA_PL=" + paymentOrderId;
+
         List<String> resultColumnCodes = new ArrayList<>();
         resultColumnCodes.add("PR_PIB");
         resultColumnCodes.add("BAR_RACUN");
@@ -292,42 +293,5 @@ public class ImportPaymentOrderAction extends AbstractAction {
 
         executor.executeProcedure(ProcedureCallFactory.getCreateProcedureCall("ANALITIKA_STAVKE", values.size()),
                 values);
-    }
-
-    // builds xml for import
-    public static void main(String[] args) {
-        PaymentOrder paymentOrder = new PaymentOrder();
-
-        GregorianCalendar cal;
-
-        paymentOrder.setMessageId("777");
-        paymentOrder.setDebtor("dejan");
-        paymentOrder.setPaymentPurpose("raspberi");
-        paymentOrder.setCreditor("dealxtremah");
-
-        cal = new GregorianCalendar();
-        cal.setTime(new Date());
-        paymentOrder.setOrderDate(new XMLGregorianCalendarImpl(cal));
-
-        cal = new GregorianCalendar();
-        cal.setTime(new Date());
-        paymentOrder.setCurrencyDate(new XMLGregorianCalendarImpl(cal));
-
-        AccountDetails debtorAccountDetails = new AccountDetails();
-        debtorAccountDetails.setAccountNumber("9U4KWP");
-        debtorAccountDetails.setModel(38);
-        debtorAccountDetails.setReferenceNumber("BQ");
-        paymentOrder.setDebtorAccountDetails(debtorAccountDetails);
-
-        AccountDetails creditorAccountDetails = new AccountDetails();
-        creditorAccountDetails.setAccountNumber("VW3JXNRZK60AT73");
-        creditorAccountDetails.setModel(38);
-        creditorAccountDetails.setReferenceNumber("BQ");
-        paymentOrder.setCreditorAccountDetails(creditorAccountDetails);
-
-        paymentOrder.setAmount(BigDecimal.TEN);
-        paymentOrder.setCurrencyCode("2P");
-
-        XmlHelper.writeToFile(paymentOrder, "paymentOrderForImport");
     }
 }

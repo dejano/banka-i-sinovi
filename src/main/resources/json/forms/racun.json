@@ -22,7 +22,7 @@
   ],
   "nextData": [
     {
-      "formName": "izvrseneUplate",
+      "formName": "nalog",
       "columnCodeMapping": [
         {
           "from": "PR_PIB",

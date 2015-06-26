@@ -29,6 +29,10 @@
           "formName": "racun"
         },
         {
+          "text": "Nalozi za plaćanje",
+          "formName": "nalog"
+        },
+        {
           "text": "Države",
           "formName": "drzava"
         },
