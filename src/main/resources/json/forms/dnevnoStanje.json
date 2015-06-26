@@ -1,0 +1,12 @@
+{
+  "title": "Dnevna stanja računa",
+  "tableName": "DNEVNO_STANJE_RACUNA",
+  "formType": "readOnly",
+  "customOrderBy": "DSR_DATUM desc",
+  "hideColumns": [
+    "PR_PIB"
+  ],
+  "hideInputs": [
+    "PR_PIB"
+  ]
+}

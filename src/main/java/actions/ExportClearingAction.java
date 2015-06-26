@@ -77,7 +77,7 @@ public class ExportClearingAction extends AbstractAction {
 
                     List<PaymentOrder> paymentOrders = createPaymentOrders(poHashPoPkValues);
 
-                    if (paymentOrders.size() == 0)
+                    if (paymentOrders == null || paymentOrders.size() == 0)
                         Toast.show(App.getMainFrame(), "Nema poruka za slanje.");
                     else {
                         Map<Integer, Mt102> poHashMt102Map = new HashMap<>();

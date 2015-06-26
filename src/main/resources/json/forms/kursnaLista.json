@@ -13,6 +13,7 @@
   ],
   "nextData": [
     {
+      "alias": "Kurs u valuti",
       "formName": "kursUValuti",
       "columnCodeMapping": [
         {

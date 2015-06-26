@@ -5,8 +5,8 @@
   "defaultValues": {
     "PRAVNO_LICE_": "0"
   },
-  "mapToAppData":{
-    "pibBanke":"PRA_PR_PIB"
+  "mapToAppData": {
+    "pibBanke": "PRA_PR_PIB"
   },
   "hideColumns": [
     "PR_PIB",
@@ -20,6 +20,7 @@
   ],
   "nextData": [
     {
+      "alias": "Računi",
       "formName": "racun",
       "columnCodeMapping": [
         {
