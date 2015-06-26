@@ -22,9 +22,10 @@ public class ZoomFormAction extends AbstractAction {
 
     private static final long serialVersionUID = 1L;
     private Form standardForm;
+    private Zoom zoom;
 
-    public ZoomFormAction(Form standardForm, String actionCommand) {
-        putValue(ACTION_COMMAND_KEY, actionCommand);
+    public ZoomFormAction(Form standardForm, Zoom zoom) {
+        this.zoom = zoom;
         putValue(SHORT_DESCRIPTION, "Zoom");
         putValue(NAME, "...");
         this.standardForm = standardForm;
@@ -32,49 +33,10 @@ public class ZoomFormAction extends AbstractAction {
 
     public void actionPerformed(ActionEvent event) {
         try {
-            List<Zoom> zoomConfig = standardForm.getTableModel().getFormData().getZoomData();
-
-            List<String> zoomColumns =
-                    standardForm.getTableModel().getFormData().getZoomColumns(event.getActionCommand());
-
-            String mutualCol = null;
-            if (zoomColumns.size() > 1) {
-                for (Zoom zoom : zoomConfig) {
-                    if (!zoom.getTableCode().equals(event.getActionCommand())) {
-                        for (ColumnMapping columnMapping : zoom.getColumns()) {
-                            if (zoomColumns.contains(columnMapping.getFrom())) {
-                                System.out.println("Mutual:" + columnMapping.getFrom());
-                                mutualCol = columnMapping.getFrom();
-                            }
-                        }
-                    }
-                }
-            }
-
-            String filterVal = null;
-            if (mutualCol != null) {
-                for (Component component : standardForm.getDataPanel().getComponents()) {
-                    if (component instanceof JTextComponent && component.getName().equals(mutualCol)) {
-                        JTextComponent textComponent = (JTextComponent) component;
-                        filterVal = textComponent.getText();
-                    }
-                }
-            }
-
-            Form zoomForm = null;
-            if (mutualCol != null && filterVal != null && !filterVal.isEmpty()) {
-                Map<String, String> nextColumns = new HashMap<>();
-                nextColumns.put(mutualCol, filterVal);
-                System.out.println("Next -> " + mutualCol + ":" + filterVal);
-                zoomForm = FormCreator.getNextStandardForm(event.getActionCommand(), nextColumns);
-            } else {
-                zoomForm = FormCreator.getStandardForm(event.getActionCommand());
-            }
+            Form zoomForm = FormCreator.getStandardForm(zoom.getTableCode());
 
             Map<String, String> zoomData = new HashMap<>();
-            for (String zoomColumn : zoomColumns) {
-                zoomData.put(zoomColumn, null);
-            }
+            zoomData.put(zoom.getColumnMapping().getTo(), null);
 
             Map<String, ColumnData> lookupColumns = standardForm.getFormData().getColumnsMap(LOOKUP);
             for (Map.Entry<String, ColumnData> entry : lookupColumns.entrySet()) {
@@ -101,17 +63,12 @@ public class ZoomFormAction extends AbstractAction {
             String removeFromTable = null;
             String untouchedColumn = null;
 
-            for (Zoom zoom : zoomConfig) {
-                if (!Objects.equals(zoom.getTableCode(), event.getActionCommand())) {
-                    for (ColumnMapping columnMapping : zoom.getColumns()) {
-                        for (String key : results.keySet()) {
-                            if (columnMapping.getTo().equals(key)) {
-                                removeFrom = zoom.getTableCode();
-                                untouchedColumn = key;
-                                removeFromTable = zoom.getTableCode();
-                                System.out.println("Contains " + columnMapping.getTo() + " in " + zoom.getTableCode());
-                            }
-                        }
+            if (!Objects.equals(zoom.getTableCode(), event.getActionCommand())) {
+                for (String key : results.keySet()) {
+                    if (zoom.getColumnMapping().getTo().equals(key)) {
+                        removeFrom = zoom.getTableCode();
+                        untouchedColumn = key;
+                        removeFromTable = zoom.getTableCode();
                     }
                 }
             }
@@ -125,16 +82,13 @@ public class ZoomFormAction extends AbstractAction {
                 }
             }
 
-            System.out.println();
+            String zoomResult = results.get(zoom.getColumnMapping().getTo());
+            results.remove(zoom.getColumnMapping().getTo());
+
+            standardForm.getDataPanel().setValue(zoom.getColumnMapping().getFrom(), zoomResult, false);
 
             for (Map.Entry<String, String> entry : results.entrySet()) {
-                for (Component component : standardForm.getDataPanel().getComponents()) {
-                    if (component instanceof JTextComponent && component.getName().equals(entry.getKey())) {
-                        JTextComponent textComponent = (JTextComponent) component;
-                        textComponent.setText(entry.getValue());
-                    }
-                }
-                System.out.println(entry.getKey() + ":" + entry.getValue());
+                standardForm.getDataPanel().setValue(entry.getKey(), entry.getValue(), false);
             }
 
             if (removeFrom != null) {
@@ -158,8 +112,6 @@ public class ZoomFormAction extends AbstractAction {
                     }
                 }
             }
-
-//            standardForm.onZoomDialogClosed(results);
         } catch (SQLException e) {
             ErrorMessageDialog.show(standardForm, e);
         }

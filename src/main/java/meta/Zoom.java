@@ -7,37 +7,16 @@ import java.util.List;
 
 public class Zoom {
 
-    private String jsonFileName;
     private String tableCode;
-    private List<ColumnMapping> columns;
+    private ColumnMapping columnMapping;
 
-    public Zoom(String tableCode, List<ColumnMapping> columns) {
-        this.jsonFileName = jsonFileName;
+    public Zoom(String tableCode, ColumnMapping columnMapping) {
         this.tableCode = tableCode;
-        this.columns = columns;
+        this.columnMapping = columnMapping;
     }
 
-    public List<String> getToColumnCodes() {
-        List<String> ret = new ArrayList<>();
-
-        for (ColumnMapping column : columns) {
-            ret.add(column.getTo());
-        }
-
-        return ret;
-    }
-
-    public boolean isZoomColumn(String columnCode){
-        boolean ret = false;
-
-        for (ColumnMapping columnMapping : columns) {
-            if(columnMapping.getFrom().equals(columnCode)){
-                ret = true;
-                break;
-            }
-        }
-
-        return ret;
+    public boolean isZoomColumn(String columnCode) {
+        return columnMapping.getFrom().equals(columnCode);
     }
 
     public String getTableCode() {
@@ -48,19 +27,11 @@ public class Zoom {
         this.tableCode = tableCode;
     }
 
-    public List<ColumnMapping> getColumns() {
-        return columns;
+    public ColumnMapping getColumnMapping() {
+        return columnMapping;
     }
 
-    public void setColumns(List<ColumnMapping> columns) {
-        this.columns = columns;
-    }
-
-    public String getJsonFileName() {
-        return jsonFileName;
-    }
-
-    public void setJsonFileName(String jsonFileName) {
-        this.jsonFileName = jsonFileName;
+    public void setColumnMapping(ColumnMapping columnMapping) {
+        this.columnMapping = columnMapping;
     }
 }

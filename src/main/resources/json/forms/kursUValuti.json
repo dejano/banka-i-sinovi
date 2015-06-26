@@ -8,48 +8,20 @@
     "PR_PIB",
     "KL_DATUM"
   ],
-  "lookupMap": {
-    "VA_IFRA": {
-      "table": "VALUTE",
-      "from": "VA_IFRA",
-      "to": "VA_IFRA",
-      "columns": [
-        {
-          "code": "VA_NAZIV",
-          "name": "Naziv valute 1"
-        }
-      ]
-    },
-    "VAL_VA_IFRA": {
-      "table": "VALUTE",
-      "from": "VAL_VA_IFRA",
-      "to": "VA_IFRA",
-      "columns": [
-        {
-          "code": "VA_NAZIV",
-          "name": "Naziv valute 2"
-        }
-      ]
-    }
-  },
   "zoomData": [
     {
       "tableCode": "valuta",
-      "columns": [
-        {
-          "from": "VA_IFRA",
-          "to": "VA_IFRA"
-        }
-      ]
+      "columnMapping": {
+        "from": "VA_IFRA",
+        "to": "VA_IFRA"
+      }
     },
     {
       "tableCode": "valuta",
-      "columns": [
-        {
-          "from": "VAL_VA_IFRA",
-          "to": "VA_IFRA"
-        }
-      ]
+      "columnMapping": {
+        "from": "VAL_VA_IFRA",
+        "to": "VA_IFRA"
+      }
     }
   ]
 }

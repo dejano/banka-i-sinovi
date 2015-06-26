@@ -48,6 +48,20 @@
           "to": "BAR_RACUN"
         }
       ]
+    },
+    {
+      "alias": "Ukidanje računa",
+      "formName": "ukidanje",
+      "columnCodeMapping": [
+        {
+          "from": "PR_PIB",
+          "to": "PR_PIB"
+        },
+        {
+          "from": "BAR_RACUN",
+          "to": "BAR_RACUN"
+        }
+      ]
     }
   ],
   "lookupMap": {
@@ -81,21 +95,17 @@
   "zoomData": [
     {
       "tableCode": "fizickoLice",
-      "columns": [
-        {
-          "from": "JMBG",
-          "to": "JMBG"
-        }
-      ]
+      "columnMapping": {
+        "from": "JMBG",
+        "to": "JMBG"
+      }
     },
     {
       "tableCode": "valuta",
-      "columns": [
-        {
-          "from": "VA_IFRA",
-          "to": "VA_IFRA"
-        }
-      ]
+      "columnMapping": {
+        "from": "VA_IFRA",
+        "to": "VA_IFRA"
+      }
     }
   ]
 }
