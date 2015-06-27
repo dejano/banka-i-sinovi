@@ -18,7 +18,6 @@
     },
     {
       "tableCode": "valuta",
-
       "columnMapping": {
         "from": "VAL_VA_IFRA",
         "to": "VA_IFRA"

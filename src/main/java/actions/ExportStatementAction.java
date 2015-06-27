@@ -1,7 +1,9 @@
 package actions;
 
+import app.App;
 import com.sun.org.apache.xerces.internal.jaxp.datatype.XMLGregorianCalendarImpl;
 import database.DBConnection;
+import gui.dialog.Toast;
 import gui.standard.form.Form;
 import gui.standard.form.components.ValidationDatePicker;
 import net.miginfocom.swing.MigLayout;
@@ -24,8 +26,18 @@ public class ExportStatementAction extends AbstractAction {
 
     private static final String TITLE = "Eksport izvoda";
     private static final String INPUT_LABEL = "Unesite datum: ";
-    private final String HEADER_QUERY = "SELECT *  FROM PI.dbo.PRENOS_IZVODA___PRESEK  WHERE BAR_RACUN = ?  AND BNP_DATUM = ?  AND BNP_PRESEK = ?;";
-    private final String ITEM_QUERY = "SELECT PRE_PR_PIB      ,PRE_BAR_RACUN      ,p.DSR_IZVOD      ,BNP_DATUM      ,BNP_PRESEK      ,APR_RBR      ,p.PR_PIB      ,p.BAR_RACUN      ,ANA_DSR_IZVOD      ,p.ASI_BROJSTAVKE\t  ,VA_IFRA      ,NM_SIFRA      ,VPL_OZNAKA      ,ID_NALOGA_PL      ,ASI_DUZNIK      ,ASI_SVRHA      ,ASI_POVERILAC      ,ASI_DATPRI      ,ASI_DATVAL      ,ASI_RACDUZ      ,ASI_MODZAD      ,ASI_PBZAD      ,ASI_RACPOV      ,ASI_MODODOB      ,ASI_PBODO      ,ASI_HITNO      ,ASI_IZNOS      ,ASI_TIPGRESKE      ,ASI_STATUS  FROM PI.dbo.ANALITIKA_PRESEKA p join ANALITIKA_IZVODA i on p.PR_PIB=i.PR_PIB AND p.ANA_DSR_IZVOD=i.DSR_IZVOD and  p.BAR_RACUN=i.BAR_RACUN and p.ASI_BROJSTAVKE=i.ASI_BROJSTAVKE  where PRE_BAR_RACUN=? and BNP_DATUM=? and BNP_PRESEK=?";
+    private final String HEADER_QUERY = "SELECT *  FROM PRENOS_IZVODA___PRESEK  " +
+            "WHERE BAR_RACUN = ?  AND convert(varchar,BNP_DATUM,110)=convert(varchar,?,110)  AND BNP_PRESEK = ?;";
+
+    private final String ITEM_QUERY = "SELECT PRE_PR_PIB, PRE_BAR_RACUN, p.DSR_IZVOD, BNP_DATUM," +
+            " BNP_PRESEK, APR_RBR, p.PR_PIB, p.BAR_RACUN, ANA_DSR_IZVOD, p.ASI_BROJSTAVKE, VA_IFRA, " +
+            "NM_SIFRA, VPL_OZNAKA, ID_NALOGA_PL, ASI_DUZNIK, ASI_SVRHA, ASI_POVERILAC, ASI_DATPRI, " +
+            "ASI_DATVAL, ASI_RACDUZ, ASI_MODZAD, ASI_PBZAD, ASI_RACPOV, ASI_MODODOB, ASI_PBODO, ASI_HITNO, " +
+            "ASI_IZNOS, ASI_TIPGRESKE,ASI_STATUS  FROM ANALITIKA_PRESEKA p " +
+            "join ANALITIKA_IZVODA i on p.PR_PIB=i.PR_PIB AND p.ANA_DSR_IZVOD=i.DSR_IZVOD " +
+            "and  p.BAR_RACUN=i.BAR_RACUN and p.ASI_BROJSTAVKE=i.ASI_BROJSTAVKE  where PRE_BAR_RACUN=? " +
+            "and convert(varchar,BNP_DATUM,110)=convert(varchar,?,110) and BNP_PRESEK=?";
+
     private Date date;
     private Form form;
     private Statement statement;
@@ -63,6 +75,7 @@ public class ExportStatementAction extends AbstractAction {
                     if (!rs.isBeforeFirst()) {
                         break;
                     }
+
                     while (rs.next()) {
                         mapHeaderRow(rs);
                     }
@@ -83,9 +96,15 @@ public class ExportStatementAction extends AbstractAction {
                     Statement.Items items = new Statement.Items();
                     items.setItem(this.items);
                     statement.setItems(items);
-                    XmlHelper.writeToFile(statement, "statement_" + System.nanoTime());
+                    XmlHelper.writeToFile(statement, "statement_"
+                            + statement.getOrderDate().getYear() + "-"
+                            + statement.getOrderDate().getMonth()
+                            + "-" + statement.getOrderDate().getDay()
+                            + "_" + statement.getStatementNumber());
                     i++;
                 }
+
+                Toast.show(App.getMainFrame(), "Izvod uspešno exportovan.");
             } catch (SQLException e1) {
                 e1.printStackTrace();
             }
@@ -101,7 +120,7 @@ public class ExportStatementAction extends AbstractAction {
         cal.setTime(resultSet.getDate("BNP_DATUM"));
         statement.setOrderDate(new XMLGregorianCalendarImpl(cal));
 
-        statement.setStatementNumber(resultSet.getInt("DSR_IZVOD"));
+        statement.setStatementNumber(resultSet.getInt("BNP_PRESEK"));
 
         statement.setPreviousBalance(new BigDecimal(0));
 
