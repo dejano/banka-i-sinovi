@@ -78,26 +78,21 @@
         }
       ]
     }
-  }
-//,
-//  "zoomData": [
-//    {
-//      "tableCode": "fizickoLice",
-//      "columns": [
-//        {
-//          "from": "JMBG",
-//          "to": "JMBG"
-//        }
-//      ]
-//    },
-//    {
-//      "tableCode": "valuta",
-//      "columns": [
-//        {
-//          "from": "VA_IFRA",
-//          "to": "VA_IFRA"
-//        }
-//      ]
-//    }
-//  ]
+  },
+  "zoomData": [
+    {
+      "tableCode": "fizickoLice",
+      "columnMapping": {
+        "from": "JMBG",
+        "to": "JMBG"
+      }
+    },
+    {
+      "tableCode": "valuta",
+      "columnMapping": {
+        "from": "VA_IFRA",
+        "to": "VA_IFRA"
+      }
+    }
+  ]
 }
