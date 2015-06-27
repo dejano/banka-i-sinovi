@@ -92,6 +92,7 @@ public class ZoomFormAction extends AbstractAction {
 
             if (index >= 0) {
                 for (String columnCode : zoomData.keySet()) {
+                    System.out.println("-----------:" +columnCode);
                     String columnValue = zoomForm.getSelectedRowValue(columnCode);
                     results.put(columnCode, columnValue);
                 }

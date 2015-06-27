@@ -87,7 +87,6 @@ public class FormData {
                     newLookupColumnData.setLookup(true);
                     newLookupColumnData.setLookupInsert(lookupMetaData.isLookupInsert());
                     newLookupColumnData.setRealTableName(lookupMetaData.getTable());
-
                     columns.put(lookupMetaColumn.getCode(), newLookupColumnData);
                 }
 
@@ -311,7 +310,7 @@ public class FormData {
         for (Zoom zoom : zoomData) {
             if (tableCode.equals(zoom.getTableCode())) {
                 for (ColumnMapping columnMapping : zoom.getColumns()) {
-                    result.add(columnMapping.getTo());
+                    result.add(columnMapping.getFrom());
                 }
             }
         }

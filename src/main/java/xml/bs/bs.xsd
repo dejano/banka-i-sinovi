@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified"
+    targetNamespace="http://www.ftn.uns.ac.rs/xws/xsd/bs"
+    xmlns:bs="http://www.ftn.uns.ac.rs/xws/xsd/bs" xmlns:jxb="http://java.sun.com/xml/ns/jaxb"
+    xmlns:cmn="http://www.ftn.uns.ac.rs/xws/xsd/common" jxb:version="2.0">
+
+    <xs:annotation>
+        <xs:appinfo>
+            <jxb:globalBindings collectionType="java.util.ArrayList"/>
+            <jxb:schemaBindings>
+                <jxb:package name="rs.ac.uns.ftn.xws.generated.bs"/>
+            </jxb:schemaBindings>
+        </xs:appinfo>
+    </xs:annotation>
+
+    <xs:import namespace="http://www.ftn.uns.ac.rs/xws/xsd/common" schemaLocation="common.xsd"/>
+    <xs:simpleType name="BsExceptionEnum">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="invalidAccountNumber"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:complexType name="StatementRequest">
+        <xs:sequence>
+            <xs:element name="accountNumber" type="cmn:AccountNumber"/>
+            <xs:element name="date" type="xs:date"/>
+            <xs:element name="statementNumber" type="bs:StatementNumber"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:element name="statementRequest" type="bs:StatementRequest"/>
+    <xs:complexType name="Statement">
+        <xs:sequence>
+            <xs:element name="accountNumber" type="cmn:AccountNumber"/>
+            <xs:element name="orderDate" type="xs:date"/>
+            <xs:element name="statementNumber" type="bs:StatementNumber"/>
+            <xs:element name="previousBalance" type="cmn:Balance"/>
+            <xs:element name="payoutCount">
+                <xs:simpleType>
+                    <xs:restriction base="xs:integer">
+                        <xs:minInclusive value="0"/>
+                        <xs:maxInclusive value="99"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="payoutAmount" type="cmn:Balance"/>
+            <xs:element name="paymentCount">
+                <xs:simpleType>
+                    <xs:restriction base="xs:integer">
+                        <xs:minInclusive value="0"/>
+                        <xs:maxInclusive value="99"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="paymentAmount" type="cmn:Balance"/>
+            <xs:element name="newBalance" type="cmn:Balance"/>
+            <xs:element name="items">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element maxOccurs="unbounded" minOccurs="0" name="item"
+                            type="bs:StatementItem"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="StatementItem">
+        <xs:complexContent>
+            <xs:extension base="cmn:Payment">
+                <xs:sequence>
+                    <xs:element name="currencyDate" type="xs:date"/>
+                    <xs:element name="direction" type="cmn:Character"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    <xs:element name="statement" type="bs:Statement"/>
+    <xs:simpleType name="StatementNumber">
+        <xs:restriction>
+            <xs:simpleType>
+                <xs:restriction base="xs:integer">
+                    <xs:minInclusive value="0"/>
+                    <xs:maxInclusive value="99"/>
+                </xs:restriction>
+            </xs:simpleType>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:element name="bsExceptionEnum" nillable="false" type="bs:BsExceptionEnum"/>
+</xs:schema>

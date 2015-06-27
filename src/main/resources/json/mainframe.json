@@ -45,6 +45,10 @@
           "formName": "kursnaLista"
         },
         {
+          "text": "Kurs u valuti",
+          "formName": "kursUValuti"
+        },
+        {
           "text": "Valute",
           "formName": "valuta"
         },
@@ -66,9 +70,6 @@
         },
         {
           "actionName": "ImportPaymentOrderAction"
-        },
-        {
-          "actionName": "ExportStatementAction"
         }
       ]
     },
