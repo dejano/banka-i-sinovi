@@ -36,7 +36,7 @@ import static gui.standard.form.misc.QueryBuilder.Query.WhereTypesEnum.EQUALS;
  */
 public class ImportPaymentOrderAction extends AbstractAction {
 
-    private static final String TITLE = "Primi nalog matora";
+    private static final String TITLE = "Import naloga za plaćanje";
 
     private enum Status {
         E, P, I
@@ -67,7 +67,7 @@ public class ImportPaymentOrderAction extends AbstractAction {
         try {
             PaymentOrder paymentOrder = getPaymentOrder();
 
-            if(paymentOrder != null) {
+            if (paymentOrder != null) {
                 String debtorBankCode =
                         paymentOrder.getDebtorAccountDetails().getAccountNumber().substring(0, 3);
                 String creditorBankCode =

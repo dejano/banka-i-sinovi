@@ -63,7 +63,7 @@ public class TableQueriesBuilder {
     public TableQueriesBuilder getLookupsQuery(Zoom zoom, LookupMetaData lookup) {
         queryBuilder.select(lookup.getTable(), lookup.getColumnCodes())
                 .from(lookup.getTable())
-                .where(zoom.getTableCode(), zoom.getToColumnCodes());
+                .where(zoom.getTableCode(), zoom.getColumnMapping().getTo());
 
         return this;
     }

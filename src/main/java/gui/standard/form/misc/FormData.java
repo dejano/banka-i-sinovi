@@ -294,50 +294,43 @@ public class FormData {
         return condition;
     }
 
-    public List<String> getZoomBaseColumns() {
-        List<String> result = new ArrayList<>();
+    public Zoom getZoom(String columnCode){
+        Zoom ret = null;
+
         for (Zoom zoom : zoomData) {
-            for (ColumnMapping columnMapping : zoom.getColumns()) {
-                result.add(columnMapping.getFrom());
+            if(zoom.getColumnMapping().getFrom().equals(columnCode)){
+                ret = zoom;
+                break;
             }
         }
 
-        return result;
+        return ret;
     }
 
     public List<String> getZoomColumns(String tableCode) {
         List<String> result = new ArrayList<>();
-        for (Zoom zoom : zoomData) {
-            if (tableCode.equals(zoom.getTableCode())) {
-                for (ColumnMapping columnMapping : zoom.getColumns()) {
-                    result.add(columnMapping.getFrom());
-                }
-            }
-        }
+
+        // TODO
+//        for (Zoom zoom : zoomData) {
+//            if (tableCode.equals(zoom.getTableCode())) {
+//                for (ColumnMapping columnMapping : zoom.getColumnMapping()) {
+//                    result.add(columnMapping.getTo());
+//                }
+//            }
+//        }
 
         return result;
     }
 
-    public String getZoomJsonFile(String columnName) {
-        for (Zoom zoom : zoomData) {
-            for (ColumnMapping columnMapping : zoom.getColumns()) {
-                if (columnMapping.getFrom().equals(columnName)) {
-                    return zoom.getJsonFileName();
-                }
-            }
-        }
+    public String getZoomTableCode(String columnName) {        // TODO
 
-        return null;
-    }
-
-    public String getZoomTableCode(String columnName) {
-        for (Zoom zoom : zoomData) {
-            for (ColumnMapping columnMapping : zoom.getColumns()) {
-                if (columnMapping.getFrom().equals(columnName)) {
-                    return zoom.getTableCode();
-                }
-            }
-        }
+//        for (Zoom zoom : zoomData) {
+//            for (ColumnMapping columnMapping : zoom.getColumnMapping()) {
+//                if (columnMapping.getFrom().equals(columnName)) {
+//                    return zoom.getTableCode();
+//                }
+//            }
+//        }
 
         return null;
     }

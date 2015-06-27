@@ -17,12 +17,10 @@
   "zoomData": [
     {
       "tableCode": "drzava",
-      "columns": [
-        {
-          "from": "DR_SIFRA",
-          "to": "DR_SIFRA"
-        }
-      ]
+      "columnMapping": {
+        "from": "DR_SIFRA",
+        "to": "DR_SIFRA"
+      }
     }
   ]
 }

@@ -57,11 +57,13 @@ public class DataPanel extends JPanel {
 
                 this.add(label);
 
-                if (!formData.isInGroup(columnData.getCode(), ZOOM) || readOnlyForm) {
+                if (formData.isInGroup(columnData.getCode(), NEXT)
+                        || !formData.isInGroup(columnData.getCode(), ZOOM)
+                        || readOnlyForm) {
                     this.add(component, "wrap");
                 } else {
                     JButton zoomBtn = new JButton(new ZoomFormAction(parent,
-                            formData.getZoomTableCode(columnData.getCode())));
+                            formData.getZoom(columnData.getCode())));
 
                     this.add(component);
                     this.add(zoomBtn, "wrap");
@@ -142,8 +144,9 @@ public class DataPanel extends JPanel {
     }
 
     public void setBlankEditableInputs() {
-        for (JComponent component : inputs.values()) {
-            if (component != null) {
+        for (String columnCode : inputs.keySet()) {
+            JComponent component = inputs.get(columnCode);
+            if (!parent.getFormData().isInGroup(columnCode, NEXT) && component != null) {
                 if (component instanceof JTextComponent) {
                     JTextComponent textComponent = (JTextComponent) component;
                     textComponent.setText("");
@@ -162,7 +165,7 @@ public class DataPanel extends JPanel {
 
     public void setBlankEditableInput(String columnCode) {
         JComponent component = inputs.get(columnCode);
-        if (component != null) {
+        if (!parent.getFormData().isInGroup(columnCode, NEXT) && component != null) {
             if (component instanceof JTextComponent) {
                 JTextComponent textComponent = (JTextComponent) component;
                 textComponent.setText("");

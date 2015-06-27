@@ -41,7 +41,7 @@ import static gui.standard.form.misc.QueryBuilder.Query.WhereTypesEnum.EQUALS;
  */
 public class ExportClearingAction extends AbstractAction {
 
-    private static final String TITLE = "Salji poruke matora";
+    private static final String TITLE = "Export clearing poruka";
 
     private int i = 1;
 
